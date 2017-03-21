@@ -1,0 +1,9 @@
+mappings:
+  ChangeSet: SilverStripe\Versioned\ChangeSet
+  ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
+  DataDifferencer: SilverStripe\Versioned\DataDifferencer
+  VersionableExtension: SilverStripe\Versioned\VersionableExtension
+  Versioned: SilverStripe\Versioned\Versioned
+  Versioned_Version: SilverStripe\Versioned\Versioned_Version
+  VersionedGridFieldDetailForm: SilverStripe\Versioned\VersionedGridFieldDetailForm
+  VersionedGridFieldItemRequest: SilverStripe\Versioned\VersionedGridFieldItemRequest

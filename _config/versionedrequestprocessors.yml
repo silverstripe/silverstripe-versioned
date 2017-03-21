@@ -1,0 +1,12 @@
+---
+Name: versionedrequestprocessors
+After:
+  - 'requestprocessors'
+---
+SilverStripe\Core\Injector\Injector:
+  VersionedRequestFilter:
+    class: SilverStripe\Versioned\VersionedRequestFilter
+  SilverStripe\Control\RequestProcessor:
+    properties:
+      filters:
+        - '%$VersionedRequestFilter'

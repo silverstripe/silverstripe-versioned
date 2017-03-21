@@ -1,0 +1,17 @@
+SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedObject:
+  parent1:
+    Title: 'versioned object'
+SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedItem:
+  child1:
+    Title: 'versioned item 1'
+  child2:
+    Title: 'versioned item 2'
+SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedJoinObject:
+  join1:
+    Title: 'versioned join 1'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedObject.parent1
+    Child: =>SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedItem.child1
+  join2:
+    Title: 'versioned join 2'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedObject.parent1
+    Child: =>SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedItem.child2
