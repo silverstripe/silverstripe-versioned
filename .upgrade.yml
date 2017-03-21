@@ -1,9 +1,19 @@
 mappings:
+  # pre-4.0 migrations
   ChangeSet: SilverStripe\Versioned\ChangeSet
   ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
   DataDifferencer: SilverStripe\Versioned\DataDifferencer
   VersionableExtension: SilverStripe\Versioned\VersionableExtension
-  Versioned: SilverStripe\Versioned\Versioned
   Versioned_Version: SilverStripe\Versioned\Versioned_Version
   VersionedGridFieldDetailForm: SilverStripe\Versioned\VersionedGridFieldDetailForm
   VersionedGridFieldItemRequest: SilverStripe\Versioned\VersionedGridFieldItemRequest
+  Versioned: SilverStripe\Versioned\Versioned
+  # alpha5-alpha6 migrations
+  SilverStripe\ORM\Versioning\ChangeSet: SilverStripe\Versioned\ChangeSet
+  SilverStripe\ORM\Versioning\ChangeSetItem: SilverStripe\Versioned\ChangeSetItem
+  SilverStripe\ORM\Versioning\DataDifferencer: SilverStripe\Versioned\DataDifferencer
+  SilverStripe\ORM\Versioning\VersionableExtension: SilverStripe\Versioned\VersionableExtension
+  SilverStripe\ORM\Versioning\Versioned_Version: SilverStripe\Versioned\Versioned_Version
+  SilverStripe\ORM\Versioning\VersionedGridFieldDetailForm: SilverStripe\Versioned\VersionedGridFieldDetailForm
+  SilverStripe\ORM\Versioning\VersionedGridFieldItemRequest: SilverStripe\Versioned\VersionedGridFieldItemRequest
+  SilverStripe\ORM\Versioning\Versioned: SilverStripe\Versioned\Versioned
