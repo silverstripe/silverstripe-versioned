@@ -7,6 +7,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\HasManyList;
@@ -50,7 +51,8 @@ class ChangeSet extends DataObject
     private static $db = [
         'Name'  => 'Varchar',
         'State' => "Enum('open,published,reverted','open')",
-        'IsInferred' => 'Boolean(0)' // True if created automatically
+        'IsInferred' => 'Boolean(0)', // True if created automatically
+        'Description' => 'Text',
     ];
 
     private static $has_many = [
@@ -66,7 +68,7 @@ class ChangeSet extends DataObject
     ];
 
     private static $casting = [
-        'Description' => 'Text',
+        'Details' => 'Text',
     ];
 
     /**
@@ -83,7 +85,7 @@ class ChangeSet extends DataObject
     private static $summary_fields = [
         'Name' => 'Title',
         'ChangesCount' => 'Changes',
-        'Description' => 'Description',
+        'Details' => 'Details',
     ];
 
     /**
@@ -437,11 +439,13 @@ class ChangeSet extends DataObject
         $fields = new FieldList(new TabSet('Root'));
         if ($this->IsInferred) {
             $fields->addFieldToTab('Root.Main', ReadonlyField::create('Name', $this->fieldLabel('Name')));
+            $fields->addFieldToTab('Root.Main', ReadonlyField::create('Description', $this->fieldLabel('Description')));
         } else {
             $fields->addFieldToTab('Root.Main', TextField::create('Name', $this->fieldLabel('Name')));
+            $fields->addFieldToTab('Root.Main', TextareaField::create('Description', $this->fieldLabel('Description')));
         }
         if ($this->isInDB()) {
-            $fields->addFieldToTab('Root.Main', ReadonlyField::create('State', $this->fieldLabel('State')));
+            $fields->addFieldToTab('Root.Main', ReadonlyField::create('State', $this->fieldLabel('State')), 'Description');
         }
 
         $this->extend('updateCMSFields', $fields);
@@ -453,7 +457,7 @@ class ChangeSet extends DataObject
      *
      * @return string
      */
-    public function getDescription()
+    public function getDetails()
     {
         // Initialise list of items to count
         $counted = [];
