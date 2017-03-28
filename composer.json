@@ -38,6 +38,6 @@
   "scripts": {
     "lint": "phpcs src/ tests/php/"
   },
-  "min-stability": "dev",
+  "minimum-stability": "dev",
   "prefer-stable": true
 }
