@@ -21,7 +21,7 @@ class ChangeSetTest extends SapphireTest
 
     protected static $fixture_file = 'ChangeSetTest.yml';
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         ChangeSetTest\BaseObject::class,
         ChangeSetTest\MidObject::class,
         ChangeSetTest\EndObject::class,

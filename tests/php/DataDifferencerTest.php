@@ -15,7 +15,7 @@ class DataDifferencerTest extends SapphireTest
 {
     protected static $fixture_file = 'DataDifferencerTest.yml';
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         DataDifferencerTest\TestObject::class,
         DataDifferencerTest\HasOneRelationObject::class
     ];

@@ -23,10 +23,10 @@ class VersionedLazyLoadingTest extends SapphireTest
         'VersionedTest.yml'
     ];
 
-    protected function getExtraDataObjects()
+    protected static function getExtraDataObjects()
     {
         return array_merge(
-            VersionedTest::$extra_data_objects,
+            VersionedTest::$extra_dataobjects,
             [
                 VersionedObject::class,
                 VersionedSubObject::class,

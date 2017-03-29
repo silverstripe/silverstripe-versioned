@@ -22,7 +22,7 @@ class VersionedTest extends SapphireTest
 
     protected static $fixture_file = 'VersionedTest.yml';
 
-    public static $extra_data_objects = [
+    public static $extra_dataobjects = [
         VersionedTest\TestObject::class,
         VersionedTest\Subclass::class,
         VersionedTest\AnotherSubclass::class,
@@ -33,11 +33,6 @@ class VersionedTest extends SapphireTest
         VersionedTest\PublicViaExtension::class,
         VersionedTest\CustomTable::class,
     ];
-
-    protected function getExtraDataObjects()
-    {
-        return static::$extra_data_objects;
-    }
 
     public function testUniqueIndexes()
     {

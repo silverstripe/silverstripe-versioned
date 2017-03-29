@@ -9,7 +9,7 @@ class VersionableExtensionsTest extends SapphireTest
 {
     protected static $fixture_file = 'VersionableExtensionsFixtures.yml';
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         VersionableExtensionsTest\TestObject::class,
     ];
 
