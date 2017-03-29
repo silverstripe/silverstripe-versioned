@@ -16,7 +16,7 @@ use DateTime;
 class VersionedOwnershipTest extends SapphireTest
 {
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         VersionedOwnershipTest\TestObject::class,
         VersionedOwnershipTest\Subclass::class,
         VersionedOwnershipTest\Related::class,

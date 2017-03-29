@@ -8,7 +8,7 @@ use SilverStripe\Dev\SapphireTest;
 class ChangeSetItemTest extends SapphireTest
 {
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         ChangeSetItemTest\VersionedObject::class
     ];
 

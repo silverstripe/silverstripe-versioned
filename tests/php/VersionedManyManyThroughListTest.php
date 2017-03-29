@@ -14,7 +14,7 @@ class VersionedManyManyThroughListTest extends SapphireTest
 {
     protected static $fixture_file = 'VersionedManyManyThroughListTest.yml';
 
-    protected $extraDataObjects = [
+    protected static $extra_dataobjects = [
         VersionedManyManyThroughListTest\VersionedItem::class,
         VersionedManyManyThroughListTest\VersionedJoinObject::class,
         VersionedManyManyThroughListTest\VersionedObject::class,
