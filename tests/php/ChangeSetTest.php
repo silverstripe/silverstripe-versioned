@@ -109,9 +109,9 @@ class ChangeSetTest extends SapphireTest
         $cs = new ChangeSet();
         $cs->write();
         $cs->addObject($this->objFromFixture(ChangeSetTest\EndObject::class, 'end1'));
-        $this->assertEquals('one item', $cs->getDescription());
+        $this->assertEquals('one item', $cs->getDetails());
         $cs->addObject($this->objFromFixture(ChangeSetTest\EndObjectChild::class, 'endchild1'));
-        $this->assertEquals('2 items', $cs->getDescription());
+        $this->assertEquals('2 items', $cs->getDetails());
     }
 
     public function testRepeatedSyncIsNOP()
