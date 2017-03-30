@@ -20,8 +20,6 @@
 
 	<testsuite name="Default">
 		<directory>tests/php</directory>
-        <directory>framework/tests/php</directory>
-        <directory>silverstripe-assets/tests/php</directory>
     </testsuite>
 
 	<listeners>
