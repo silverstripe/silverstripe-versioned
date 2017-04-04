@@ -34,3 +34,17 @@ SilverStripe\Versioned\Tests\VersionedTest\AnotherSubclass:
 SilverStripe\Versioned\Tests\VersionedTest\SingleStage:
   single:
     Title: 'Singlestage Title'
+
+SilverStripe\Versioned\Tests\VersionedTest\ChangeSetTestObject:
+  page1:
+    Title: Page 1
+  page2:
+    Title: Page 2
+  page3:
+    Title: Page 3
+  page2a:
+    Parent: =>SilverStripe\Versioned\Tests\VersionedTest\ChangeSetTestObject.page2
+    Title: Page 2a
+  page2b:
+    Parent: =>SilverStripe\Versioned\Tests\VersionedTest\ChangeSetTestObject.page2
+    Title: Page 2b

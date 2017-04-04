@@ -1612,11 +1612,29 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         $owner->invokeWithExtensions('onBeforeArchive', $this);
+        $owner->deleteFromChangeSets();
         $owner->doUnpublish();
         $owner->deleteFromStage(static::DRAFT);
         $owner->invokeWithExtensions('onAfterArchive', $this);
 
         return true;
+    }
+
+    public function deleteFromChangeSets()
+    {
+        $owner = $this->owner;
+        if (!$owner->canArchive()) {
+            return false;
+        }
+
+        $ids = [$owner->ID];
+        if ($owner->hasMethod('getDescendantIDList')) {
+            $ids = array_merge($ids, $owner->getDescendantIDList());
+        }
+
+        ChangeSetItem::get()
+            ->filter(['ObjectID' => $ids])
+            ->removeAll();
     }
 
     /**
