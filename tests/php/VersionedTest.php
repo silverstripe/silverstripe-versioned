@@ -6,6 +6,8 @@ use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\ChangeSetItem;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Core\Convert;
@@ -32,6 +34,7 @@ class VersionedTest extends SapphireTest
         VersionedTest\PublicStage::class,
         VersionedTest\PublicViaExtension::class,
         VersionedTest\CustomTable::class,
+        VersionedTest\ChangeSetTestObject::class,
     ];
 
     public function testUniqueIndexes()
@@ -389,6 +392,46 @@ class VersionedTest extends SapphireTest
             0,
             DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = '.$pageID)->value()
         );
+    }
+
+    public function testDeleteFromChangeSets()
+    {
+        $page1 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page1');
+        $page2 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2');
+        $page2a = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2a');
+        $page2b = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2b');
+        $page3 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page3');
+
+        $cs1 = new ChangeSet();
+        $cs1->write();
+
+        $cs2 = new ChangeSet();
+        $cs2->write();
+
+        // "cs1" will contain 2 items
+        $cs1->addObject($page1);
+        $cs1->addObject($page2);
+
+        // "cs2" will contain 3 items
+        $cs2->addObject($page2a);
+        $cs2->addObject($page2b);
+        $cs2->addObject($page3);
+
+        $this->assertEquals(2, $cs1->Changes()->count());
+        $this->assertEquals(3, $cs2->Changes()->count());
+
+        // "cs1" will now contain 1 item
+        $page1->deleteFromChangeSets();
+
+        $this->assertEquals(1, $cs1->Changes()->count());
+        $this->assertEquals(3, $cs2->Changes()->count());
+
+        // "cs2" will now contain 1 ("page3") since deleting "page2" from "cs1" will also
+        // delete "page2a" and "page2b" from change "cs2"
+        $page2->deleteFromChangeSets();
+        $this->assertEquals(0, $cs1->Changes()->count());
+        $this->assertEquals(1, $cs2->Changes()->count());
+        $this->assertEquals('Page 3', $cs2->Changes()->first()->Title);
     }
 
     public function testWritingNewToStage()
