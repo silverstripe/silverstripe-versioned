@@ -5,8 +5,6 @@ en:
       one: 'A Campaign'
       other: '{count} Campaigns'
     SINGULARNAME: Campaign
-  SilverStripe\CMS\Controllers\ContentController:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'You must log in with your CMS password in order to view the draft or archived content. <a href="%s">Click here to go back to the published site.</a>'
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Change Set Items'
     PLURALS:
