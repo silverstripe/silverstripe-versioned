@@ -31,7 +31,7 @@ class VersionedRequestFilter implements RequestFilter
         if (!Versioned::can_choose_site_stage($request)) {
             $permissionMessage = sprintf(
                 _t(
-                    "ContentController.DRAFT_SITE_ACCESS_RESTRICTION",
+                    "SilverStripe\\CMS\\Controllers\\ContentController.DRAFT_SITE_ACCESS_RESTRICTION",
                     'You must log in with your CMS password in order to view the draft or archived content. '.
                     '<a href="%s">Click here to go back to the published site.</a>'
                 ),

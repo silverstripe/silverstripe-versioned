@@ -34,7 +34,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             // "publish", as with "save", it supports an alternate state to show when action is needed.
             $publish = FormAction::create(
                 'doPublish',
-                _t('VersionedGridFieldItemRequest.BUTTONPUBLISH', 'Publish')
+                _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONPUBLISH', 'Publish')
             )
                 ->setUseButtonTag(true)
                 ->addExtraClass('btn btn-primary font-icon-rocket');
@@ -53,11 +53,11 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $actions->push(
                 FormAction::create(
                     'doUnpublish',
-                    _t('VersionedGridFieldItemRequest.BUTTONUNPUBLISH', 'Unpublish')
+                    _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONUNPUBLISH', 'Unpublish')
                 )
                     ->setUseButtonTag(true)
                     ->setDescription(_t(
-                        'VersionedGridFieldItemRequest.BUTTONUNPUBLISHDESC',
+                        'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONUNPUBLISHDESC',
                         'Remove this record from the published site'
                     ))
                     ->addExtraClass('btn-secondary')
@@ -71,9 +71,9 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
             // "archive"
             $actions->push(
-                FormAction::create('doArchive', _t('VersionedGridFieldItemRequest.ARCHIVE', 'Archive'))
+                FormAction::create('doArchive', _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.ARCHIVE', 'Archive'))
                     ->setDescription(_t(
-                        'VersionedGridFieldItemRequest.BUTTONARCHIVEDESC',
+                        'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONARCHIVEDESC',
                         'Unpublish and send to archive'
                     ))
                     ->addExtraClass('delete btn-secondary')
@@ -102,7 +102,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $record->doArchive();
 
         $message = sprintf(
-            _t('VersionedGridFieldItemRequest.Archived', 'Archived %s %s'),
+            _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Archived', 'Archived %s %s'),
             $record->i18n_singular_name(),
             Convert::raw2xml($title)
         );
@@ -140,7 +140,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $xmlTitle = Convert::raw2xml($record->Title);
         $link = "<a href=\"{$editURL}\">{$xmlTitle}</a>";
         $message = _t(
-            'VersionedGridFieldItemRequest.Published',
+            'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Published',
             'Published {name} {link}',
             [
                 'name' => $record->i18n_singular_name(),
@@ -172,7 +172,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $record->doUnpublish();
 
         $message = sprintf(
-            _t('VersionedGridFieldItemRequest.Unpublished', 'Unpublished %s %s'),
+            _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Unpublished', 'Unpublished %s %s'),
             $record->i18n_singular_name(),
             Convert::raw2xml($title)
         );

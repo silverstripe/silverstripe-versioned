@@ -502,13 +502,13 @@ class ChangeSet extends DataObject
         if ($countedOther) {
             if ($counted) {
                 $parts[] = i18n::_t(
-                    'ChangeSet.DESCRIPTION_OTHER_ITEM_PLURALS',
+                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_OTHER_ITEM_PLURALS',
                     'one other item|{count} other items',
                     [ 'count' => $countedOther ]
                 );
             } else {
                 $parts[] = i18n::_t(
-                    'ChangeSet.DESCRIPTION_ITEM_PLURALS',
+                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_ITEM_PLURALS',
                     'one item|{count} items',
                     [ 'count' => $countedOther ]
                 );
@@ -526,7 +526,7 @@ class ChangeSet extends DataObject
         // Non-comma list
         if (count($parts) === 2) {
             return _t(
-                'ChangeSet.DESCRIPTION_AND',
+                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_AND',
                 '{first} and {second}',
                 [
                     'first' => $parts[0],
@@ -537,7 +537,7 @@ class ChangeSet extends DataObject
 
         // First item
         $string = _t(
-            'ChangeSet.DESCRIPTION_LIST_FIRST',
+            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_FIRST',
             '{item}',
             ['item' => $parts[0]]
         );
@@ -545,7 +545,7 @@ class ChangeSet extends DataObject
         // Middle items
         for ($i = 1; $i < count($parts) - 1; $i++) {
             $string = _t(
-                'ChangeSet.DESCRIPTION_LIST_MID',
+                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_MID',
                 '{list}, {item}',
                 [
                     'list' => $string,
@@ -556,7 +556,7 @@ class ChangeSet extends DataObject
 
         // Oxford comma
         $string = _t(
-            'ChangeSet.DESCRIPTION_LIST_LAST',
+            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_LAST',
             '{list}, and {item}',
             [
                 'list' => $string,
@@ -579,8 +579,8 @@ class ChangeSet extends DataObject
     public function fieldLabels($includerelations = true)
     {
         $labels = parent::fieldLabels($includerelations);
-        $labels['Name'] = _t('ChangeSet.NAME', 'Name');
-        $labels['State'] = _t('ChangeSet.STATE', 'State');
+        $labels['Name'] = _t('SilverStripe\\Versioned\\ChangeSet.NAME', 'Name');
+        $labels['State'] = _t('SilverStripe\\Versioned\\ChangeSet.STATE', 'State');
 
         return $labels;
     }
