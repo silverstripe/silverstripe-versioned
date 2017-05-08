@@ -29,13 +29,12 @@ class VersionedRequestFilter implements RequestFilter
 
         // Block non-authenticated users from setting the stage mode
         if (!Versioned::can_choose_site_stage($request)) {
-            $permissionMessage = sprintf(
-                _t(
-                    "ContentController.DRAFT_SITE_ACCESS_RESTRICTION",
-                    'You must log in with your CMS password in order to view the draft or archived content. '.
-                    '<a href="%s">Click here to go back to the published site.</a>'
-                ),
-                Convert::raw2xml(Controller::join_links(Director::baseURL(), $request->getURL(), "?stage=Live"))
+            $link = Convert::raw2xml(Controller::join_links(Director::baseURL(), $request->getURL(), "?stage=Live"));
+            $permissionMessage = _t(
+                __CLASS__.'.DRAFT_SITE_ACCESS_RESTRICTION',
+                'You must log in with your CMS password in order to view the draft or archived content. '
+                . '<a href="{link}">Click here to go back to the published site.</a>',
+                [ 'link' => $link ]
             );
 
             // Force output since RequestFilter::preRequest doesn't support response overriding
