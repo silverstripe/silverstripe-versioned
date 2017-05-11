@@ -103,7 +103,7 @@ class VersionedTest extends SapphireTest
         DB::query("INSERT INTO \"VersionedTest_DataObject_Versions\" (\"RecordID\") VALUES ($obj->ID)");
 
         // run the script which should clean that up
-        $obj->augmentDatabase();
+        $obj->extend('augmentDatabase', $dummy);
 
         $versions = DB::query(
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
@@ -119,7 +119,7 @@ class VersionedTest extends SapphireTest
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
             . " WHERE \"RecordID\" = '$obj->ID'"
         )->value();
-        $obj->augmentDatabase();
+        $obj->extend('augmentDatabase', $dummy);
 
         $count2 = DB::query(
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
