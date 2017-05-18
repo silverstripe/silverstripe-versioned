@@ -27,12 +27,12 @@ en:
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archive
-    Archived: 'Archived %s %s'
+    Archived: 'Archived {name} {title}'
     BUTTONARCHIVEDESC: 'Unpublish and send to archive'
     BUTTONPUBLISH: Publish
     BUTTONUNPUBLISH: Unpublish
     BUTTONUNPUBLISHDESC: 'Remove this record from the published site'
     Published: 'Published {name} {link}'
-    Unpublished: 'Unpublished %s %s'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
+    Unpublished: 'Unpublished {name} {title}'
     DRAFT_SITE_ACCESS_RESTRICTION: 'You must log in with your CMS password in order to view the draft or archived content. <a href="{link}">Click here to go back to the published site.</a>'
