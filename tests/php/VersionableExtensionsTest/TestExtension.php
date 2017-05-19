@@ -22,7 +22,11 @@ class TestExtension extends DataExtension implements VersionableExtension, TestO
      */
     public function updateVersionableFields($suffix, &$fields, &$indexes)
     {
-        $indexes['ExtraField'] = true;
+        $indexes['ExtraField'] = [
+            'type' => 'index',
+            'name' => 'ExtraField',
+            'columns' => ['ExtraField'],
+        ];
         $fields['ExtraField'] = 'Varchar()';
     }
 }

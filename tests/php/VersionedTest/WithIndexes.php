@@ -23,11 +23,14 @@ class WithIndexes extends DataObject implements TestOnly
     ];
 
     private static $indexes = [
-        'UniqS_idx' => 'unique ("UniqS")',
+        'UniqS_idx' => [
+            'type' => 'unique',
+            'columns' => ['UniqS'],
+        ],
         'UniqA_idx' => [
             'type' => 'unique',
             'name' => 'UniqA_idx',
-            'value' => '"UniqA"',
+            'columns' => ['UniqA'],
         ],
     ];
 }

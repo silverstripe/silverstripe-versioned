@@ -75,7 +75,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     private static $indexes = [
         'ObjectUniquePerChangeSet' => [
             'type' => 'unique',
-            'value' => '"ObjectID", "ObjectClass", "ChangeSetID"'
+            'columns' => ['ObjectID', 'ObjectClass', 'ChangeSetID'],
         ]
     ];
 
