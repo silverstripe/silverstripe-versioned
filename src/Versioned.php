@@ -8,7 +8,6 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Object;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
@@ -259,8 +258,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function __construct($mode = self::STAGEDVERSIONED)
     {
-        parent::__construct();
-
         // Handle deprecated behaviour
         if ($mode === 'Stage' && func_num_args() === 1) {
             Deprecation::notice("5.0", "Versioned now takes a mode as a single parameter");
@@ -1042,9 +1039,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         // Find all classes with 'owns' config
         $lookup = [];
-        foreach (ClassInfo::subclassesFor('SilverStripe\ORM\DataObject') as $class) {
+        foreach (ClassInfo::subclassesFor(DataObject::class) as $class) {
             // Ensure this class is versioned
-            if (!Object::has_extension($class, static::class)) {
+            if (!DataObject::has_extension($class, static::class)) {
                 continue;
             }
 
@@ -1112,7 +1109,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                     "Invalid %s config value \"%s\" on object on class \"%s\"",
                     $source,
                     $relationship,
-                    $owner->class
+                    get_class($owner)
                 ), E_USER_WARNING);
                 continue;
             }
@@ -1362,7 +1359,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // If we weren't definitely loaded from live, and we can't view non-live content, we need to
         // check to make sure this version is the live version and so can be viewed
-        $latestVersion = Versioned::get_versionnumber_by_stage($owner->class, static::LIVE, $owner->ID);
+        $latestVersion = Versioned::get_versionnumber_by_stage(get_class($owner), static::LIVE, $owner->ID);
         if ($latestVersion == $owner->Version) {
             // Even if this is loaded from a non-live stage, this is the live version
             return true;
@@ -1375,7 +1372,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Fall back to default permission check
-        $permissions = Config::inst()->get($owner->class, 'non_live_permissions');
+        $permissions = Config::inst()->get(get_class($owner), 'non_live_permissions');
         $check = Permission::checkMember($member, $permissions);
         return (bool)$check;
     }
@@ -1399,7 +1396,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         Versioned::set_stage($stage);
 
         $owner = $this->owner;
-        $versionFromStage = DataObject::get($owner->class)->byID($owner->ID);
+        $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
 
         Versioned::set_reading_mode($oldMode);
         return $versionFromStage ? $versionFromStage->canView($member) : false;
@@ -1935,8 +1932,8 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function compareVersions($from, $to)
     {
         $owner = $this->owner;
-        $fromRecord = Versioned::get_version($owner->class, $owner->ID, $from);
-        $toRecord = Versioned::get_version($owner->class, $owner->ID, $to);
+        $fromRecord = Versioned::get_version(get_class($owner), $owner->ID, $from);
+        $toRecord = Versioned::get_version(get_class($owner), $owner->ID, $to);
 
         $diff = new DataDifferencer($fromRecord, $toRecord);
 
@@ -2370,7 +2367,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return false;
         }
 
-        $version = static::get_latest_version($owner->class, $owner->ID);
+        $version = static::get_latest_version(get_class($owner), $owner->ID);
         return ($version->Version == $owner->Version);
     }
 
