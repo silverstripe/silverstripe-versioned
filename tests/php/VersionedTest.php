@@ -53,23 +53,18 @@ class VersionedTest extends SapphireTest
             $indexes = DB::get_schema()->indexList($tableName);
 
             // Check for presence of all unique indexes
-            $indexColumns = array_map(
-                function ($index) {
-                    return $index['value'];
-                },
-                $indexes
-            );
-            sort($indexColumns);
-            $expectedColumns = ['"UniqA"', '"UniqS"'];
-            $this->assertEquals(
-                array_values($expectedColumns),
-                array_values(array_intersect($indexColumns, $expectedColumns)),
-                "$tableName has both indexes"
-            );
+            $indexColumns = [];
+            foreach ($indexes as $index) {
+                $indexColumns = array_merge($indexColumns, $index['columns']);
+            }
+            $expectedColumns = ['UniqA', 'UniqS'];
+            foreach ($expectedColumns as $column) {
+                $this->assertContains($column, $indexColumns);
+            }
 
             // Check unique -> non-unique conversion
             foreach ($indexes as $indexKey => $indexSpec) {
-                if (in_array($indexSpec['value'], $expectedColumns)) {
+                if (array_intersect($indexSpec['columns'], $expectedColumns)) {
                     $isUnique = $indexSpec['type'] === 'unique';
                     $this->assertEquals($isUnique, $expectation['value'], $expectation['message']);
                 }

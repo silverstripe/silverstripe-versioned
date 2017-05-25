@@ -142,11 +142,26 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @var array $indexes_for_versions_table
      */
     private static $indexes_for_versions_table = [
-        'RecordID_Version' => '("RecordID","Version")',
-        'RecordID' => true,
-        'Version' => true,
-        'AuthorID' => true,
-        'PublisherID' => true,
+        'RecordID_Version' => [
+            'type' => 'index',
+            'columns' => ['RecordID', 'Version'],
+        ],
+        'RecordID' => [
+            'type' => 'index',
+            'columns' => ['RecordID'],
+        ],
+        'Version' => [
+            'type' => 'index',
+            'columns' => ['Version'],
+        ],
+        'AuthorID' => [
+            'type' => 'index',
+            'columns' => ['AuthorID'],
+        ],
+        'PublisherID' => [
+            'type' => 'index',
+            'columns' => ['PublisherID'],
+        ],
     ];
 
 
@@ -620,7 +635,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             unset($fields['ID']);
             if ($fields) {
                 $options = Config::inst()->get($class, 'create_table_options');
-                $indexes = $owner->databaseIndexes();
+                $indexes = $schema->databaseIndexes($class, false);
                 $extensionClass = $allSuffixes[$suffix];
                 if ($suffix && ($extension = $owner->getExtensionInstance($extensionClass))) {
                     if (!$extension instanceof VersionableExtension) {
@@ -666,9 +681,18 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                     );
                     $versionIndexes = array_merge(
                         [
-                            'RecordID_Version' => ['type' => 'unique', 'value' => '"RecordID","Version"'],
-                            'RecordID' => true,
-                            'Version' => true,
+                            'RecordID_Version' => [
+                                'type' => 'unique',
+                                'columns' => ['RecordID', 'Version']
+                            ],
+                            'RecordID' => [
+                                'type' => 'index',
+                                'columns' => ['RecordID'],
+                            ],
+                            'Version' => [
+                                'type' => 'index',
+                                'columns' => ['Version'],
+                            ],
                         ],
                         (array)$nonUniqueIndexes
                     );
@@ -741,24 +765,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     private function uniqueToIndex($indexes)
     {
-        $unique_regex = '/unique/i';
-        $results = [];
-        foreach ($indexes as $key => $index) {
-            $results[$key] = $index;
-
-            // support string descriptors
-            if (is_string($index)) {
-                if (preg_match($unique_regex, $index)) {
-                    $results[$key] = preg_replace($unique_regex, 'index', $index);
-                }
-            } // canonical, array-based descriptors
-            elseif (is_array($index)) {
-                if (strtolower($index['type']) == 'unique') {
-                    $results[$key]['type'] = 'index';
-                }
+        foreach ($indexes as &$spec) {
+            if ($spec['type'] === 'unique') {
+                $spec['type'] = 'index';
             }
         }
-        return $results;
+        return $indexes;
     }
 
     /**
