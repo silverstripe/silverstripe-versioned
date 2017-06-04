@@ -20,6 +20,7 @@ use SilverStripe\Security\Permission;
 use BadMethodCallException;
 use Exception;
 use LogicException;
+use SilverStripe\Security\Security;
 
 /**
  * The ChangeSet model tracks several VersionedAndStaged objects for later publication as a single
@@ -363,12 +364,16 @@ class ChangeSet extends DataObject
      */
     public function canPublish($member = null)
     {
+        if (!$member) {
+            $member = Security::getCurrentUser();
+        }
         foreach ($this->Changes() as $change) {
             /** @var ChangeSetItem $change */
             if (!$change->canPublish($member)) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -420,7 +425,7 @@ class ChangeSet extends DataObject
     public function can($perm, $member = null, $context = [])
     {
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         // Allow extensions to bypass default permissions, but only if
