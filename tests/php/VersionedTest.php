@@ -1029,6 +1029,7 @@ class VersionedTest extends SapphireTest
      */
     public function testReadingModeSecurity()
     {
+        $this->logOut();
         $this->setExpectedException(HTTPResponse_Exception::class);
         $session = Injector::inst()->create(Session::class, []);
         Director::test('/?stage=Stage', null, $session);
@@ -1186,7 +1187,7 @@ class VersionedTest extends SapphireTest
         $singleID = $this->idFromFixture(VersionedTest\SingleStage::class, 'single');
 
         // Test that all (and only) public pages are viewable in stage mode
-        Session::clear("loggedInAs");
+        $this->logOut();
         Versioned::set_stage(Versioned::DRAFT);
         $public1 = Versioned::get_one_by_stage(VersionedTest\PublicStage::class, 'Stage', ['"ID"' => $public1ID]);
         $public2 = Versioned::get_one_by_stage(VersionedTest\PublicViaExtension::class, 'Stage', ['"ID"' => $public2ID]);
@@ -1238,7 +1239,7 @@ class VersionedTest extends SapphireTest
     {
         $public = $this->objFromFixture(VersionedTest\PublicStage::class, 'public1');
         $private = $this->objFromFixture(VersionedTest\TestObject::class, 'page1');
-        Session::clear("loggedInAs");
+        $this->logOut();
         Versioned::set_stage(Versioned::DRAFT);
 
         // Test that all (and only) public pages are viewable in stage mode
