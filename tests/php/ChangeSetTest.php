@@ -246,7 +246,7 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals(5, $changeSet->Changes()->count());
 
         // Test un-authenticated user cannot publish
-        Session::clear("loggedInAs");
+        $this->logOut();
         $this->assertFalse($changeSet->canPublish());
 
         // campaign admin only permission doesn't grant publishing rights
@@ -309,7 +309,7 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals(5, $changeSet->Changes()->count());
 
         // Check canEdit
-        Session::clear("loggedInAs");
+        $this->logOut();
         $this->assertFalse($changeSet->canEdit());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canEdit());
@@ -320,7 +320,7 @@ class ChangeSetTest extends SapphireTest
     public function testCanCreate()
     {
         // Check canCreate
-        Session::clear("loggedInAs");
+        $this->logOut();
         $this->assertFalse(ChangeSet::singleton()->canCreate());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse(ChangeSet::singleton()->canCreate());
@@ -340,7 +340,7 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals(5, $changeSet->Changes()->count());
 
         // Check canDelete
-        Session::clear("loggedInAs");
+        $this->logOut();
         $this->assertFalse($changeSet->canDelete());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canDelete());
@@ -360,7 +360,7 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals(5, $changeSet->Changes()->count());
 
         // Check canView
-        Session::clear("loggedInAs");
+        $this->logOut();
         $this->assertFalse($changeSet->canView());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canView());

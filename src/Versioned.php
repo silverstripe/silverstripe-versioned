@@ -22,6 +22,7 @@ use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
 use SilverStripe\View\TemplateGlobalProvider;
 use InvalidArgumentException;
 use LogicException;
@@ -828,7 +829,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         if ($class === $baseDataClass) {
             // Write AuthorID for baseclass
-            $userID = (Member::currentUser()) ? Member::currentUser()->ID : 0;
+            if ((Security::getCurrentUser())) {
+                $userID = Security::getCurrentUser()->ID;
+            } else {
+                $userID = 0;
+            }
             $newManipulation['fields']['AuthorID'] = $userID;
 
             // Update main table version if not previously known
@@ -1187,7 +1192,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if (Permission::checkMember($member, "ADMIN")) {
@@ -1219,7 +1224,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if (Permission::checkMember($member, "ADMIN")) {
@@ -1252,7 +1257,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         // Standard mechanism for accepting permission changes from extensions
@@ -1301,7 +1306,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if (Permission::checkMember($member, "ADMIN")) {
@@ -1784,7 +1789,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $from->migrateVersion($from->Version);
 
             // Mark this version as having been published at some stage
-            $publisherID = isset(Member::currentUser()->ID) ? Member::currentUser()->ID : 0;
+            $publisherID = isset(Security::getCurrentUser()->ID) ? Security::getCurrentUser()->ID : 0;
             $extTable = $this->extendWithSuffix($baseTable);
             DB::prepared_query(
                 "UPDATE \"{$extTable}_Versions\"
@@ -2002,7 +2007,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Check permissions with member ID in session.
-        $member = Member::currentUser();
+        $member = Security::getCurrentUser();
         $permissions = Config::inst()->get(get_called_class(), 'non_live_permissions');
         return $member && Permission::checkMember($member, $permissions);
     }

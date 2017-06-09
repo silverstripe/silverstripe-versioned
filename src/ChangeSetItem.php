@@ -15,6 +15,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use BadMethodCallException;
 use Exception;
+use SilverStripe\Security\Security;
 
 /**
  * A single line in a changeset
@@ -384,7 +385,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     public function can($perm, $member = null, $context = [])
     {
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         // Allow extensions to bypass default permissions, but only if
