@@ -245,7 +245,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public static function reset()
     {
         self::$reading_mode = '';
-        Session::clear('readingMode');
+        Controller::curr()->getRequest()->getSession()->clear('readingMode');
     }
 
     /**
