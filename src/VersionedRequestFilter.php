@@ -35,7 +35,7 @@ class VersionedRequestFilter implements RequestFilter
 
             // Force output since RequestFilter::preRequest doesn't support response overriding
             $response = Security::permissionFailure($dummyController, $permissionMessage);
-            $request->getSession()->inst_save();
+            $request->getSession()->save();
             $dummyController->popCurrent();
             throw new HTTPResponse_Exception($response);
         }
