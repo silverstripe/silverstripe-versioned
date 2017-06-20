@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Dev;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Dev\TestState;
+use SilverStripe\Dev\State\TestState;
 use SilverStripe\Versioned\Versioned;
 
 /**
