@@ -988,16 +988,14 @@ class VersionedTest extends SapphireTest
             'Check that subsequent requests in the same session remain in Stage mode'
         );
 
-        // Test live persists
+        // Doesn't store default stage in session if not necessary
         Director::test('/?stage=Live', null, $session);
-        $this->assertEquals(
-            'Stage.Live',
+        $this->assertNull(
             $session->get('readingMode'),
             'Check querystring changes reading mode to Live'
         );
         Director::test('/', null, $session);
-        $this->assertEquals(
-            'Stage.Live',
+        $this->assertNull(
             $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Live mode'
         );
