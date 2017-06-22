@@ -1,0 +1,10 @@
+---
+Name: versionedtests
+After:
+  - sapphiretest
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Dev\SapphireTestState:
+    properties:
+      States:
+        versioned: %$SilverStripe\Versioned\Dev\VersionedTestState

@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
 use SilverStripe\Control\Director;
@@ -244,7 +245,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public static function reset()
     {
         self::$reading_mode = '';
-        Session::clear('readingMode');
+        Controller::curr()->getRequest()->getSession()->clear('readingMode');
     }
 
     /**
@@ -1365,7 +1366,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Bypass if site is unsecured
-        if (Session::get('unsecuredDraftSite')) {
+        if (Controller::has_curr() && Controller::curr()->getRequest()->getSession()->get('unsecuredDraftSite')) {
             return true;
         }
 
@@ -2023,24 +2024,33 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * If neither of these are set, it checks the session, otherwise the stage
      * is set to 'Live'.
+     * @param HTTPRequest $request
      */
-    public static function choose_site_stage()
+    public static function choose_site_stage(HTTPRequest $request)
     {
         // Check any pre-existing session mode
-        $preexistingMode = Session::get('readingMode');
+        $preexistingMode = $request->getSession()->get('readingMode') ?: static::DEFAULT_MODE;
+        $mode = $preexistingMode;
 
-        // Determine the reading mode
-        if (isset($_GET['stage'])) {
-            $stage = ucfirst(strtolower($_GET['stage']));
-            if (!in_array($stage, [static::DRAFT, static::LIVE])) {
+        // Check reading mode
+        $getStage = $request->getVar('stage');
+        if ($getStage) {
+            if (strcasecmp($getStage, static::DRAFT) === 0) {
+                $stage = static::DRAFT;
+            } else {
                 $stage = static::LIVE;
             }
             $mode = 'Stage.' . $stage;
-        } elseif (isset($_GET['archiveDate']) && strtotime($_GET['archiveDate'])) {
-            $mode = 'Archive.' . $_GET['archiveDate'];
-        } elseif ($preexistingMode) {
-            $mode = $preexistingMode;
-        } else {
+        }
+
+        // Check archived date
+        $getArchived = $request->getVar('archiveDate');
+        if ($getArchived && strtotime($getArchived)) {
+            $mode = 'Archive.' . $getArchived;
+        }
+
+        // Fallback
+        if (!$mode) {
             $mode = static::DEFAULT_MODE;
         }
 
@@ -2048,10 +2058,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         Versioned::set_reading_mode($mode);
 
         // Try not to store the mode in the session if not needed
-        if (($preexistingMode && $preexistingMode !== $mode)
-            || (!$preexistingMode && $mode !== static::DEFAULT_MODE)
-        ) {
-            Session::set('readingMode', $mode);
+        if ($mode === static::DEFAULT_MODE) {
+            $request->getSession()->clear('readingMode');
+        } else {
+            $request->getSession()->set('readingMode', $mode);
         }
 
         if (!headers_sent() && !Director::is_cli()) {

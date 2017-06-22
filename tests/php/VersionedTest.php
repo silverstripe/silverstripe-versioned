@@ -2,22 +2,22 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use DateTime;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse_Exception;
-use SilverStripe\ORM\DataObjectSchema;
-use SilverStripe\ORM\DB;
-use SilverStripe\Versioned\Versioned;
-use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\ChangeSetItem;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\Core\Convert;
+use SilverStripe\Control\Session;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Control\Director;
-use SilverStripe\Control\Session;
-use DateTime;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataObjectSchema;
+use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
 {
@@ -970,57 +970,57 @@ class VersionedTest extends SapphireTest
      */
     public function testReadingPersistent()
     {
-        $session = Injector::inst()->create('SilverStripe\\Control\\Session', []);
+        $session = new Session([]);
         $adminID = $this->logInWithPermission('ADMIN');
-        $session->inst_set('loggedInAs', $adminID);
+        $session->set('loggedInAs', $adminID);
 
         // Set to stage
         Director::test('/?stage=Stage', null, $session);
         $this->assertEquals(
             'Stage.Stage',
-            $session->inst_get('readingMode'),
+            $session->get('readingMode'),
             'Check querystring changes reading mode to Stage'
         );
         Director::test('/', null, $session);
         $this->assertEquals(
             'Stage.Stage',
-            $session->inst_get('readingMode'),
+            $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Stage mode'
         );
 
-        // Test live persists
+        // Doesn't store default stage in session if not necessary
         Director::test('/?stage=Live', null, $session);
-        $this->assertEquals(
-            'Stage.Live',
-            $session->inst_get('readingMode'),
+        $this->assertNull(
+            $session->get('readingMode'),
             'Check querystring changes reading mode to Live'
         );
         Director::test('/', null, $session);
-        $this->assertEquals(
-            'Stage.Live',
-            $session->inst_get('readingMode'),
+        $this->assertNull(
+            $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Live mode'
         );
 
         // Test that session doesn't redundantly store the default stage if it doesn't need to
-        $session2 = Injector::inst()->create('SilverStripe\\Control\\Session', []);
-        $session2->inst_set('loggedInAs', $adminID);
+        $session2 = new Session([]);
+        $session2->set('loggedInAs', $adminID);
         Director::test('/', null, $session2);
-        $this->assertArrayNotHasKey('readingMode', $session2->inst_changedData());
+        $this->assertArrayNotHasKey('readingMode', $session2->changedData());
         Director::test('/?stage=Live', null, $session2);
-        $this->assertArrayNotHasKey('readingMode', $session2->inst_changedData());
+        $this->assertArrayNotHasKey('readingMode', $session2->changedData());
 
         // Test choose_site_stage
         unset($_GET['stage']);
         unset($_GET['archiveDate']);
-        Session::set('readingMode', 'Stage.Stage');
-        Versioned::choose_site_stage();
+        $request = new HTTPRequest('GET', '/');
+        $request->setSession(new Session([]));
+        $request->getSession()->set('readingMode', 'Stage.Stage');
+        Versioned::choose_site_stage($request);
         $this->assertEquals('Stage.Stage', Versioned::get_reading_mode());
-        Session::set('readingMode', 'Archive.2014-01-01');
-        Versioned::choose_site_stage();
+        $request->getSession()->set('readingMode', 'Archive.2014-01-01');
+        Versioned::choose_site_stage($request);
         $this->assertEquals('Archive.2014-01-01', Versioned::get_reading_mode());
-        Session::clear('readingMode');
-        Versioned::choose_site_stage();
+        $request->getSession()->clear('readingMode');
+        Versioned::choose_site_stage($request);
         $this->assertEquals('Stage.Live', Versioned::get_reading_mode());
     }
 
@@ -1030,7 +1030,7 @@ class VersionedTest extends SapphireTest
     public function testReadingModeSecurity()
     {
         $this->logOut();
-        $this->setExpectedException(HTTPResponse_Exception::class);
+        $this->expectException(HTTPResponse_Exception::class);
         $session = Injector::inst()->create(Session::class, []);
         Director::test('/?stage=Stage', null, $session);
     }
@@ -1064,12 +1064,14 @@ class VersionedTest extends SapphireTest
 
         // Stage record - 2 children
         Versioned::set_stage(Versioned::DRAFT);
+        /** @var VersionedTest\TestObject $draftPage */
         $draftPage = $this->objFromFixture(VersionedTest\TestObject::class, 'page2');
         $draftPage->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $this->assertEquals(2, $draftPage->Children()->Count());
 
         // Live record - no children
         Versioned::set_stage(Versioned::LIVE);
+        /** @var VersionedTest\TestObject $livePage */
         $livePage = $this->objFromFixture(VersionedTest\TestObject::class, 'page2');
         $this->assertEquals(0, $livePage->Children()->Count());
 
@@ -1124,6 +1126,7 @@ class VersionedTest extends SapphireTest
         $this->assertRecordHasLatestVersion($record, 2);
 
         // Test subclass with versioned extension only added to the base clases
+        /** @var VersionedTest\AnotherSubclass $record */
         $record = VersionedTest\AnotherSubclass::create();
         $record->Title = "Test A";
         $record->AnotherField = "Test A";
