@@ -2,11 +2,10 @@
 Name: versionedrequestprocessors
 After:
   - 'requestprocessors'
+  - 'coresecurity'
 ---
 SilverStripe\Core\Injector\Injector:
-  VersionedRequestFilter:
-    class: SilverStripe\Versioned\VersionedRequestFilter
-  SilverStripe\Control\RequestProcessor:
+  SilverStripe\Control\Director:
     properties:
-      filters:
-        - '%$VersionedRequestFilter'
+      Middlewares:
+        VersionedMiddleware: %$SilverStripe\Versioned\VersionedHTTPMiddleware
