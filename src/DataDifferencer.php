@@ -115,7 +115,7 @@ class DataDifferencer extends ViewableData
 
             // Show only to value
             if (!$this->fromRecord) {
-                $diffed->setField($field, "<ins>{$toValue}</ins>");
+                $diffed->setField($field, DBField::create_field('HTMLFragment', "<ins>{$toValue}</ins>"));
                 continue;
             }
 
@@ -128,7 +128,7 @@ class DataDifferencer extends ViewableData
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
-                $diffed->setField($field, Diff::compareHTML($fromValue, $toValue));
+                $diffed->setField($field, DBField::create_field('HTMLFragment', Diff::compareHTML($fromValue, $toValue)));
             }
         }
 
@@ -140,57 +140,61 @@ class DataDifferencer extends ViewableData
 
             // Create the actual column name
             $relField = "{$relName}ID";
+            // Using relation name instead of database column name, because of FileField etc.
+            $setField = is_a($relSpec, Image::class, true) ? $relName : $relField;
             $toTitle = '';
+            /** @var DataObject $relObjTo */
+            $relObjTo = null;
             if ($this->toRecord->hasMethod($relName)) {
                 $relObjTo = $this->toRecord->$relName();
-                if ($relObjTo) {
-                    $toTitle = ($relObjTo->hasMethod('Title') || $relObjTo->hasField('Title')) ? $relObjTo->Title : '';
-                } else {
-                    $toTitle = '';
-                }
+                $toTitle = $this->getObjectDisplay($relObjTo);
             }
 
             if (!$this->fromRecord) {
-                if ($relObjTo) {
-                    if ($relObjTo instanceof Image) {
-                        // Using relation name instead of database column name, because of FileField etc.
-                        // TODO Use CMSThumbnail instead to limit max size, blocked by DataDifferencerTest and GC
-                        // not playing nice with mocked images
-                        $diffed->setField($relName, "<ins>" . $relObjTo->getTag() . "</ins>");
-                    } else {
-                        $diffed->setField($relField, "<ins>" . $toTitle . "</ins>");
-                    }
-                }
+                $diffed->setField(
+                    $setField,
+                    DBField::create_field('HTMLFragment', "<ins>{$toTitle}</ins>")
+                );
             } elseif ($this->fromRecord->$relField != $this->toRecord->$relField) {
                 $fromTitle = '';
+                $relObjFrom = null;
                 if ($this->fromRecord->hasMethod($relName)) {
                     $relObjFrom = $this->fromRecord->$relName();
-                    if ($relObjFrom) {
-                        $fromTitle = ($relObjFrom->hasMethod('Title') || $relObjFrom->hasField('Title'))
-                            ? $relObjFrom->Title
-                            : '';
-                    } else {
-                        $fromTitle = '';
-                    }
+                    $fromTitle = $this->getObjectDisplay($relObjFrom);
                 }
-                if (isset($relObjFrom) && $relObjFrom instanceof Image) {
-                    // TODO Use CMSThumbnail (see above)
-                    $diffed->setField(
-                        // Using relation name instead of database column name, because of FileField etc.
-                        $relName,
-                        Diff::compareHTML($relObjFrom->getTag(), $relObjTo->getTag())
-                    );
-                } else {
-                    // Set the field.
-                    $diffed->setField(
-                        $relField,
-                        Diff::compareHTML($fromTitle, $toTitle)
-                    );
-                }
+
+                // Set the field.
+                $diffed->setField(
+                    $setField,
+                    DBField::create_field('HTMLFragment', Diff::compareHTML($fromTitle, $toTitle))
+                );
             }
         }
 
         return $diffed;
+    }
+
+    /**
+     * Get HTML to display for a dataobject
+     *
+     * @param DataObject $object
+     * @return string HTML output
+     */
+    protected function getObjectDisplay($object = null)
+    {
+        if (!$object || !$object->isInDB()) {
+            return '';
+        }
+
+        // Use image tag
+        // TODO Use CMSThumbnail instead to limit max size, blocked by DataDifferencerTest and GC
+        // not playing nice with mocked images
+        if ($object instanceof Image) {
+            return $object->getTag();
+        }
+
+        // Format title
+        return $object->obj('Title')->forTemplate();
     }
 
     /**
