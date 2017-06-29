@@ -1397,7 +1397,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
     /**
      * Determines canView permissions for the latest version of this object on a specific stage.
-     * Usually the stage is read from {@link Versioned::current_stage()}.
+     * Usually the stage is read from {@link self::current_stage()}.
      *
      * This method should be invoked by user code to check if a record is visible in the given stage.
      *
