@@ -10,8 +10,11 @@ use SilverStripe\Versioned\Versioned;
 
 /**
  * @property string $Choices
+ * @property int $ImageID
+ * @property int $HasOneRelationID
  * @method Image Image()
  * @method HasOneRelationObject HasOneRelation()
+ * @mixin Versioned
  */
 class TestObject extends DataObject implements TestOnly
 {
