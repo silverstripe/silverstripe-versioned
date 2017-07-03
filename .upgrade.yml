@@ -59,3 +59,6 @@ mappings:
   SilverStripe\ORM\Versioning\VersionedGridFieldDetailForm: SilverStripe\Versioned\VersionedGridFieldDetailForm
   SilverStripe\ORM\Versioning\VersionedGridFieldItemRequest: SilverStripe\Versioned\VersionedGridFieldItemRequest
   SilverStripe\ORM\Versioning\Versioned: SilverStripe\Versioned\Versioned
+skipConfigs:
+  - db_for_versions_table
+

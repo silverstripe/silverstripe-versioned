@@ -11,6 +11,9 @@ use SilverStripe\Assets\Filesystem;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Assets\Tests\Storage\AssetStoreTest\TestAssetStore;
 
+/**
+ * @skipUpgrade
+ */
 class DataDifferencerTest extends SapphireTest
 {
     protected static $fixture_file = 'DataDifferencerTest.yml';
