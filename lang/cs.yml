@@ -1,0 +1,26 @@
+cs:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, a {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    NAME: Název
+    PLURALNAME: Kampaně
+    SINGULARNAME: Kampaň
+    STATE: Stav
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Změnit nastavení položek '
+    SINGULARNAME: 'Změnit nastevení položky'
+  SilverStripe\Versioned\Versioned:
+    INFERRED_TITLE: 'Generováno vydavatelem ''{title}'' v {created}'
+    has_many_Versions: Verze
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Archiv
+    Archived: 'Archivováno %s %s'
+    BUTTONARCHIVEDESC: 'Nezveřejnit a poslat do archivu'
+    BUTTONPUBLISH: Zveřejnit
+    BUTTONUNPUBLISH: Nezveřejnit
+    BUTTONUNPUBLISHDESC: 'Odstranit tento záznam ze zveřejněného webu'
+    Published: 'Zveřejněno {name} {link}'
+    Unpublished: 'Nezveřejněno %s %s'
+  SilverStripe\Versioned\VersionedRequestFilter:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte se přihlásit s vasím CMS heslem pro pohled na koncept nebo na archivovaný obsah. <a href="{link}">Kliknte sem pro návrat do zveřejněného webu.</a>'

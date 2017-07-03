@@ -1,0 +1,30 @@
+sk:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'jedna položka'
+      few: '{count} položky'
+      other: '{count} položiek'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, a {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    NAME: Názov
+    PLURALNAME: Kampane
+    SINGULARNAME: Kampaň
+    STATE: Stav
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Zmeniť nastavenie položiek'
+    SINGULARNAME: 'Zmeniť nastavenie položky'
+  SilverStripe\Versioned\Versioned:
+    INFERRED_TITLE: 'Generované vydavetaľom ''{title}'' v {created}'
+    has_many_Versions: Verzie
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Archív
+    Archived: 'Archivované %s %s'
+    BUTTONARCHIVEDESC: 'Nezverejniť a poslať do archívu'
+    BUTTONPUBLISH: Zverejniť
+    BUTTONUNPUBLISH: Nezverejniť
+    BUTTONUNPUBLISHDESC: 'Odstrániť tento záznam zo zverejneného webu'
+    Published: 'Zverejnené {name} {link}'
+    Unpublished: 'Nezverejnené %s %s'
+  SilverStripe\Versioned\VersionedRequestFilter:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte sa prihlásiť s vašim CMS heslom pre náhľad koncepu alebo archivovaného obsahu. <a href="{link}">Kliknite tu pre návrat do zverejneného webu.</a>'

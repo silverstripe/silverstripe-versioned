@@ -1,0 +1,46 @@
+ru:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'один объект'
+      few: '{count} объекта'
+      many: '{count} объектов'
+      other: '{count} объектов'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, и {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    DESCRIPTION_OTHER_ITEM_PLURALS:
+      one: 'другой объект'
+      few: '{count} других объекта'
+      many: '{count} других объектов'
+      other: '{count} других объектов'
+    NAME: Имя
+    PLURALNAME: Кампании
+    PLURALS:
+      one: Кампания
+      few: '{count} кампании'
+      many: '{count} кампаний'
+      other: '{count} кампаний'
+    SINGULARNAME: Кампания
+    STATE: Состояние
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Объекты набора изменений'
+    PLURALS:
+      one: 'Объект набора изменений'
+      few: '{count} объекта набора изменений'
+      many: '{count} объектов набора изменений'
+      other: '{count} объектов набора изменений'
+    SINGULARNAME: 'Объект набора изменений'
+  SilverStripe\Versioned\Versioned:
+    INFERRED_TITLE: 'Сгенерировано автоматически при публикации ''{title}'' в {created}'
+    has_many_Versions: Версии
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: 'Архив'
+    Archived: 'Добавлено в архив %s %s'
+    BUTTONARCHIVEDESC: 'Отменить публикацию и добавить в архив'
+    BUTTONPUBLISH: Опубликовать
+    BUTTONUNPUBLISH: 'Отменить публикацию'
+    BUTTONUNPUBLISHDESC: 'Удалить эту запись с сайта'
+    Published: 'Опубликовано {name} {link}'
+    Unpublished: 'Публикация отменена %s %s'
+  SilverStripe\Versioned\VersionedRequestFilter:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Авторизуйтесь в панели управления для просмотра черновиков и архива. <a href="{link}"> Перейдите по этой ссылке для возврата на сайт.</a>'

@@ -34,5 +34,5 @@ en:
     BUTTONUNPUBLISHDESC: 'Remove this record from the published site'
     Published: 'Published {name} {link}'
     Unpublished: 'Unpublished %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'You must log in with your CMS password in order to view the draft or archived content. <a href="{link}">Click here to go back to the published site.</a>'
