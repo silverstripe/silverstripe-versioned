@@ -1,0 +1,38 @@
+it:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'un elemento'
+      other: '{count} elementi'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, e {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    DESCRIPTION_OTHER_ITEM_PLURALS:
+      one: 'un altro elemento'
+      other: '{count} altri elementi'
+    NAME: Nome
+    PLURALNAME: Campagne
+    PLURALS:
+      one: 'Una Campagna'
+      other: '{count} Campagne'
+    SINGULARNAME: Campagna
+    STATE: Stato
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Elementi del Gruppo Modifiche'
+    PLURALS:
+      one: 'Un Elemento del Gruppo Modifiche'
+      other: '{count} Elementi del Gruppo Modifiche'
+    SINGULARNAME: 'Elemento del Gruppo Modifiche'
+  SilverStripe\Versioned\Versioned:
+    INFERRED_TITLE: 'Generato pubblicando ''{title}'' il {created}'
+    has_many_Versions: Versioni
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Archivia
+    Archived: 'Archiviate %s %s'
+    BUTTONARCHIVEDESC: 'Nascondi e archivia'
+    BUTTONPUBLISH: Pubblica
+    BUTTONUNPUBLISH: Nascondi
+    BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
+    Published: 'Pubblicato {name} {link}'
+    Unpublished: 'Nascosto %s %s'
+  SilverStripe\Versioned\VersionedRequestFilter:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Devi effettuare l''accesso al CMS per poter vedere il sito bozza o il contenuto archiviato. <a href="{link}">Premere qui per tornare al sito pubblicato.</a>'

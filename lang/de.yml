@@ -1,0 +1,25 @@
+de:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'Ein Element'
+      other: '{count} Elemente'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list} und {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    DESCRIPTION_OTHER_ITEM_PLURALS:
+      one: 'ein anderes Element'
+      other: '{count} andere Elemente'
+    NAME: Name
+    PLURALNAME: Kampagnen
+    PLURALS:
+      one: 'Eine Kampagne'
+      other: '{count} Kampagnen'
+    SINGULARNAME: Kampagne
+    STATE: Bundesland
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Versionen
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Archiv
+    Archived: '%s %s archiviert'
+    BUTTONPUBLISH: Veröffentlichen
+    Published: '{name} {link} veröffentlicht'

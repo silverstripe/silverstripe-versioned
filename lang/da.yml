@@ -1,0 +1,18 @@
+da:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'Et element'
+      other: '{count} Elementer'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, og {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    DESCRIPTION_OTHER_ITEM_PLURALS:
+      one: 'et andet element'
+      other: '{count} andre elementer'
+    NAME: Navn
+    PLURALNAME: Kampagner
+    PLURALS:
+      one: 'En Kampagne'
+      other: '{count} Kampagner'
+    SINGULARNAME: Kampagne
+    STATE: Tilstand
