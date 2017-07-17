@@ -191,7 +191,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * or programatically:
      *
-     *  Config::inst()->update($this->owner->class, 'versionableExtensions',
+     *  Config::modify()->merge($this->owner->class, 'versionableExtensions',
      *  array('Extension1' => 'suffix1', 'Extension2' => array('suffix2', 'suffix3')));
      *
      *

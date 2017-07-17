@@ -1168,7 +1168,7 @@ class VersionedTest extends SapphireTest
     {
         Config::inst()->remove(VersionedTest\RelatedWithoutversion::class, 'db', 'Name', 'Varchar');
 
-        Config::inst()->update(
+        Config::modify()->merge(
             VersionedTest\RelatedWithoutversion::class,
             'db',
             [
