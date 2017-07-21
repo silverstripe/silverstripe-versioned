@@ -8,4 +8,4 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Control\Director:
     properties:
       Middlewares:
-        VersionedMiddleware: %$SilverStripe\Versioned\VersionedHTTPMiddleware
+        VersionedMiddleware: '%$SilverStripe\Versioned\VersionedHTTPMiddleware'
