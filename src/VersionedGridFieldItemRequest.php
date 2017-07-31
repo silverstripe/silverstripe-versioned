@@ -101,10 +101,13 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $title = $record->Title;
             $record->doArchive();
 
-        $message = sprintf(
-            _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Archived', 'Archived %s %s'),
-            $record->i18n_singular_name(),
-            Convert::raw2xml($title)
+        $message = _t(
+            __CLASS__ . '.Archived',
+            'Archived {name} {title}',
+            [
+                'name' => $record->i18n_singular_name(),
+                'title' => Convert::raw2xml($title)
+            ]
         );
         $this->setFormMessage($form, $message);
 
@@ -171,10 +174,13 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $title = $record->Title;
             $record->doUnpublish();
 
-        $message = sprintf(
-            _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Unpublished', 'Unpublished %s %s'),
-            $record->i18n_singular_name(),
-            Convert::raw2xml($title)
+        $message = _t(
+            __CLASS__ . '.Unpublished',
+            'Unpublished {name} {title}',
+            [
+                'name' => $record->i18n_singular_name(),
+                'title' => Convert::raw2xml($title)
+            ]
         );
         $this->setFormMessage($form, $message);
 
