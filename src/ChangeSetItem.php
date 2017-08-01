@@ -192,6 +192,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function findReferenced()
     {
+        // remove this for recursive unpublish action in a ChangeSet
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
             // If deleted from stage, need to look at live record
             $record = $this->getObjectInStage(Versioned::LIVE);
@@ -202,12 +203,10 @@ class ChangeSetItem extends DataObject implements Thumbnail
             // If changed on stage, look at owned objects there
             $record = $this->getObjectInStage(Versioned::DRAFT);
             if ($record) {
-                return $record->findOwned()->filterByCallback(function ($owned) {
-                    /** @var Versioned|DataObject $owned */
-                    return $owned->stagesDiffer(Versioned::DRAFT, Versioned::LIVE);
-                });
+                return $record->findOwned();
             }
         }
+        
         // Empty set
         return new ArrayList();
     }

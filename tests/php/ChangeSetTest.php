@@ -128,7 +128,11 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
 
@@ -136,7 +140,11 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
     }
@@ -156,7 +164,11 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
 
@@ -169,8 +181,11 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY,
-            ChangeSetTest\EndObject::class.'.end1' => ChangeSetItem::IMPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
 
@@ -212,13 +227,17 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
         $this->assertTrue($cs->isSynced());
 
-        $end = $this->objFromFixture(ChangeSetTest\EndObject::class, 'end1');
-        $end->Baz = 3;
+        $end = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
+        $end->BaseID = null;
         $end->write();
         $this->assertFalse($cs->isSynced());
 
@@ -227,8 +246,9 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $cs,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY,
-            ChangeSetTest\EndObject::class.'.end1' => ChangeSetItem::IMPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
         $this->assertTrue($cs->isSynced());
@@ -487,7 +507,9 @@ class ChangeSetTest extends SapphireTest
         $this->assertChangeSetLooksLike(
             $changeset,
             [
-            ChangeSetTest\BaseObject::class.'.base' => ChangeSetItem::EXPLICITLY
+                ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
 
