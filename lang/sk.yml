@@ -26,5 +26,3 @@ sk:
     BUTTONUNPUBLISHDESC: 'Odstrániť tento záznam zo zverejneného webu'
     Published: 'Zverejnené {name} {link}'
     Unpublished: 'Nezverejnené %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte sa prihlásiť s vašim CMS heslom pre náhľad koncepu alebo archivovaného obsahu. <a href="{link}">Kliknite tu pre návrat do zverejneného webu.</a>'

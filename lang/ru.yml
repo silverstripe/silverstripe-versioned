@@ -42,5 +42,5 @@ ru:
     BUTTONUNPUBLISHDESC: 'Удалить эту запись с сайта'
     Published: 'Опубликовано {name} {link}'
     Unpublished: 'Публикация отменена %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Авторизуйтесь в панели управления для просмотра черновиков и архива. <a href="{link}"> Перейдите по этой ссылке для возврата на сайт.</a>'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Вы должны войти в систему с помощью вашего пароля чтобы иметь возможность просматривать черновые или архивные страницы. Нажмите чтобы вернуться на опубликованный сайт.'

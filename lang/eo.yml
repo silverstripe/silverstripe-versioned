@@ -34,5 +34,3 @@ eo:
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
     Published: 'Pubikigita {name} {link}'
     Unpublished: 'Malpublikigita %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Por vidigi la malneton aŭ enarkivigitan enhavon, necesas ke vi ensalutu per via CMS-pasvorto. <a href="{link}">Alklaku ĉi tie por reiri al la publika retejo.</a>'

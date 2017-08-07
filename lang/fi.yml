@@ -1,0 +1,38 @@
+fi:
+  SilverStripe\Versioned\ChangeSet:
+    DESCRIPTION_ITEM_PLURALS:
+      one: 'yksi kohde'
+      other: '{count} kohdetta'
+    DESCRIPTION_LIST_FIRST: '{item}'
+    DESCRIPTION_LIST_LAST: '{list}, ja {item}'
+    DESCRIPTION_LIST_MID: '{list}, {item}'
+    DESCRIPTION_OTHER_ITEM_PLURALS:
+      one: 'yksi muu kohde'
+      other: '{count} muuta kohdetta'
+    NAME: Nimi
+    PLURALNAME: Kampanjat
+    PLURALS:
+      one: 'Yksi kampanja'
+      other: '{count} kampanjaa'
+    SINGULARNAME: Kampanja
+    STATE: Tila
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Muuta valikoiman kohteita'
+    PLURALS:
+      one: 'Muutos valikoiman kohteessa'
+      other: '{count} Muutosta vailkoiman kohteissa'
+    SINGULARNAME: 'Muuta valikoiman kohdetta'
+  SilverStripe\Versioned\Versioned:
+    INFERRED_TITLE: 'Luotu julkaisusta ''{title}'', tekijä {created}'
+    has_many_Versions: Versiot
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Arkisto
+    Archived: 'Arkistoitiin %s %s'
+    BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
+    BUTTONPUBLISH: Julkaise
+    BUTTONUNPUBLISH: 'Poista julkaisusta'
+    BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
+    Published: 'Julkaistiin {name} {link}'
+    Unpublished: 'Poistettiin julkaisusta %s %s'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Sinun on kirjauduttava CMS-järjestelmän salasanalla nähdäksesi vedokset tai arkistoitu sisältö. <a href="{link}">Klikkaa tästä palataksesi julkaistulle sivustolle.</a>'

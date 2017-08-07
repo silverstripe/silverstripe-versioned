@@ -34,5 +34,3 @@ it:
     BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
     Published: 'Pubblicato {name} {link}'
     Unpublished: 'Nascosto %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Devi effettuare l''accesso al CMS per poter vedere il sito bozza o il contenuto archiviato. <a href="{link}">Premere qui per tornare al sito pubblicato.</a>'
