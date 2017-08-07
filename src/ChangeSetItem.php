@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use InvalidArgumentException;
 use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
@@ -192,12 +193,13 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function findReferenced()
     {
-        // remove this for recursive unpublish action in a ChangeSet
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
-            // If deleted from stage, need to look at live record
+            // If we have deleted this record, recursively delete live objects on publish
+            /** @var DataObject $record */
             $record = $this->getObjectInStage(Versioned::LIVE);
             if ($record) {
-                return $record->findOwners(false);
+                // Get all cascade deletions (recursively)
+                return $record->findCascadeDeletes(true);
             }
         } else {
             // If changed on stage, look at owned objects there
@@ -206,7 +208,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
                 return $record->findOwned();
             }
         }
-        
+
         // Empty set
         return new ArrayList();
     }
@@ -406,10 +408,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public static function get_for_object($object)
     {
-        return ChangeSetItem::get()->filter([
-            'ObjectID' => $object->ID,
-            'ObjectClass' => $object->baseClass(),
-        ]);
+        // Capture changesetitem for both changed and deleted objects
+        $id = $object->isInDB()
+            ? $object->ID
+            : $object->OldID;
+        return static::get_for_object_by_id($id, $object->baseClass());
     }
 
     /**
@@ -421,6 +424,9 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public static function get_for_object_by_id($objectID, $objectClass)
     {
+        if (!$objectID) {
+            throw new InvalidArgumentException("Cannot get ChangesetItem for object which was never saved");
+        }
         return ChangeSetItem::get()->filter([
             'ObjectID' => $objectID,
             'ObjectClass' => static::getSchema()->baseDataClass($objectClass)

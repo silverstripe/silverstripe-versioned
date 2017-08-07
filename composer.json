@@ -22,7 +22,7 @@
         "silverstripe/framework": "^4@dev"
     },
     "require-dev": {
-        "phpunit/PHPUnit": "~4.8"
+        "phpunit/phpunit": "^5.7"
     },
     "extra": {
         "branch-alias": {
