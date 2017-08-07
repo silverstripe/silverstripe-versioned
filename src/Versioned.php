@@ -2,22 +2,24 @@
 
 namespace SilverStripe\Versioned;
 
+use InvalidArgumentException;
+use LogicException;
 use SilverStripe\Control\Controller;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\Cookie;
-use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataQuery;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\ORM\Queries\SQLUpdate;
@@ -25,8 +27,6 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use SilverStripe\View\TemplateGlobalProvider;
-use InvalidArgumentException;
-use LogicException;
 
 /**
  * The Versioned extension allows your DataObjects to have several versions,
@@ -1102,7 +1102,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Find objects in the given relationships, merging them into the given list
      *
-     * @param array $source Config property to extract relationships from
+     * @param string $source Config property to extract relationships from
      * @param bool $recursive True if recursive
      * @param ArrayList $list Optional list to add items to
      * @return ArrayList The list
@@ -1461,6 +1461,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (count($versionableExtensions)) {
             foreach ($versionableExtensions as $versionableExtension => $suffixes) {
                 if ($owner->hasExtension($versionableExtension)) {
+                    /** @var VersionableExtension|Extension $ext */
                     $ext = $owner->getExtensionInstance($versionableExtension);
                     $ext->setOwner($owner);
                     $table = $ext->extendWithSuffix($table);
@@ -1635,6 +1636,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         return true;
     }
 
+    /**
+     * Remove this item from any changesets
+     *
+     * @return bool
+     */
     public function deleteFromChangeSets()
     {
         $owner = $this->owner;
@@ -1650,6 +1656,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         ChangeSetItem::get()
             ->filter(['ObjectID' => $ids])
             ->removeAll();
+        return true;
     }
 
     /**
@@ -1690,19 +1697,24 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Trigger unpublish of owning objects
+     * Determine if this object is published, and has any published owners.
+     * If this is true, a warning should be shown before this is published.
+     *
+     * Note: This method returns false if the object itself is unpublished,
+     * since owners are only considered on the same stage as the record itself.
+     *
+     * @return bool
      */
-    public function onAfterUnpublish()
+    public function hasPublishedOwners()
     {
-        $owner = $this->owner;
-
-        // Any objects which owned (and thus relied on the unpublished object) are now unpublished automatically.
-        foreach ($owner->findOwners(false) as $object) {
-            /** @var Versioned|DataObject $object */
-            $object->doUnpublish();
+        if (!$this->isPublished()) {
+            return false;
         }
+        // Count live owners
+        /** @var Versioned|DataObject $liveRecord */
+        $liveRecord = static::get_by_stage(get_class($this->owner), Versioned::LIVE)->byID($this->owner->ID);
+        return $liveRecord->findOwners(false)->count() > 0;
     }
-
 
     /**
      * Revert the draft changes: replace the draft content with the content on live
@@ -2631,7 +2643,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @param ArrayList $list Global list. Object will not be added if already added to this list.
      * @param ArrayList $added Additional list to insert into
      * @param DataObject $item Item to add
-     * @return mixed
      */
     protected function mergeRelatedObject($list, $added, $item)
     {
