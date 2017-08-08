@@ -354,7 +354,7 @@ class VersionedOwnershipTest extends SapphireTest
     }
 
     /**
-     * Test that owning objects get unpublished as needed
+     * Test that owning objects don't get unpublished when object is unpublished
      */
     public function testRecursiveUnpublish()
     {
@@ -367,47 +367,48 @@ class VersionedOwnershipTest extends SapphireTest
         $banner3Unpublished = $this->objFromFixture(VersionedOwnershipTest\RelatedMany::class, 'relatedmany3');
         $this->assertFalse($banner3Unpublished->doUnpublish());
 
-        // First test: mid-level unpublish; We expect that owners should be unpublished, but not
-        // owned objects, nor other siblings shared by the same owner.
+        // First test: mid-level unpublish; no other objects are unpublished
+        /** @var VersionedOwnershipTest\Related $related2 */
         $related2 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related2_published');
         /** @var VersionedOwnershipTest\Attachment $attachment3 */
         $attachment3 = $this->objFromFixture(VersionedOwnershipTest\Attachment::class, 'attachment3_published');
         /** @var VersionedOwnershipTest\RelatedMany $relatedMany4 */
         $relatedMany4 = $this->objFromFixture(VersionedOwnershipTest\RelatedMany::class, 'relatedmany4_published');
+
+        // Ensure that this object, and it's owned objects, are aware of published parents
+        $this->assertTrue($attachment3->hasPublishedOwners());
+        $this->assertTrue($related2->hasPublishedOwners());
+
         /** @var VersionedOwnershipTest\Related $related2 */
         $this->assertTrue($related2->doUnpublish());
+        /** @var VersionedOwnershipTest\Subclass $subclass2 */
         $subclass2 = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass2_published');
 
+        // After unpublish this should change
+        $this->assertFalse($attachment3->hasPublishedOwners()); // Because owner is unpublished
+        $this->assertFalse($related2->hasPublishedOwners()); // Because self is unpublished
+        $this->assertFalse($subclass2->hasPublishedOwners()); // Because no owners
+
         /** @var VersionedOwnershipTest\Subclass $subclass2 */
-        $this->assertFalse($subclass2->isPublished()); // Owner IS unpublished
+        $this->assertTrue($subclass2->isPublished()); // Owner is not unpublished
         $this->assertTrue($attachment3->isPublished()); // Owned object is NOT unpublished
         $this->assertTrue($relatedMany4->isPublished()); // Owned object by owner is NOT unpublished
 
-        // Second test: multi-level unpublish should recursively cascade down all owning objects
-        // Publish related2 again
+        // Second test: Re-publishing the owner should re-publish this item
         $subclass2->publishRecursive();
         $this->assertTrue($subclass2->isPublished());
         $this->assertTrue($related2->isPublished());
         $this->assertTrue($attachment3->isPublished());
-
-        // Unpublish leaf node
-        $this->assertTrue($attachment3->doUnpublish());
-
-        // Now all owning objects (only) are unpublished
-        $this->assertFalse($attachment3->isPublished()); // Unpublished because we just unpublished it
-        $this->assertFalse($related2->isPublished()); // Unpublished because it owns attachment3
-        $this->assertFalse($subclass2->isPublished()); // Unpublished ecause it owns related2
-        $this->assertTrue($relatedMany4->isPublished()); // Stays live because recursion only affects owners not owned.
     }
 
     public function testRecursiveArchive()
     {
-        // When archiving an object, any published owners should be unpublished at the same time
-        // but NOT achived
+        // When archiving an object owners are not affected
 
         /** @var VersionedOwnershipTest\Attachment $attachment3 */
         $attachment3 = $this->objFromFixture(VersionedOwnershipTest\Attachment::class, 'attachment3_published');
         $attachment3ID = $attachment3->ID;
+        $this->assertTrue($attachment3->hasPublishedOwners()); // Warning should be shown
         $this->assertTrue($attachment3->doArchive());
 
         // This object is on neither stage nor live
@@ -418,17 +419,17 @@ class VersionedOwnershipTest extends SapphireTest
         $this->assertEmpty($stageAttachment);
         $this->assertEmpty($liveAttachment);
 
-        // Owning object is unpublished only
+        // Owning object is not unpublished or archived
         /** @var VersionedOwnershipTest\Related $stageOwner */
         $stageOwner = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related2_published');
         $this->assertTrue($stageOwner->isOnDraft());
-        $this->assertFalse($stageOwner->isPublished());
+        $this->assertTrue($stageOwner->isPublished());
 
-        // Bottom level owning object is also unpublished
+        // Bottom level owning object is also unaffected
         /** @var VersionedOwnershipTest\Subclass $stageTopOwner */
         $stageTopOwner = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass2_published');
         $this->assertTrue($stageTopOwner->isOnDraft());
-        $this->assertFalse($stageTopOwner->isPublished());
+        $this->assertTrue($stageTopOwner->isPublished());
     }
 
     public function testRecursiveRevertToLive()
