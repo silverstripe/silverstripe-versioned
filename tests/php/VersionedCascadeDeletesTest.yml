@@ -1,0 +1,39 @@
+SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\GrandChildObject:
+  grandchild1:
+    Title: 'Grandchild 1'
+  grandchild2:
+    Title: 'Grandchild 2'
+  grandchild3:
+    Title: 'Grandchild 3'
+
+SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\RelatedObject:
+  related1:
+    Title: 'Related 1'
+  related2:
+    Title: 'Related 2'
+  related3:
+    Title: 'Related 3'
+
+SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\ParentObject:
+  parent1:
+    Title: 'Parent 1'
+  parent2:
+    Title: 'Parent 2'
+  parent3:
+    Title: 'Parent 3'
+
+SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\ChildObject:
+  child1:
+    Title: 'Child 1'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\ParentObject.parent1
+    Related: =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\RelatedObject.related1
+    Children:
+      - =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\GrandChildObject.grandchild1
+      - =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\GrandChildObject.grandchild2
+  child2:
+    Title: 'Child 2'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\ParentObject.parent2
+    Related: =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\RelatedObject.related2
+    Children:
+      - =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\GrandChildObject.grandchild2
+      - =>SilverStripe\Versioned\Tests\VersionedCascadeDeletesTest\GrandChildObject.grandchild3

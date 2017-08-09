@@ -28,6 +28,10 @@ class MidObject extends DataObject implements TestOnly
         'End',
     ];
 
+    private static $cascade_deletes = [
+        'End',
+    ];
+
     private static $extensions = [
         Versioned::class,
     ];

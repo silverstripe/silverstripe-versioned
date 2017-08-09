@@ -38,7 +38,6 @@ use SilverStripe\View\TemplateGlobalProvider;
  */
 class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
 {
-
     /**
      * Versioning mode for this object.
      * Note: Not related to the current versioning mode in the state / session
@@ -979,7 +978,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function findOwned($recursive = true, $list = null)
     {
         // Find objects in these relationships
-        return $this->findRelatedObjects('owns', $recursive, $list);
+        return $this->owner->findRelatedObjects('owns', $recursive, $list);
     }
 
     /**
@@ -1016,7 +1015,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function findOwnersRecursive($recursive, $list, $lookup)
     {
         // First pass: find objects that are explicitly owned_by (e.g. custom relationships)
-        $owners = $this->findRelatedObjects('owned_by', false);
+        /** @var DataObject $owner */
+        $owner = $this->owner;
+        $owners = $owner->findRelatedObjects('owned_by', false);
 
         // Second pass: Find owners via reverse lookup list
         foreach ($lookup as $ownedClass => $classLookups) {
@@ -1029,12 +1030,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 $ownerClass = $classLookup['class'];
                 $ownerRelation = $classLookup['relation'];
                 $result = $this->owner->inferReciprocalComponent($ownerClass, $ownerRelation);
-                $this->mergeRelatedObjects($owners, $result);
+                $owner->mergeRelatedObjects($owners, $result);
             }
         }
 
         // Merge all objects into the main list
-        $newItems = $this->mergeRelatedObjects($list, $owners);
+        $newItems = $owner->mergeRelatedObjects($list, $owners);
 
         // If recursing, iterate over all newly added items
         if ($recursive) {
@@ -1096,82 +1097,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             }
         }
         return $lookup;
-    }
-
-
-    /**
-     * Find objects in the given relationships, merging them into the given list
-     *
-     * @param string $source Config property to extract relationships from
-     * @param bool $recursive True if recursive
-     * @param ArrayList $list Optional list to add items to
-     * @return ArrayList The list
-     */
-    public function findRelatedObjects($source, $recursive = true, $list = null)
-    {
-        if (!$list) {
-            $list = new ArrayList();
-        }
-
-        // Skip search for unsaved records
-        $owner = $this->owner;
-        if (!$owner->isInDB()) {
-            return $list;
-        }
-
-        $relationships = $owner->config()->get($source);
-        foreach ($relationships as $relationship) {
-            // Warn if invalid config
-            if (!$owner->hasMethod($relationship)) {
-                trigger_error(sprintf(
-                    "Invalid %s config value \"%s\" on object on class \"%s\"",
-                    $source,
-                    $relationship,
-                    get_class($owner)
-                ), E_USER_WARNING);
-                continue;
-            }
-
-            // Inspect value of this relationship
-            $items = $owner->{$relationship}();
-
-            // Merge any new item
-            $newItems = $this->mergeRelatedObjects($list, $items);
-
-            // Recurse if necessary
-            if ($recursive) {
-                foreach ($newItems as $item) {
-                    /** @var Versioned|DataObject $item */
-                    $item->findRelatedObjects($source, true, $list);
-                }
-            }
-        }
-        return $list;
-    }
-
-    /**
-     * Helper method to merge owned/owning items into a list.
-     * Items already present in the list will be skipped.
-     *
-     * @param ArrayList $list Items to merge into
-     * @param mixed $items List of new items to merge
-     * @return ArrayList List of all newly added items that did not already exist in $list
-     */
-    protected function mergeRelatedObjects($list, $items)
-    {
-        $added = new ArrayList();
-        if (!$items) {
-            return $added;
-        }
-        if ($items instanceof DataObject) {
-            $items = [$items];
-        }
-
-        /** @var Versioned|DataObject $item */
-        foreach ($items as $item) {
-            $this->mergeRelatedObject($list, $added, $item);
-        }
-        return $added;
     }
 
     /**
@@ -2635,30 +2560,5 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function hasStages()
     {
         return $this->mode === static::STAGEDVERSIONED;
-    }
-
-    /**
-     * Merge single object into a list
-     *
-     * @param ArrayList $list Global list. Object will not be added if already added to this list.
-     * @param ArrayList $added Additional list to insert into
-     * @param DataObject $item Item to add
-     */
-    protected function mergeRelatedObject($list, $added, $item)
-    {
-        // Identify item
-        $itemKey = get_class($item) . '/' . $item->ID;
-
-        // Write if saved, versioned, and not already added
-        if ($item->isInDB() && $item->has_extension(static::class) && !isset($list[$itemKey])) {
-            $list[$itemKey] = $item;
-            $added[$itemKey] = $item;
-        }
-
-        // Add joined record (from many_many through) automatically
-        $joined = $item->getJoin();
-        if ($joined) {
-            $this->mergeRelatedObject($list, $added, $joined);
-        }
     }
 }
