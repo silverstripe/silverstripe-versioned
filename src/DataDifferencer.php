@@ -230,10 +230,10 @@ class DataDifferencer extends ViewableData
                     $fieldDiff = Diff::compareHTML(
                         $this->fromRecord->$field,
                         $this->toRecord->$field,
-                        (!$fieldObj || $fieldObj->stat('escape_type') != 'xml')
+                        (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml')
                     );
                 } else {
-                    if ($fieldObj && $fieldObj->stat('escape_type') == 'xml') {
+                    if ($fieldObj && $fieldObj->config()->get('escape_type') == 'xml') {
                         $fieldDiff = "<ins>" . $this->toRecord->$field . "</ins>";
                     } else {
                         $fieldDiff = "<ins>" . Convert::raw2xml($this->toRecord->$field) . "</ins>";
