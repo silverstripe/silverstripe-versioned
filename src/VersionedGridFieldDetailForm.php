@@ -12,7 +12,6 @@ use SilverStripe\ORM\DataObject;
  */
 class VersionedGridFieldDetailForm extends Extension
 {
-
     /**
      * @param string $class
      * @param GridField $gridField
@@ -22,7 +21,10 @@ class VersionedGridFieldDetailForm extends Extension
     public function updateItemRequestClass(&$class, $gridField, $record, $requestHandler)
     {
         // Conditionally use a versioned item handler
-        if ($record && $record->has_extension(Versioned::class)) {
+        if ($record
+            && $record->has_extension(Versioned::class)
+            && $record->config()->get('versioned_gridfield_extensions')
+        ) {
             $class = VersionedGridFieldItemRequest::class;
         }
     }
