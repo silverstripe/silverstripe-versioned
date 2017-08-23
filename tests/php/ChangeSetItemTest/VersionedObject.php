@@ -21,7 +21,7 @@ class VersionedObject extends DataObject implements TestOnly
         Versioned::class
     ];
 
-    function canEdit($member = null)
+    public function canEdit($member = null)
     {
         return true;
     }

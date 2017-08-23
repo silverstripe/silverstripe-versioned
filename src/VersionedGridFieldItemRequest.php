@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Convert;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
@@ -20,66 +21,68 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
     protected function getFormActions()
     {
-        $actions = parent::getFormActions();
-
         // Check if record is versionable
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
         if (!$record || !$record->has_extension(Versioned::class)) {
-            return $actions;
+            return parent::getFormActions();
         }
 
-        // Save & Publish action
-        if ($record->canPublish()) {
-            // "publish", as with "save", it supports an alternate state to show when action is needed.
-            $publish = FormAction::create(
-                'doPublish',
-                _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONPUBLISH', 'Publish')
-            )
-                ->setUseButtonTag(true)
-                ->addExtraClass('btn btn-primary font-icon-rocket');
-
-            // Insert after save
-            if ($actions->fieldByName('action_doSave')) {
-                $actions->insertAfter('action_doSave', $publish);
-            } else {
-                $actions->push($publish);
-            }
-        }
-
-        // Unpublish action
-        $isPublished = $record->isPublished();
-        if ($isPublished && $record->canUnpublish()) {
-            $actions->push(
-                FormAction::create(
-                    'doUnpublish',
-                    _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONUNPUBLISH', 'Unpublish')
+        // Add extra actions prior to extensions so that these can be modified too
+        $this->beforeExtending('updateFormActions', function (FieldList $actions) use ($record) {
+            // Save & Publish action
+            if ($record->canPublish()) {
+                // "publish", as with "save", it supports an alternate state to show when action is needed.
+                $publish = FormAction::create(
+                    'doPublish',
+                    _t(__CLASS__.'.BUTTONPUBLISH', 'Publish')
                 )
                     ->setUseButtonTag(true)
-                    ->setDescription(_t(
-                        'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONUNPUBLISHDESC',
-                        'Remove this record from the published site'
-                    ))
-                    ->addExtraClass('btn-secondary')
-            );
-        }
+                    ->addExtraClass('btn btn-primary font-icon-rocket');
 
-        // Archive action
-        if ($record->canArchive()) {
-            // Replace "delete" action
-            $actions->removeByName('action_doDelete');
+                // Insert after save
+                if ($actions->fieldByName('action_doSave')) {
+                    $actions->insertAfter('action_doSave', $publish);
+                } else {
+                    $actions->push($publish);
+                }
+            }
 
-            // "archive"
-            $actions->push(
-                FormAction::create('doArchive', _t('SilverStripe\\Versioned\\VersionedGridFieldItemRequest.ARCHIVE', 'Archive'))
-                    ->setDescription(_t(
-                        'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.BUTTONARCHIVEDESC',
-                        'Unpublish and send to archive'
-                    ))
-                    ->addExtraClass('delete btn-secondary')
-            );
-        }
-        return $actions;
+            // Unpublish action
+            $isPublished = $record->isPublished();
+            if ($isPublished && $record->canUnpublish()) {
+                $actions->push(
+                    FormAction::create(
+                        'doUnpublish',
+                        _t(__CLASS__.'.BUTTONUNPUBLISH', 'Unpublish')
+                    )
+                        ->setUseButtonTag(true)
+                        ->setDescription(_t(
+                            __CLASS__.'.BUTTONUNPUBLISHDESC',
+                            'Remove this record from the published site'
+                        ))
+                        ->addExtraClass('btn-secondary')
+                );
+            }
+
+            // Archive action
+            if ($record->canArchive()) {
+                // Replace "delete" action
+                $actions->removeByName('action_doDelete');
+
+                // "archive"
+                $actions->push(
+                    FormAction::create('doArchive', _t(__CLASS__.'.ARCHIVE', 'Archive'))
+                        ->setDescription(_t(
+                            __CLASS__.'.BUTTONARCHIVEDESC',
+                            'Unpublish and send to archive'
+                        ))
+                        ->addExtraClass('delete btn-secondary')
+                );
+            }
+        });
+
+        return parent::getFormActions();
     }
 
     /**
@@ -143,7 +146,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $xmlTitle = Convert::raw2xml($record->Title);
         $link = "<a href=\"{$editURL}\">{$xmlTitle}</a>";
         $message = _t(
-            'SilverStripe\\Versioned\\VersionedGridFieldItemRequest.Published',
+            __CLASS__.'.Published',
             'Published {name} {link}',
             [
                 'name' => $record->i18n_singular_name(),

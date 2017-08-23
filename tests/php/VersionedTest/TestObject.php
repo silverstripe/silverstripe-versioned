@@ -21,6 +21,14 @@ class TestObject extends DataObject implements TestOnly
 {
     private static $table_name = 'VersionedTest_DataObject';
 
+    /**
+     * Enable extensions in gridfield
+     *
+     * @config
+     * @var bool
+     */
+    private static $versioned_gridfield_extensions = true;
+
     private static $db = [
         "Name" => "Varchar",
         'Title' => 'Varchar',
@@ -42,7 +50,6 @@ class TestObject extends DataObject implements TestOnly
     private static $many_many = [
         'Related' => RelatedWithoutversion::class,
     ];
-
 
     public function canView($member = null)
     {

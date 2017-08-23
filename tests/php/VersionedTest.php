@@ -5,7 +5,6 @@ namespace SilverStripe\Versioned\Tests;
 use DateTime;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
