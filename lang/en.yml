@@ -16,6 +16,8 @@ en:
       other: '{count} Campaigns'
     SINGULARNAME: Campaign
     STATE: State
+    CONTAINS_COUNT: '1 item|{count} items'
+    EMPTY: 'Empty'
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Change Set Items'
     PLURALS:

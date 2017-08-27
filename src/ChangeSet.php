@@ -21,6 +21,7 @@ use BadMethodCallException;
 use Exception;
 use LogicException;
 use SilverStripe\Security\Security;
+use SilverStripe\ORM\FieldType\DBDatetime;
 
 /**
  * The ChangeSet model tracks several VersionedAndStaged objects for later publication as a single
@@ -54,6 +55,7 @@ class ChangeSet extends DataObject
         'State' => "Enum('open,published,reverted','open')",
         'IsInferred' => 'Boolean(0)', // True if created automatically
         'Description' => 'Text',
+        'PublishDate' => 'Datetime',
     ];
 
     private static $has_many = [
@@ -66,6 +68,7 @@ class ChangeSet extends DataObject
 
     private static $has_one = [
         'Owner' => Member::class,
+        'Publisher' => Member::class,
     ];
 
     private static $casting = [
@@ -86,7 +89,9 @@ class ChangeSet extends DataObject
     private static $summary_fields = [
         'Name' => 'Title',
         'ChangesCount' => 'Changes',
-        'Details' => 'Details',
+        'ContainsCount' => 'Contains',
+        'LastPublishedLabel' => 'Last Published',
+        'PublisherName' => 'Published By',
     ];
 
     /**
@@ -142,6 +147,9 @@ class ChangeSet extends DataObject
             }
 
             $this->State = static::STATE_PUBLISHED;
+            $this->PublisherID = Security::getCurrentUser()->ID;
+            $this->PublishDate = DBDatetime::now()->Rfc2822();
+
             $this->write();
         });
         return true;
@@ -452,6 +460,24 @@ class ChangeSet extends DataObject
         if ($this->isInDB()) {
             $fields->addFieldToTab('Root.Main', ReadonlyField::create('State', $this->fieldLabel('State')), 'Description');
         }
+        if ($this->Publisher()->exists()) {
+            $fields->addFieldsToTab(
+                'Root.Main',
+                [
+                    ReadonlyField::create(
+                        'PublishDate',
+                        $this->fieldLabel('LastPublished'),
+                        $this->getLastPublishedLabel()
+                    ),
+                    ReadonlyField::create(
+                        'PublisherName',
+                        $this->fieldLabel('PublishedBy'),
+                        $this->getPublisherName()
+                    )
+                ],
+                'Description'
+            );
+        }
 
         $this->extend('updateCMSFields', $fields);
         return $fields;
@@ -572,15 +598,65 @@ class ChangeSet extends DataObject
     }
 
     /**
-     * Required to support count display in react gridfield column
+     * Required to support the "changes" count display in react gridfield column
      *
      * @return int
      */
     public function getChangesCount()
     {
-        return $this->Changes()->count();
+        return $this->Changes()->filterByCallback(function ($item) {
+            return $item->hasChange();
+        })->count();
     }
 
+    /**
+     * Required to support the "contains" count display in react gridfield column
+     *
+     * @return int
+     */
+    public function getContainsCount()
+    {
+        $itemCount = $this->Changes()->count();
+        return $itemCount
+            ? _t(__CLASS__.'CONTAINS_COUNT', '1 item|{count} items', ['count' => $itemCount])
+            : _t(__CLASS__.'EMPTY', 'Empty');
+    }
+
+    /**
+     * Gets the label for the "last published" date. Special case for "today"
+     *
+     * @return string
+     */
+    public function getLastPublishedLabel()
+    {
+        $dateObj = $this->obj('PublishDate');
+        if ($dateObj) {
+            return $dateObj->IsToday()
+                ? _t(__CLASS__.'PUBLISHED_TODAY', 'Today {time}', ['time' => $dateObj->Time12()])
+                : $dateObj->FormatFromSettings();
+        }
+
+        return '-';
+    }
+
+    /**
+     * Gets the full name of the user who last published this campaign
+     *
+     * @return string
+     */
+    public function getPublisherName()
+    {
+        if ($this->Publisher()->exists()) {
+            return $this->Publisher()->getName();
+        }
+
+        return '-';
+    }
+
+    /**
+     * @param bool $includerelations
+     * @return array
+     */
     public function fieldLabels($includerelations = true)
     {
         $labels = parent::fieldLabels($includerelations);
