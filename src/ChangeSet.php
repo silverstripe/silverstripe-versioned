@@ -92,6 +92,7 @@ class ChangeSet extends DataObject
         'ContainsCount' => 'Contains',
         'LastPublishedLabel' => 'Last Published',
         'PublisherName' => 'Published By',
+        'Details' => 'Details',
     ];
 
     /**
