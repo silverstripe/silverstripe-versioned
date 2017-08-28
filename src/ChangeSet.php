@@ -637,7 +637,7 @@ class ChangeSet extends DataObject
                 : $dateObj->FormatFromSettings();
         }
 
-        return '-';
+        return null;
     }
 
     /**
@@ -651,7 +651,7 @@ class ChangeSet extends DataObject
             return $this->Publisher()->getName();
         }
 
-        return '-';
+        return null;
     }
 
     /**
