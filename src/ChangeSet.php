@@ -2,26 +2,25 @@
 
 namespace SilverStripe\Versioned;
 
-use SilverStripe\Assets\File;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\i18n\i18n;
-use SilverStripe\ORM\HasManyList;
-use SilverStripe\ORM\ValidationException;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\UnexpectedDataException;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Permission;
 use BadMethodCallException;
 use Exception;
 use LogicException;
-use SilverStripe\Security\Security;
+use SilverStripe\Assets\File;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\HasManyList;
+use SilverStripe\ORM\UnexpectedDataException;
+use SilverStripe\ORM\ValidationException;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
 
 /**
  * The ChangeSet model tracks several VersionedAndStaged objects for later publication as a single
@@ -29,6 +28,7 @@ use SilverStripe\ORM\FieldType\DBDatetime;
  *
  * @method HasManyList Changes()
  * @method Member Owner()
+ * @method Member Publisher()
  * @property string $Name
  * @property string $State
  * @property bool $IsInferred
@@ -75,6 +75,8 @@ class ChangeSet extends DataObject
         'Details' => 'Text',
     ];
 
+    private static $default_sort = '"ChangeSet"."State" ASC, "ChangeSet"."ID" ASC';
+
     /**
      * List of classes to set apart in description
      *
@@ -88,11 +90,9 @@ class ChangeSet extends DataObject
 
     private static $summary_fields = [
         'Name' => 'Title',
-        'ChangesCount' => 'Changes',
-        'ContainsCount' => 'Contains',
-        'LastPublishedLabel' => 'Last Published',
-        'PublisherName' => 'Published By',
-        'Details' => 'Details',
+        'Details' => 'Items',
+        'StateLabel' => 'Status',
+        'PublishedLabel' => 'Published',
     ];
 
     /**
@@ -233,6 +233,11 @@ class ChangeSet extends DataObject
         return $item->baseClass() . '.' . $item->ID;
     }
 
+    /**
+     * List of all implicit items inferred from all currently assigned explicit changes
+     *
+     * @return array
+     */
     protected function calculateImplicit()
     {
         /** @var string[][] $explicit List of all items that have been explicitly added to this ChangeSet */
@@ -461,7 +466,11 @@ class ChangeSet extends DataObject
             $fields->addFieldToTab('Root.Main', TextareaField::create('Description', $this->fieldLabel('Description')));
         }
         if ($this->isInDB()) {
-            $fields->addFieldToTab('Root.Main', ReadonlyField::create('State', $this->fieldLabel('State')), 'Description');
+            $fields->addFieldToTab(
+                'Root.Main',
+                ReadonlyField::create('State', $this->fieldLabel('State')),
+                'Description'
+            );
         }
         if ($this->Publisher()->exists()) {
             $fields->addFieldsToTab(
@@ -469,8 +478,7 @@ class ChangeSet extends DataObject
                 [
                     ReadonlyField::create(
                         'PublishDate',
-                        $this->fieldLabel('LastPublished'),
-                        $this->getLastPublishedLabel()
+                        $this->fieldLabel('LastPublished')
                     ),
                     ReadonlyField::create(
                         'PublisherName',
@@ -493,111 +501,41 @@ class ChangeSet extends DataObject
      */
     public function getDetails()
     {
-        // Initialise list of items to count
-        $counted = [];
-        $countedOther = 0;
-        foreach ($this->config()->important_classes as $type) {
-            if (class_exists($type)) {
-                $counted[$type] = 0;
-            }
-        }
-
         // Check each change item
         /** @var ChangeSetItem $change */
+        $total = 0;
+        $withChanges = 0;
         foreach ($this->Changes() as $change) {
-            $found = false;
-            foreach ($counted as $class => $num) {
-                if (is_a($change->ObjectClass, $class, true)) {
-                    $counted[$class]++;
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $countedOther++;
+            $total++;
+            if ($change->hasChange()) {
+                $withChanges++;
             }
         }
-
-        // Describe set based on this output
-        $counted = array_filter($counted);
 
         // Empty state
-        if (empty($counted) && empty($countedOther)) {
-            return '';
+        if (empty($total)) {
+            return _t(__CLASS__ . 'EMPTY', 'Empty');
         }
 
-        // Put all parts together
-        $parts = [];
-        foreach ($counted as $class => $count) {
-            $parts[] = DataObject::singleton($class)->i18n_pluralise($count);
-        }
-
-        // Describe non-important items
-        if ($countedOther) {
-            if ($counted) {
-                $parts[] = i18n::_t(
-                    __CLASS__.'.DESCRIPTION_OTHER_ITEM_PLURALS',
-                    'one other item|{count} other items',
-                    ['count' => $countedOther]
-                );
-            } else {
-                $parts[] = i18n::_t(
-                    __CLASS__.'.DESCRIPTION_ITEM_PLURALS',
-                    'one item|{count} items',
-                    ['count' => $countedOther]
-                );
-            }
-        }
-
-        // Figure out how to join everything together
-        if (empty($parts)) {
-            return '';
-        }
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        // Non-comma list
-        if (count($parts) === 2) {
-            return _t(
-                __CLASS__.'.DESCRIPTION_AND',
-                '{first} and {second}',
-                [
-                    'first' => $parts[0],
-                    'second' => $parts[1],
-                ]
-            );
-        }
-
-        // First item
-        $string = _t(
-            __CLASS__.'.DESCRIPTION_LIST_FIRST',
-            '{item}',
-            ['item' => $parts[0]]
+        // Count all items
+        $totalText = _t(
+            __CLASS__ . '.ITEMS_TOTAL',
+            '1 total|{count} total',
+            ['count' => $total]
         );
-
-        // Middle items
-        for ($i = 1; $i < count($parts) - 1; $i++) {
-            $string = _t(
-                __CLASS__.'.DESCRIPTION_LIST_MID',
-                '{list}, {item}',
-                [
-                    'list' => $string,
-                    'item' => $parts[$i]
-                ]
-            );
+        if (empty($withChanges)) {
+            return $totalText;
         }
 
-        // Oxford comma
-        $string = _t(
-            __CLASS__.'.DESCRIPTION_LIST_LAST',
-            '{list}, and {item}',
+        // Interpolate with changes text
+        return _t(
+            __CLASS__ . '.ITEMS_CHANGES',
+            '{total} (1 change)|{total} ({count} changes)',
             [
-                'list' => $string,
-                'item' => end($parts)
+                'total' => $totalText,
+                'count' => $withChanges,
             ]
         );
-        return $string;
     }
 
     /**
@@ -607,22 +545,7 @@ class ChangeSet extends DataObject
      */
     public function getChangesCount()
     {
-        return $this->Changes()->filterByCallback(function ($item) {
-            return $item->hasChange();
-        })->count();
-    }
-
-    /**
-     * Required to support the "contains" count display in react gridfield column
-     *
-     * @return string
-     */
-    public function getContainsCount()
-    {
-        $itemCount = $this->Changes()->count();
-        return $itemCount
-            ? _t(__CLASS__ . 'CONTAINS_COUNT', '1 item|{count} items', ['count' => $itemCount])
-            : _t(__CLASS__ . 'EMPTY', 'Empty');
+        return $this->Changes()->count();
     }
 
     /**
@@ -630,16 +553,68 @@ class ChangeSet extends DataObject
      *
      * @return string
      */
-    public function getLastPublishedLabel()
+    public function getPublishedLabel()
     {
         $dateObj = $this->obj('PublishDate');
-        if ($dateObj) {
-            return $dateObj->IsToday()
-                ? _t(__CLASS__ . 'PUBLISHED_TODAY', 'Today {time}', ['time' => $dateObj->Time12()])
-                : $dateObj->FormatFromSettings();
+        if (!$dateObj) {
+            return null;
         }
 
-        return null;
+        $publisher = $this->getPublisherName();
+
+        // Use "today"
+        if ($dateObj->IsToday()) {
+            if ($publisher) {
+                return _t(
+                    __CLASS__ . 'PUBLISHED_TODAY_BY',
+                    'Today {time} by {name}',
+                    [
+                        'time' => $dateObj->Time12(),
+                        'name' => $publisher,
+                    ]
+                );
+            }
+            // Today, no publisher
+            return _t(
+                __CLASS__ . 'PUBLISHED_TODAY',
+                'Today {time}',
+                ['time' => $dateObj->Time12()]
+            );
+        }
+
+        // Use date
+        if ($publisher) {
+            return _t(
+                __CLASS__ . 'PUBLISHED_DATE_BY',
+                '{date} by {name}',
+                [
+                    'date' => $dateObj->FormatFromSettings(),
+                    'name' => $publisher,
+                ]
+            );
+        }
+
+        // Date, no publisher
+        return $dateObj->FormatFromSettings();
+    }
+
+    /**
+     * Description for state
+     *
+     * @return string
+     */
+    public function getStateLabel()
+    {
+        switch ($this->State) {
+            case self::STATE_OPEN:
+                return _t(__CLASS__.'.STATE_OPEN', 'Active');
+            case self::STATE_PUBLISHED:
+                return _t(__CLASS__.'.STATE_PUBLISHED', 'Published');
+            case self::STATE_REVERTED:
+                return _t(__CLASS__.'.STATE_REVERTED', 'Reverted');
+            default:
+                return null;
+        }
     }
 
     /**
@@ -663,8 +638,8 @@ class ChangeSet extends DataObject
     public function fieldLabels($includerelations = true)
     {
         $labels = parent::fieldLabels($includerelations);
-        $labels['Name'] = _t(__CLASS__.'.NAME', 'Name');
-        $labels['State'] = _t(__CLASS__.'.STATE', 'State');
+        $labels['Name'] = _t(__CLASS__ . '.NAME', 'Name');
+        $labels['State'] = _t(__CLASS__ . '.STATE', 'State');
         return $labels;
     }
 
@@ -673,9 +648,13 @@ class ChangeSet extends DataObject
         return array_merge(
             parent::provideI18nEntities(),
             [
-                __CLASS__ . 'CONTAINS_COUNT' => [
-                    'one' => '1 item',
-                    'other' => '{count} items',
+                __CLASS__ . '.ITEMS_TOTAL' => [
+                    'one' => '1 total',
+                    'other' => '{count} total',
+                ],
+                __CLASS__ . '.ITEMS_CHANGES' => [
+                    'one' => '{total} (1 change)',
+                    'other' => '{total} ({count} changes)',
                 ],
             ]
         );
