@@ -51,7 +51,7 @@ class ChangeSet extends DataObject
     private static $table_name = 'ChangeSet';
 
     private static $db = [
-        'Name'  => 'Varchar',
+        'Name' => 'Varchar',
         'State' => "Enum('open,published,reverted','open')",
         'IsInferred' => 'Boolean(0)', // True if created automatically
         'Description' => 'Text',
@@ -148,7 +148,9 @@ class ChangeSet extends DataObject
             }
 
             $this->State = static::STATE_PUBLISHED;
-            $this->PublisherID = Security::getCurrentUser()->ID;
+            $this->PublisherID = Security::getCurrentUser()
+                ? Security::getCurrentUser()->ID
+                : 0;
             $this->PublishDate = DBDatetime::now()->Rfc2822();
 
             $this->write();
@@ -173,7 +175,7 @@ class ChangeSet extends DataObject
         }
 
         $references = [
-            'ObjectID'    => $object->ID,
+            'ObjectID' => $object->ID,
             'ObjectClass' => $object->baseClass(),
         ];
 
@@ -203,10 +205,10 @@ class ChangeSet extends DataObject
     public function removeObject(DataObject $object)
     {
         $item = ChangeSetItem::get()->filter([
-                'ObjectID' => $object->ID,
-                'ObjectClass' => $object->baseClass(),
-                'ChangeSetID' => $this->ID
-            ])->first();
+            'ObjectID' => $object->ID,
+            'ObjectClass' => $object->baseClass(),
+            'ChangeSetID' => $this->ID
+        ])->first();
 
         if ($item) {
             // TODO: Handle case of implicit added item being removed.
@@ -226,9 +228,9 @@ class ChangeSet extends DataObject
     protected function implicitKey(DataObject $item)
     {
         if ($item instanceof ChangeSetItem) {
-            return $item->ObjectClass.'.'.$item->ObjectID;
+            return $item->ObjectClass . '.' . $item->ObjectID;
         }
-        return $item->baseClass().'.'.$item->ID;
+        return $item->baseClass() . '.' . $item->ID;
     }
 
     protected function calculateImplicit()
@@ -259,7 +261,7 @@ class ChangeSet extends DataObject
 
                     $references[$key][] = $item->ID;
 
-                // Skip any bad records
+                    // Skip any bad records
                 } catch (UnexpectedDataException $e) {
                 }
             }
@@ -534,15 +536,15 @@ class ChangeSet extends DataObject
         if ($countedOther) {
             if ($counted) {
                 $parts[] = i18n::_t(
-                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_OTHER_ITEM_PLURALS',
+                    __CLASS__.'.DESCRIPTION_OTHER_ITEM_PLURALS',
                     'one other item|{count} other items',
-                    [ 'count' => $countedOther ]
+                    ['count' => $countedOther]
                 );
             } else {
                 $parts[] = i18n::_t(
-                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_ITEM_PLURALS',
+                    __CLASS__.'.DESCRIPTION_ITEM_PLURALS',
                     'one item|{count} items',
-                    [ 'count' => $countedOther ]
+                    ['count' => $countedOther]
                 );
             }
         }
@@ -558,7 +560,7 @@ class ChangeSet extends DataObject
         // Non-comma list
         if (count($parts) === 2) {
             return _t(
-                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_AND',
+                __CLASS__.'.DESCRIPTION_AND',
                 '{first} and {second}',
                 [
                     'first' => $parts[0],
@@ -569,7 +571,7 @@ class ChangeSet extends DataObject
 
         // First item
         $string = _t(
-            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_FIRST',
+            __CLASS__.'.DESCRIPTION_LIST_FIRST',
             '{item}',
             ['item' => $parts[0]]
         );
@@ -577,7 +579,7 @@ class ChangeSet extends DataObject
         // Middle items
         for ($i = 1; $i < count($parts) - 1; $i++) {
             $string = _t(
-                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_MID',
+                __CLASS__.'.DESCRIPTION_LIST_MID',
                 '{list}, {item}',
                 [
                     'list' => $string,
@@ -588,7 +590,7 @@ class ChangeSet extends DataObject
 
         // Oxford comma
         $string = _t(
-            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_LAST',
+            __CLASS__.'.DESCRIPTION_LIST_LAST',
             '{list}, and {item}',
             [
                 'list' => $string,
@@ -613,14 +615,14 @@ class ChangeSet extends DataObject
     /**
      * Required to support the "contains" count display in react gridfield column
      *
-     * @return int
+     * @return string
      */
     public function getContainsCount()
     {
         $itemCount = $this->Changes()->count();
         return $itemCount
-            ? _t(__CLASS__.'CONTAINS_COUNT', '1 item|{count} items', ['count' => $itemCount])
-            : _t(__CLASS__.'EMPTY', 'Empty');
+            ? _t(__CLASS__ . 'CONTAINS_COUNT', '1 item|{count} items', ['count' => $itemCount])
+            : _t(__CLASS__ . 'EMPTY', 'Empty');
     }
 
     /**
@@ -633,7 +635,7 @@ class ChangeSet extends DataObject
         $dateObj = $this->obj('PublishDate');
         if ($dateObj) {
             return $dateObj->IsToday()
-                ? _t(__CLASS__.'PUBLISHED_TODAY', 'Today {time}', ['time' => $dateObj->Time12()])
+                ? _t(__CLASS__ . 'PUBLISHED_TODAY', 'Today {time}', ['time' => $dateObj->Time12()])
                 : $dateObj->FormatFromSettings();
         }
 
@@ -661,9 +663,21 @@ class ChangeSet extends DataObject
     public function fieldLabels($includerelations = true)
     {
         $labels = parent::fieldLabels($includerelations);
-        $labels['Name'] = _t('SilverStripe\\Versioned\\ChangeSet.NAME', 'Name');
-        $labels['State'] = _t('SilverStripe\\Versioned\\ChangeSet.STATE', 'State');
-
+        $labels['Name'] = _t(__CLASS__.'.NAME', 'Name');
+        $labels['State'] = _t(__CLASS__.'.STATE', 'State');
         return $labels;
+    }
+
+    public function provideI18nEntities()
+    {
+        return array_merge(
+            parent::provideI18nEntities(),
+            [
+                __CLASS__ . 'CONTAINS_COUNT' => [
+                    'one' => '1 item',
+                    'other' => '{count} items',
+                ],
+            ]
+        );
     }
 }
