@@ -582,4 +582,53 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals($mid2->ID, $mid2Live->ID);
         $this->assertEquals($base->ID, $mid2Live->BaseID);
     }
+
+    /**
+     * Test that deletions of relations on a published object will cascade unpublishes on that relation,
+     * using `cascade_deletes`
+     */
+    public function testPartialCascadeDeletes()
+    {
+        $this->publishAllFixtures();
+
+        // Publish mid object with a deleted child
+        /** @var ChangeSetTest\MidObject $mid1 */
+        $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
+        /** @var ChangeSetTest\EndObject $end1 */
+        $end1 = $this->objFromFixture(ChangeSetTest\EndObject::class, 'end1');
+        $end1ID = $end1->ID;
+        $end1->delete();
+
+        // Publishing recursively should unlinkd this object
+        $changeset = new ChangeSet();
+        $changeset->write();
+        $changeset->addObject($mid1);
+
+        // Assert changeset only contains root object
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+            ]
+        );
+
+        // Check that change types match
+        /** @var ChangeSetItem $mid1Change */
+        $mid1Change = ChangeSetItem::get_for_object($mid1)->first();
+        $this->assertEquals(ChangeSetItem::CHANGE_NONE, $mid1Change->getChangeType());
+        /** @var ChangeSetItem $end1Change */
+        $end1Change = ChangeSetItem::get_for_object($end1)->first();
+        $this->assertEquals(ChangeSetItem::CHANGE_DELETED, $end1Change->getChangeType());
+
+        // Ensure item is published
+        $this->assertTrue($end1->isPublished());
+        $changeset->publish();
+
+        // Changeset will unpublish deleted item
+        $this->assertFalse($end1->isPublished());
+        $this->assertFalse($end1->isOnDraft());
+        $this->assertTrue($mid1->isPublished());
+        $this->assertTrue($mid1->isOnDraft());
+    }
 }
