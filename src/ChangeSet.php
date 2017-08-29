@@ -2,24 +2,24 @@
 
 namespace SilverStripe\Versioned;
 
-use SilverStripe\Assets\File;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\i18n\i18n;
-use SilverStripe\ORM\HasManyList;
-use SilverStripe\ORM\ValidationException;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\UnexpectedDataException;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Permission;
 use BadMethodCallException;
 use Exception;
 use LogicException;
+use SilverStripe\Assets\File;
+use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\HasManyList;
+use SilverStripe\ORM\UnexpectedDataException;
+use SilverStripe\ORM\ValidationException;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 
 /**
@@ -28,6 +28,7 @@ use SilverStripe\Security\Security;
  *
  * @method HasManyList Changes()
  * @method Member Owner()
+ * @method Member Publisher()
  * @property string $Name
  * @property string $State
  * @property bool $IsInferred
@@ -50,10 +51,11 @@ class ChangeSet extends DataObject
     private static $table_name = 'ChangeSet';
 
     private static $db = [
-        'Name'  => 'Varchar',
+        'Name' => 'Varchar',
         'State' => "Enum('open,published,reverted','open')",
         'IsInferred' => 'Boolean(0)', // True if created automatically
         'Description' => 'Text',
+        'PublishDate' => 'Datetime',
     ];
 
     private static $has_many = [
@@ -66,11 +68,14 @@ class ChangeSet extends DataObject
 
     private static $has_one = [
         'Owner' => Member::class,
+        'Publisher' => Member::class,
     ];
 
     private static $casting = [
         'Details' => 'Text',
     ];
+
+    private static $default_sort = '"ChangeSet"."State" ASC, "ChangeSet"."ID" ASC';
 
     /**
      * List of classes to set apart in description
@@ -85,8 +90,9 @@ class ChangeSet extends DataObject
 
     private static $summary_fields = [
         'Name' => 'Title',
-        'ChangesCount' => 'Changes',
-        'Details' => 'Details',
+        'Details' => 'Items',
+        'StateLabel' => 'Status',
+        'PublishedLabel' => 'Published',
     ];
 
     /**
@@ -142,6 +148,11 @@ class ChangeSet extends DataObject
             }
 
             $this->State = static::STATE_PUBLISHED;
+            $this->PublisherID = Security::getCurrentUser()
+                ? Security::getCurrentUser()->ID
+                : 0;
+            $this->PublishDate = DBDatetime::now()->Rfc2822();
+
             $this->write();
         });
         return true;
@@ -164,7 +175,7 @@ class ChangeSet extends DataObject
         }
 
         $references = [
-            'ObjectID'    => $object->ID,
+            'ObjectID' => $object->ID,
             'ObjectClass' => $object->baseClass(),
         ];
 
@@ -194,10 +205,10 @@ class ChangeSet extends DataObject
     public function removeObject(DataObject $object)
     {
         $item = ChangeSetItem::get()->filter([
-                'ObjectID' => $object->ID,
-                'ObjectClass' => $object->baseClass(),
-                'ChangeSetID' => $this->ID
-            ])->first();
+            'ObjectID' => $object->ID,
+            'ObjectClass' => $object->baseClass(),
+            'ChangeSetID' => $this->ID
+        ])->first();
 
         if ($item) {
             // TODO: Handle case of implicit added item being removed.
@@ -217,11 +228,16 @@ class ChangeSet extends DataObject
     protected function implicitKey(DataObject $item)
     {
         if ($item instanceof ChangeSetItem) {
-            return $item->ObjectClass.'.'.$item->ObjectID;
+            return $item->ObjectClass . '.' . $item->ObjectID;
         }
-        return $item->baseClass().'.'.$item->ID;
+        return $item->baseClass() . '.' . $item->ID;
     }
 
+    /**
+     * List of all implicit items inferred from all currently assigned explicit changes
+     *
+     * @return array
+     */
     protected function calculateImplicit()
     {
         /** @var string[][] $explicit List of all items that have been explicitly added to this ChangeSet */
@@ -250,7 +266,7 @@ class ChangeSet extends DataObject
 
                     $references[$key][] = $item->ID;
 
-                // Skip any bad records
+                    // Skip any bad records
                 } catch (UnexpectedDataException $e) {
                 }
             }
@@ -450,7 +466,28 @@ class ChangeSet extends DataObject
             $fields->addFieldToTab('Root.Main', TextareaField::create('Description', $this->fieldLabel('Description')));
         }
         if ($this->isInDB()) {
-            $fields->addFieldToTab('Root.Main', ReadonlyField::create('State', $this->fieldLabel('State')), 'Description');
+            $fields->addFieldToTab(
+                'Root.Main',
+                ReadonlyField::create('State', $this->fieldLabel('State')),
+                'Description'
+            );
+        }
+        if ($this->Publisher()->exists()) {
+            $fields->addFieldsToTab(
+                'Root.Main',
+                [
+                    ReadonlyField::create(
+                        'PublishDate',
+                        $this->fieldLabel('PublishDate')
+                    ),
+                    ReadonlyField::create(
+                        'PublisherName',
+                        $this->fieldLabel('PublisherName'),
+                        $this->getPublisherName()
+                    )
+                ],
+                'Description'
+            );
         }
 
         $this->extend('updateCMSFields', $fields);
@@ -464,115 +501,45 @@ class ChangeSet extends DataObject
      */
     public function getDetails()
     {
-        // Initialise list of items to count
-        $counted = [];
-        $countedOther = 0;
-        foreach ($this->config()->important_classes as $type) {
-            if (class_exists($type)) {
-                $counted[$type] = 0;
-            }
-        }
-
         // Check each change item
         /** @var ChangeSetItem $change */
+        $total = 0;
+        $withChanges = 0;
         foreach ($this->Changes() as $change) {
-            $found = false;
-            foreach ($counted as $class => $num) {
-                if (is_a($change->ObjectClass, $class, true)) {
-                    $counted[$class]++;
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $countedOther++;
+            $total++;
+            if ($change->hasChange()) {
+                $withChanges++;
             }
         }
-
-        // Describe set based on this output
-        $counted = array_filter($counted);
 
         // Empty state
-        if (empty($counted) && empty($countedOther)) {
-            return '';
+        if (empty($total)) {
+            return _t(__CLASS__ . 'EMPTY', 'Empty');
         }
 
-        // Put all parts together
-        $parts = [];
-        foreach ($counted as $class => $count) {
-            $parts[] = DataObject::singleton($class)->i18n_pluralise($count);
-        }
-
-        // Describe non-important items
-        if ($countedOther) {
-            if ($counted) {
-                $parts[] = i18n::_t(
-                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_OTHER_ITEM_PLURALS',
-                    'one other item|{count} other items',
-                    [ 'count' => $countedOther ]
-                );
-            } else {
-                $parts[] = i18n::_t(
-                    'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_ITEM_PLURALS',
-                    'one item|{count} items',
-                    [ 'count' => $countedOther ]
-                );
-            }
-        }
-
-        // Figure out how to join everything together
-        if (empty($parts)) {
-            return '';
-        }
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        // Non-comma list
-        if (count($parts) === 2) {
-            return _t(
-                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_AND',
-                '{first} and {second}',
-                [
-                    'first' => $parts[0],
-                    'second' => $parts[1],
-                ]
-            );
-        }
-
-        // First item
-        $string = _t(
-            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_FIRST',
-            '{item}',
-            ['item' => $parts[0]]
+        // Count all items
+        $totalText = _t(
+            __CLASS__ . '.ITEMS_TOTAL',
+            '1 total|{count} total',
+            ['count' => $total]
         );
-
-        // Middle items
-        for ($i = 1; $i < count($parts) - 1; $i++) {
-            $string = _t(
-                'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_MID',
-                '{list}, {item}',
-                [
-                    'list' => $string,
-                    'item' => $parts[$i]
-                ]
-            );
+        if (empty($withChanges)) {
+            return $totalText;
         }
 
-        // Oxford comma
-        $string = _t(
-            'SilverStripe\\Versioned\\ChangeSet.DESCRIPTION_LIST_LAST',
-            '{list}, and {item}',
+        // Interpolate with changes text
+        return _t(
+            __CLASS__ . '.ITEMS_CHANGES',
+            '{total} (1 change)|{total} ({count} changes)',
             [
-                'list' => $string,
-                'item' => end($parts)
+                'total' => $totalText,
+                'count' => $withChanges,
             ]
         );
-        return $string;
     }
 
     /**
-     * Required to support count display in react gridfield column
+     * Required to support the "changes" count display in react gridfield column
      *
      * @return int
      */
@@ -581,12 +548,117 @@ class ChangeSet extends DataObject
         return $this->Changes()->count();
     }
 
+    /**
+     * Gets the label for the "last published" date. Special case for "today"
+     *
+     * @return string
+     */
+    public function getPublishedLabel()
+    {
+        $dateObj = $this->obj('PublishDate');
+        if (!$dateObj) {
+            return null;
+        }
+
+        $publisher = $this->getPublisherName();
+
+        // Use "today"
+        if ($dateObj->IsToday()) {
+            if ($publisher) {
+                return _t(
+                    __CLASS__ . 'PUBLISHED_TODAY_BY',
+                    'Today {time} by {name}',
+                    [
+                        'time' => $dateObj->Time12(),
+                        'name' => $publisher,
+                    ]
+                );
+            }
+            // Today, no publisher
+            return _t(
+                __CLASS__ . 'PUBLISHED_TODAY',
+                'Today {time}',
+                ['time' => $dateObj->Time12()]
+            );
+        }
+
+        // Use date
+        if ($publisher) {
+            return _t(
+                __CLASS__ . 'PUBLISHED_DATE_BY',
+                '{date} by {name}',
+                [
+                    'date' => $dateObj->FormatFromSettings(),
+                    'name' => $publisher,
+                ]
+            );
+        }
+
+        // Date, no publisher
+        return $dateObj->FormatFromSettings();
+    }
+
+    /**
+     * Description for state
+     *
+     * @return string
+     */
+    public function getStateLabel()
+    {
+        switch ($this->State) {
+            case self::STATE_OPEN:
+                return _t(__CLASS__.'.STATE_OPEN', 'Active');
+            case self::STATE_PUBLISHED:
+                return _t(__CLASS__.'.STATE_PUBLISHED', 'Published');
+            case self::STATE_REVERTED:
+                return _t(__CLASS__.'.STATE_REVERTED', 'Reverted');
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Gets the full name of the user who last published this campaign
+     *
+     * @return string
+     */
+    public function getPublisherName()
+    {
+        if ($this->Publisher()->exists()) {
+            return $this->Publisher()->getName();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param bool $includerelations
+     * @return array
+     */
     public function fieldLabels($includerelations = true)
     {
         $labels = parent::fieldLabels($includerelations);
-        $labels['Name'] = _t('SilverStripe\\Versioned\\ChangeSet.NAME', 'Name');
-        $labels['State'] = _t('SilverStripe\\Versioned\\ChangeSet.STATE', 'State');
-
+        $labels['Name'] = _t(__CLASS__ . '.NAME', 'Name');
+        $labels['State'] = _t(__CLASS__ . '.STATE', 'State');
+        $labels['PublishDate'] = _t(__CLASS__.'.PUBLISH_DATE', 'Publish date');
+        $labels['PublisherName'] = _t(__CLASS__.'.PUBLISHER_NAME', 'Published by');
         return $labels;
+    }
+
+    public function provideI18nEntities()
+    {
+        return array_merge(
+            parent::provideI18nEntities(),
+            [
+                __CLASS__ . '.ITEMS_TOTAL' => [
+                    'one' => '1 total',
+                    'other' => '{count} total',
+                ],
+                __CLASS__ . '.ITEMS_CHANGES' => [
+                    'one' => '{total} (1 change)',
+                    'other' => '{total} ({count} changes)',
+                ],
+            ]
+        );
     }
 }
