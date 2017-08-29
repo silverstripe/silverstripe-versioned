@@ -478,11 +478,11 @@ class ChangeSet extends DataObject
                 [
                     ReadonlyField::create(
                         'PublishDate',
-                        $this->fieldLabel('LastPublished')
+                        $this->fieldLabel('PublishDate')
                     ),
                     ReadonlyField::create(
                         'PublisherName',
-                        $this->fieldLabel('PublishedBy'),
+                        $this->fieldLabel('PublisherName'),
                         $this->getPublisherName()
                     )
                 ],
@@ -640,6 +640,8 @@ class ChangeSet extends DataObject
         $labels = parent::fieldLabels($includerelations);
         $labels['Name'] = _t(__CLASS__ . '.NAME', 'Name');
         $labels['State'] = _t(__CLASS__ . '.STATE', 'State');
+        $labels['PublishDate'] = _t(__CLASS__.'.PUBLISH_DATE', 'Publish date');
+        $labels['PublisherName'] = _t(__CLASS__.'.PUBLISHER_NAME', 'Published by');
         return $labels;
     }
 
