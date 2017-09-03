@@ -193,24 +193,35 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function findReferenced()
     {
+        /** @var DataObject $liveRecord */
+        $liveRecord = $this->getObjectInStage(Versioned::LIVE);
+
+        // If we have deleted this record, recursively delete live objects on publish
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
-            // If we have deleted this record, recursively delete live objects on publish
-            /** @var DataObject $record */
-            $record = $this->getObjectInStage(Versioned::LIVE);
-            if ($record) {
-                // Get all cascade deletions (recursively)
-                return $record->findCascadeDeletes(true);
+            if (!$liveRecord) {
+                return ArrayList::create();
             }
-        } else {
-            // If changed on stage, look at owned objects there
-            $record = $this->getObjectInStage(Versioned::DRAFT);
-            if ($record) {
-                return $record->findOwned();
-            }
+            return $liveRecord->findCascadeDeletes(true);
         }
 
-        // Empty set
-        return new ArrayList();
+        // If changed on stage, include all owned objects for publish
+        /** @var DataObject $draftRecord */
+        $draftRecord = $this->getObjectInStage(Versioned::DRAFT);
+        if (!$draftRecord) {
+            return ArrayList::create();
+        }
+        $references = $draftRecord->findOwned();
+
+        // When publishing, use cascade_deletes to partially unpublished sets
+        if ($liveRecord) {
+            foreach ($liveRecord->findCascadeDeletes(true) as $next) {
+                /** @var Versioned|DataObject $next */
+                if ($next->isOnLiveOnly()) {
+                    $this->mergeRelatedObject($references, ArrayList::create(), $next);
+                }
+            }
+        }
+        return $references;
     }
 
     /**
