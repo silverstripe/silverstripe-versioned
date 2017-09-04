@@ -216,7 +216,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         if ($liveRecord) {
             foreach ($liveRecord->findCascadeDeletes(true) as $next) {
                 /** @var Versioned|DataObject $next */
-                if ($next->isOnLiveOnly()) {
+                if ($next->has_extension(Versioned::class) && $next->isOnLiveOnly()) {
                     $this->mergeRelatedObject($references, ArrayList::create(), $next);
                 }
             }
