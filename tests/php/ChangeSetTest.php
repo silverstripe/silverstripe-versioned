@@ -5,7 +5,6 @@ namespace SilverStripe\Versioned\Tests;
 use BadMethodCallException;
 use PHPUnit_Framework_ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
-use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\ChangeSet;
@@ -27,6 +26,7 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\MidObject::class,
         ChangeSetTest\EndObject::class,
         ChangeSetTest\EndObjectChild::class,
+        ChangeSetTest\UnversionedObject::class,
     ];
 
     /**
@@ -39,7 +39,9 @@ class ChangeSetTest extends SapphireTest
             foreach ($fixtures as $handle => $id) {
                 /** @var Versioned|DataObject $object */
                 $object = $this->objFromFixture($class, $handle);
-                $object->publishSingle();
+                if ($object->hasExtension(Versioned::class)) {
+                    $object->publishSingle();
+                }
             }
         }
     }
@@ -596,7 +598,6 @@ class ChangeSetTest extends SapphireTest
         $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
         /** @var ChangeSetTest\EndObject $end1 */
         $end1 = $this->objFromFixture(ChangeSetTest\EndObject::class, 'end1');
-        $end1ID = $end1->ID;
         $end1->delete();
 
         // Publishing recursively should unlinkd this object
@@ -630,5 +631,37 @@ class ChangeSetTest extends SapphireTest
         $this->assertFalse($end1->isOnDraft());
         $this->assertTrue($mid1->isPublished());
         $this->assertTrue($mid1->isOnDraft());
+    }
+
+    public function testCascadeUnversionedDeletes()
+    {
+        $this->publishAllFixtures();
+
+        // Publish mid object with a deleted child
+        /** @var ChangeSetTest\MidObject $mid1 */
+        $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
+        $unversioned1ID = $this->idFromFixture(ChangeSetTest\UnversionedObject::class, 'unversioned1');
+
+        // Publishing recursively should unlinkd this object
+        $changeset = new ChangeSet();
+        $changeset->write();
+        $changeset->addObject($mid1);
+
+        // Assert unversioned object exists
+        $this->assertNotEmpty(ChangeSetTest\UnversionedObject::get()->byID($unversioned1ID));
+
+        $mid1->delete();
+
+        // Unversioned object is immediately deleted
+        $this->assertEmpty(ChangeSetTest\UnversionedObject::get()->byID($unversioned1ID));
+
+        // Assert changeset only contains root object and no unversioned objects
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+            ]
+        );
     }
 }
