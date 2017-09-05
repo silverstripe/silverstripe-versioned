@@ -23,3 +23,7 @@ SilverStripe\Versioned\Tests\ChangeSetTest\MidObject:
     End: =>SilverStripe\Versioned\Tests\ChangeSetTest\EndObject.end2
   mid3:
     Base: =>SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject.base2
+SilverStripe\Versioned\Tests\ChangeSetTest\UnversionedObject:
+  unversioned1:
+    Title: 'object'
+    Parent: =>SilverStripe\Versioned\Tests\ChangeSetTest\MidObject.mid1
