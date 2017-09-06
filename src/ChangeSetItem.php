@@ -26,7 +26,8 @@ use SilverStripe\Security\Security;
  * @property int $ObjectID The numeric ID for the referenced object
  * @method ManyManyList ReferencedBy() List of explicit items that require this change
  * @method ManyManyList References() List of implicit items required by this change
- * @method ChangeSet ChangeSet()
+ * @method ChangeSet ChangeSet() Parent changeset
+ * @method DataObject Object() The object attached to this item
  */
 class ChangeSetItem extends DataObject implements Thumbnail
 {
