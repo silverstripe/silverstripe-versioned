@@ -30,8 +30,9 @@ use SilverStripe\Security\Security;
  * @method Member Owner()
  * @method Member Publisher()
  * @property string $Name
- * @property string $State
+ * @property string $State one of 'open', 'published', or 'reverted'
  * @property bool $IsInferred
+ * @property string $LastSynced Last synced date
  */
 class ChangeSet extends DataObject
 {
@@ -56,6 +57,7 @@ class ChangeSet extends DataObject
         'IsInferred' => 'Boolean(0)', // True if created automatically
         'Description' => 'Text',
         'PublishDate' => 'Datetime',
+        'LastSynced' => 'Datetime',
     ];
 
     private static $has_many = [
@@ -296,6 +298,11 @@ class ChangeSet extends DataObject
      */
     public function sync()
     {
+        // Only sync open changesets
+        if ($this->State !== static::STATE_OPEN) {
+            return;
+        }
+
         // Start a transaction (if we can)
         DB::get_conn()->withTransaction(function () {
 
@@ -327,6 +334,10 @@ class ChangeSet extends DataObject
                 $item->ReferencedBy()->setByIDList($props['ReferencedBy']);
                 $item->write();
             }
+
+            // Mark last synced
+            $this->LastSynced = DBDatetime::now()->getValue();
+            $this->write();
         });
     }
 
