@@ -27,10 +27,8 @@ it:
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archivia
-    Archived: 'Archiviate %s %s'
     BUTTONARCHIVEDESC: 'Nascondi e archivia'
     BUTTONPUBLISH: Pubblica
     BUTTONUNPUBLISH: Nascondi
     BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
     Published: 'Pubblicato {name} {link}'
-    Unpublished: 'Nascosto %s %s'

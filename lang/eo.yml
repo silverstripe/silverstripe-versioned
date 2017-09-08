@@ -27,10 +27,8 @@ eo:
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Enarkivigi
-    Archived: 'Enarkivigita %s %s'
     BUTTONARCHIVEDESC: 'Malpublikigi kaj enarkivigi'
     BUTTONPUBLISH: Publikigi
     BUTTONUNPUBLISH: Malpublikigi
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
     Published: 'Pubikigita {name} {link}'
-    Unpublished: 'Malpublikigita %s %s'

@@ -27,12 +27,10 @@ fi:
     has_many_Versions: Versiot
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Arkisto
-    Archived: 'Arkistoitiin %s %s'
     BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
     BUTTONPUBLISH: Julkaise
     BUTTONUNPUBLISH: 'Poista julkaisusta'
     BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
     Published: 'Julkaistiin {name} {link}'
-    Unpublished: 'Poistettiin julkaisusta %s %s'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Sinun on kirjauduttava CMS-järjestelmän salasanalla nähdäksesi vedokset tai arkistoitu sisältö. <a href="{link}">Klikkaa tästä palataksesi julkaistulle sivustolle.</a>'

@@ -12,12 +12,10 @@ nl:
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiveren
-    Archived: '%s %s gearchiveerd'
     BUTTONARCHIVEDESC: 'Publicatie intrekken en archiveren'
     BUTTONPUBLISH: Publiceren
     BUTTONUNPUBLISH: 'Publicatie intrekken'
     BUTTONUNPUBLISHDESC: 'Dit record van de gepubliceerde site verwijderen'
     Published: 'Gepubliceerd: {name} {link}'
-    Unpublished: 'Publicatie ingetrokken van %s %s'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Om de concept site en de archieven te kunnen zien, moet u eerst inloggen met uw CMS wachtwoord. <a href="{link}">Klik hier om terug te gaan naar de gepubliceerde site.</a>'
