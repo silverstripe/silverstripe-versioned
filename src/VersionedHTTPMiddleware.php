@@ -31,6 +31,26 @@ class VersionedHTTPMiddleware implements HTTPMiddleware
                 // Set stage
                 Versioned::choose_site_stage($request);
             }
+            if (Versioned::get_stage() === Versioned::DRAFT || Versioned::current_archived_date()) {
+                // work out the current host (and port if non-standard)
+                $urlParts = parse_url(Director::absoluteBaseURL());
+                $host = $urlParts['host'];
+                if (array_key_exists('port', $urlParts) && $urlParts['port'] !== 80 && $urlParts['port'] !== 443) {
+                    $host .= ':' . $urlParts['port'];
+                }
+                $hosts = ini_get('url_rewriter.hosts');
+                if ($hosts) {
+                    $hosts .= ',';
+                }
+                $hosts .= $host;
+                ini_set('url_rewriter.tags', "a=href,area=href,frame=src,form=,fieldset=");
+                ini_set('url_rewriter.hosts', $hosts);
+                if (Versioned::get_stage() === Versioned::DRAFT) {
+                    output_add_rewrite_var('stage', Versioned::DRAFT);
+                } elseif ($date = Versioned::current_archived_date()) {
+                    output_add_rewrite_var('archiveDate', $date);
+                }
+            }
         } finally {
             // Reset dummy controller
             $dummyController->popCurrent();

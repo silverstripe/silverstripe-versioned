@@ -1401,7 +1401,7 @@ SQL
         }
 
         // Bypass if site is unsecured
-        if (Controller::has_curr() && Controller::curr()->getRequest()->getSession()->get('unsecuredDraftSite')) {
+        if (Versioned::get_stage() === $stage) {
             return true;
         }
 
@@ -1957,8 +1957,7 @@ SQL
     public static function choose_site_stage(HTTPRequest $request)
     {
         // Check any pre-existing session mode
-        $preexistingMode = $request->getSession()->get('readingMode') ?: static::DEFAULT_MODE;
-        $mode = $preexistingMode;
+        $mode = static::DEFAULT_MODE;
 
         // Check reading mode
         $getStage = $request->getVar('stage');
@@ -1981,23 +1980,11 @@ SQL
             }
         }
 
-        // Fallback
-        if (!$mode) {
-            $mode = static::DEFAULT_MODE;
-        }
-
         // Save reading mode
         Versioned::set_reading_mode($mode);
 
-        // Try not to store the mode in the session if not needed
-        if ($mode === static::DEFAULT_MODE) {
-            $request->getSession()->clear('readingMode');
-        } else {
-            $request->getSession()->set('readingMode', $mode);
-        }
-
         if (!headers_sent() && !Director::is_cli()) {
-            if (Versioned::get_stage() == 'Live') {
+            if (Versioned::get_stage() === static::LIVE) {
                 // clear the cookie if it's set
                 if (Cookie::get('bypassStaticCache')) {
                     Cookie::force_expiry('bypassStaticCache', null, null, false, true /* httponly */);
