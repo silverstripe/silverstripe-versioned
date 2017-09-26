@@ -1,21 +1,27 @@
 en:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_ITEM_PLURALS:
-      one: 'one item'
-      other: '{count} items'
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, and {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
-    DESCRIPTION_OTHER_ITEM_PLURALS:
-      one: 'one other item'
-      other: '{count} other items'
+    EMPTY: Empty
+    ITEMS_CHANGES:
+      one: '{total} (1 change)'
+      other: '{total} ({count} changes)'
+    ITEMS_TOTAL:
+      one: '1 total'
+      other: '{count} total'
     NAME: Name
     PLURALNAME: Campaigns
     PLURALS:
       one: 'A Campaign'
       other: '{count} Campaigns'
+    PUBLISHED_DATE_BY: '{date} by {name}'
+    PUBLISHED_TODAY: 'Today {time}'
+    PUBLISHED_TODAY_BY: 'Today {time} by {name}'
+    PUBLISHER_NAME: 'Published by'
+    PUBLISH_DATE: 'Publish date'
     SINGULARNAME: Campaign
     STATE: State
+    STATE_OPEN: Active
+    STATE_PUBLISHED: Published
+    STATE_REVERTED: Reverted
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Change Set Items'
     PLURALS:
