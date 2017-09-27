@@ -1,7 +1,7 @@
 {
     "name": "silverstripe/versioned",
     "description": "SilverStripe Versioned component",
-    "type": "silverstripe-module",
+    "type": "silverstripe-vendormodule",
     "homepage": "http://silverstripe.org",
     "license": "BSD-3-Clause",
     "keywords": [
@@ -19,7 +19,8 @@
         }
     ],
     "require": {
-        "silverstripe/framework": "^4@dev"
+        "silverstripe/framework": "^4@dev",
+        "silverstripe/vendor-plugin": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7",
