@@ -525,7 +525,7 @@ class ChangeSet extends DataObject
 
         // Empty state
         if (empty($total)) {
-            return _t(__CLASS__ . 'EMPTY', 'Empty');
+            return _t(__CLASS__ . '.EMPTY', 'Empty');
         }
 
         // Count all items
@@ -577,7 +577,7 @@ class ChangeSet extends DataObject
         if ($dateObj->IsToday()) {
             if ($publisher) {
                 return _t(
-                    __CLASS__ . 'PUBLISHED_TODAY_BY',
+                    __CLASS__ . '.PUBLISHED_TODAY_BY',
                     'Today {time} by {name}',
                     [
                         'time' => $dateObj->Time12(),
@@ -587,7 +587,7 @@ class ChangeSet extends DataObject
             }
             // Today, no publisher
             return _t(
-                __CLASS__ . 'PUBLISHED_TODAY',
+                __CLASS__ . '.PUBLISHED_TODAY',
                 'Today {time}',
                 ['time' => $dateObj->Time12()]
             );
@@ -596,7 +596,7 @@ class ChangeSet extends DataObject
         // Use date
         if ($publisher) {
             return _t(
-                __CLASS__ . 'PUBLISHED_DATE_BY',
+                __CLASS__ . '.PUBLISHED_DATE_BY',
                 '{date} by {name}',
                 [
                     'date' => $dateObj->FormatFromSettings(),
