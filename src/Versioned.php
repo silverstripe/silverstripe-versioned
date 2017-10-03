@@ -2561,4 +2561,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         return $this->mode === static::STAGEDVERSIONED;
     }
+
+    public function getStatusFlags() {
+        if($this->isOnDraftOnly()) {
+            return [ 'draft' ];
+        }
+        else if($this->isModifiedOnDraft()) {
+            return [ 'modified' ];
+        }
+    }
 }
