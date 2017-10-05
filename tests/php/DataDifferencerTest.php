@@ -2,14 +2,13 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Image;
-use SilverStripe\Versioned\Versioned;
-use SilverStripe\Versioned\DataDifferencer;
-use SilverStripe\Assets\File;
-use SilverStripe\Assets\Filesystem;
-use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Assets\Tests\Storage\AssetStoreTest\TestAssetStore;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Versioned\DataDifferencer;
+use SilverStripe\Versioned\Versioned;
 
 /**
  * @skipUpgrade
@@ -34,11 +33,10 @@ class DataDifferencerTest extends SapphireTest
 
         // Create a test files for each of the fixture references
         $files = File::get()->exclude('ClassName', Folder::class);
+        /** @var File $file */
         foreach ($files as $file) {
             $fromPath = __DIR__ . '/DataDifferencerTest/images/' . $file->Name;
-            $destPath = TestAssetStore::getLocalPath($file); // Only correct for test asset store
-            Filesystem::makeFolder(dirname($destPath));
-            copy($fromPath, $destPath);
+            $file->setFromLocalFile($fromPath);
         }
     }
 
