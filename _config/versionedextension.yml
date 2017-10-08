@@ -1,0 +1,16 @@
+---
+Name: versionedextension
+---
+SilverStripe\Core\Injector\Injector:
+  # Versioning only
+  SilverStripe\Versioned\Versioned.versioned:
+    class: SilverStripe\Versioned\Versioned
+    constructor:
+      mode: Versioned
+  # Staging and Versioning
+  SilverStripe\Versioned\Versioned.stagedversioned:
+    class: SilverStripe\Versioned\Versioned
+    constructor:
+      mode: StagedVersioned
+  # Default is alias for .stagedversioned
+  SilverStripe\Versioned\Versioned: '%$SilverStripe\Versioned\Versioned.stagedversioned'

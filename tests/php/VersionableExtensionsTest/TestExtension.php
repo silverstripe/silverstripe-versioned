@@ -29,4 +29,9 @@ class TestExtension extends DataExtension implements VersionableExtension, TestO
         ];
         $fields['ExtraField'] = 'Varchar()';
     }
+
+    public function extendWithSuffix($table)
+    {
+        return $table;
+    }
 }

@@ -74,19 +74,19 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const DRAFT = 'Stage';
 
     /**
-     * A version that a DataObject should be when it is 'migrating',
-     * that is, when it is in the process of moving from one stage to another.
-     * @var string
-     */
-    public $migratingVersion;
-
-    /**
      * A cache used by get_versionnumber_by_stage().
      * Clear through {@link flushCache()}.
      *
      * @var array
      */
     protected static $cache_versionnumber;
+
+    /**
+     * Cache of version to modified dates for this object
+     *
+     * @var array
+     */
+    protected $versionModifiedCache = [];
 
     /**
      * Current reading mode
@@ -96,12 +96,25 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     protected static $reading_mode = null;
 
     /**
-     * @var Boolean Flag which is temporarily changed during the write() process
-     * to influence augmentWrite() behaviour. If set to TRUE, no new version will be created
-     * for the following write. Needs to be public as other classes introspect this state
-     * during the write process in order to adapt to this versioning behaviour.
+     * Field used to hold the migrating version
      */
-    public $_nextWriteWithoutVersion = false;
+    const MIGRATING_VERSION = 'MigratingVersion';
+
+    /**
+     * Field used to hold flag indicating the next write should be without a new version
+     */
+    const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
+
+    /**
+     * Ensure versioned page doesn't attempt to virtualise these non-db fields
+     *
+     * @config
+     * @var array
+     */
+    private static $non_virtual_fields = [
+        self::MIGRATING_VERSION,
+        self::NEXT_WRITE_WITHOUT_VERSIONED,
+    ];
 
     /**
      * Additional database columns for the new
@@ -291,13 +304,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         $this->mode = $mode;
     }
-
-    /**
-     * Cache of version to modified dates for this objects
-     *
-     * @var array
-     */
-    protected $versionModifiedCache = [];
 
     /**
      * Get modified date for the given version
@@ -645,11 +651,14 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                         );
                     }
                     // Allow versionable extension to customise table fields and indexes
-                    $extension->setOwner($owner);
-                    if ($extension->isVersionedTable($suffixTable)) {
-                        $extension->updateVersionableFields($suffix, $fields, $indexes);
+                    try {
+                        $extension->setOwner($owner);
+                        if ($extension->isVersionedTable($suffixTable)) {
+                            $extension->updateVersionableFields($suffix, $fields, $indexes);
+                        }
+                    } finally {
+                        $extension->clearOwner();
                     }
-                    $extension->clearOwner();
                 }
 
                 // Build _Live table
@@ -873,9 +882,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $version = null;
         $owner = $this->owner;
         $baseDataTable = DataObject::getSchema()->baseDataTable($owner);
+        $migratingVersion = $this->getMigratingVersion();
         if (isset($manipulation[$baseDataTable]['fields'])) {
-            if ($this->migratingVersion) {
-                $manipulation[$baseDataTable]['fields']['Version'] = $this->migratingVersion;
+            if ($migratingVersion) {
+                $manipulation[$baseDataTable]['fields']['Version'] = $migratingVersion;
             }
             if (isset($manipulation[$baseDataTable]['fields']['Version'])) {
                 $version = $manipulation[$baseDataTable]['fields']['Version'];
@@ -900,7 +910,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 user_error("Couldn't find ID in " . var_export($manipulation[$table], true), E_USER_ERROR);
             }
 
-            if ($version < 0 || $this->_nextWriteWithoutVersion) {
+            if ($version < 0 || $this->getNextWriteWithoutVersion()) {
                 // Putting a Version of -1 is a signal to leave the version table alone, despite their being no version
                 unset($manipulation[$table]['fields']['Version']);
             } elseif (empty($version)) {
@@ -926,8 +936,8 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Clear the migration flag
-        if ($this->migratingVersion) {
-            $this->migrateVersion(null);
+        if ($migratingVersion) {
+            $this->setMigratingVersion(null);
         }
 
         // Add the new version # back into the data object, for accessing
@@ -945,7 +955,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function writeWithoutVersion()
     {
-        $this->_nextWriteWithoutVersion = true;
+        $this->setNextWriteWithoutVersion(true);
 
         return $this->owner->write();
     }
@@ -955,7 +965,28 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function onAfterWrite()
     {
-        $this->_nextWriteWithoutVersion = false;
+        $this->setNextWriteWithoutVersion(false);
+    }
+
+    /**
+     * Check if next write is without version
+     *
+     * @return bool
+     */
+    public function getNextWriteWithoutVersion()
+    {
+        return $this->owner->getField(self::NEXT_WRITE_WITHOUT_VERSIONED);
+    }
+
+    /**
+     * Set if next write should be without version or not
+     *
+     * @param bool $flag
+     * @return DataObject owner
+     */
+    public function setNextWriteWithoutVersion($flag)
+    {
+        return $this->owner->setField(self::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
     }
 
     /**
@@ -964,7 +995,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function onAfterSkippedWrite()
     {
-        $this->migrateVersion(null);
+        $this->setMigratingVersion(null);
     }
 
     /**
@@ -1388,9 +1419,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 if ($owner->hasExtension($versionableExtension)) {
                     /** @var VersionableExtension|Extension $ext */
                     $ext = $owner->getExtensionInstance($versionableExtension);
-                    $ext->setOwner($owner);
-                    $table = $ext->extendWithSuffix($table);
-                    $ext->clearOwner();
+                    try {
+                        $ext->setOwner($owner);
+                        $table = $ext->extendWithSuffix($table);
+                    } finally {
+                        $ext->clearOwner();
+                    }
                 }
             }
         }
@@ -1724,7 +1758,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             // Clear version to be automatically created on write
             $from->Version = null;
         } else {
-            $from->migrateVersion($from->Version);
+            $from->setMigratingVersion($from->Version);
 
             // Mark this version as having been published at some stage
             $publisherID = isset(Security::getCurrentUser()->ID) ? Security::getCurrentUser()->ID : 0;
@@ -1762,13 +1796,34 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Set the migrating version.
+     * Get version migrated to
      *
+     * @return int|null
+     */
+    public function getMigratingVersion()
+    {
+        return $this->owner->getField(self::MIGRATING_VERSION);
+    }
+
+    /**
+     * @deprecated 4.0...5.0
      * @param string $version The version.
      */
     public function migrateVersion($version)
     {
-        $this->migratingVersion = $version;
+        Deprecation::notice('5.0', 'use setMigratingVersion instead');
+        $this->setMigratingVersion($version);
+    }
+
+    /**
+     * Set the migrating version.
+     *
+     * @param string $version The version.
+     * @return DataObject Owner
+     */
+    public function setMigratingVersion($version)
+    {
+        return $this->owner->setField(self::MIGRATING_VERSION, $version);
     }
 
     /**
@@ -2519,6 +2574,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function flushCache()
     {
         self::$cache_versionnumber = [];
+        $this->versionModifiedCache = [];
     }
 
     /**

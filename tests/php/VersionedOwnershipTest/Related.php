@@ -26,7 +26,7 @@ class Related extends DataObject implements TestOnly
     ];
 
     private static $has_many = [
-        'Parents' => 'SilverStripe\\Versioned\\Tests\\VersionedOwnershipTest\\Subclass.Related',
+        'Parents' => Subclass::class . '.Related',
     ];
 
     private static $owned_by = [

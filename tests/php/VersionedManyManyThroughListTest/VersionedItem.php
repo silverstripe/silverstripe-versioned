@@ -25,6 +25,6 @@ class VersionedItem extends DataObject implements TestOnly
     ];
 
     private static $belongs_many_many = [
-        'Objects' => 'SilverStripe\\Versioned\\Tests\\VersionedManyManyThroughListTest\\VersionedObject.Items'
+        'Objects' => VersionedObject::class . '.Items',
     ];
 }
