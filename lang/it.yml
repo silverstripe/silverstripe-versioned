@@ -27,8 +27,12 @@ it:
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archivia
+    Archived: 'Pubblicato {name} {title}'
     BUTTONARCHIVEDESC: 'Nascondi e archivia'
     BUTTONPUBLISH: Pubblica
     BUTTONUNPUBLISH: Nascondi
     BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
     Published: 'Pubblicato {name} {link}'
+    Unpublished: 'Nascosto {name} {title}'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Devi effettuare l''accesso al CMS per poter vedere il sito bozza o il contenuto archiviato. <a href="{link}">Premere qui per tornare al sito pubblicato.</a>'
