@@ -2,22 +2,24 @@
 
 namespace SilverStripe\Versioned;
 
+use InvalidArgumentException;
+use LogicException;
 use SilverStripe\Control\Controller;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\Cookie;
-use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataQuery;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataQuery;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\ORM\Queries\SQLUpdate;
@@ -25,8 +27,6 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use SilverStripe\View\TemplateGlobalProvider;
-use InvalidArgumentException;
-use LogicException;
 
 /**
  * The Versioned extension allows your DataObjects to have several versions,
@@ -38,7 +38,6 @@ use LogicException;
  */
 class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
 {
-
     /**
      * Versioning mode for this object.
      * Note: Not related to the current versioning mode in the state / session
@@ -75,19 +74,19 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const DRAFT = 'Stage';
 
     /**
-     * A version that a DataObject should be when it is 'migrating',
-     * that is, when it is in the process of moving from one stage to another.
-     * @var string
-     */
-    public $migratingVersion;
-
-    /**
      * A cache used by get_versionnumber_by_stage().
      * Clear through {@link flushCache()}.
      *
      * @var array
      */
     protected static $cache_versionnumber;
+
+    /**
+     * Cache of version to modified dates for this object
+     *
+     * @var array
+     */
+    protected $versionModifiedCache = [];
 
     /**
      * Current reading mode
@@ -97,12 +96,25 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     protected static $reading_mode = null;
 
     /**
-     * @var Boolean Flag which is temporarily changed during the write() process
-     * to influence augmentWrite() behaviour. If set to TRUE, no new version will be created
-     * for the following write. Needs to be public as other classes introspect this state
-     * during the write process in order to adapt to this versioning behaviour.
+     * Field used to hold the migrating version
      */
-    public $_nextWriteWithoutVersion = false;
+    const MIGRATING_VERSION = 'MigratingVersion';
+
+    /**
+     * Field used to hold flag indicating the next write should be without a new version
+     */
+    const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
+
+    /**
+     * Ensure versioned page doesn't attempt to virtualise these non-db fields
+     *
+     * @config
+     * @var array
+     */
+    private static $non_virtual_fields = [
+        self::MIGRATING_VERSION,
+        self::NEXT_WRITE_WITHOUT_VERSIONED,
+    ];
 
     /**
      * Additional database columns for the new
@@ -191,7 +203,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * or programatically:
      *
-     *  Config::inst()->update($this->owner->class, 'versionableExtensions',
+     *  Config::modify()->merge($this->owner->class, 'versionableExtensions',
      *  array('Extension1' => 'suffix1', 'Extension2' => array('suffix2', 'suffix3')));
      *
      *
@@ -292,13 +304,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         $this->mode = $mode;
     }
-
-    /**
-     * Cache of version to modified dates for this objects
-     *
-     * @var array
-     */
-    protected $versionModifiedCache = [];
 
     /**
      * Get modified date for the given version
@@ -646,11 +651,14 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                         );
                     }
                     // Allow versionable extension to customise table fields and indexes
-                    $extension->setOwner($owner);
-                    if ($extension->isVersionedTable($suffixTable)) {
-                        $extension->updateVersionableFields($suffix, $fields, $indexes);
+                    try {
+                        $extension->setOwner($owner);
+                        if ($extension->isVersionedTable($suffixTable)) {
+                            $extension->updateVersionableFields($suffix, $fields, $indexes);
+                        }
+                    } finally {
+                        $extension->clearOwner();
                     }
-                    $extension->clearOwner();
                 }
 
                 // Build _Live table
@@ -874,9 +882,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $version = null;
         $owner = $this->owner;
         $baseDataTable = DataObject::getSchema()->baseDataTable($owner);
+        $migratingVersion = $this->getMigratingVersion();
         if (isset($manipulation[$baseDataTable]['fields'])) {
-            if ($this->migratingVersion) {
-                $manipulation[$baseDataTable]['fields']['Version'] = $this->migratingVersion;
+            if ($migratingVersion) {
+                $manipulation[$baseDataTable]['fields']['Version'] = $migratingVersion;
             }
             if (isset($manipulation[$baseDataTable]['fields']['Version'])) {
                 $version = $manipulation[$baseDataTable]['fields']['Version'];
@@ -901,7 +910,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 user_error("Couldn't find ID in " . var_export($manipulation[$table], true), E_USER_ERROR);
             }
 
-            if ($version < 0 || $this->_nextWriteWithoutVersion) {
+            if ($version < 0 || $this->getNextWriteWithoutVersion()) {
                 // Putting a Version of -1 is a signal to leave the version table alone, despite their being no version
                 unset($manipulation[$table]['fields']['Version']);
             } elseif (empty($version)) {
@@ -927,8 +936,8 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Clear the migration flag
-        if ($this->migratingVersion) {
-            $this->migrateVersion(null);
+        if ($migratingVersion) {
+            $this->setMigratingVersion(null);
         }
 
         // Add the new version # back into the data object, for accessing
@@ -946,7 +955,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function writeWithoutVersion()
     {
-        $this->_nextWriteWithoutVersion = true;
+        $this->setNextWriteWithoutVersion(true);
 
         return $this->owner->write();
     }
@@ -956,7 +965,28 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function onAfterWrite()
     {
-        $this->_nextWriteWithoutVersion = false;
+        $this->setNextWriteWithoutVersion(false);
+    }
+
+    /**
+     * Check if next write is without version
+     *
+     * @return bool
+     */
+    public function getNextWriteWithoutVersion()
+    {
+        return $this->owner->getField(self::NEXT_WRITE_WITHOUT_VERSIONED);
+    }
+
+    /**
+     * Set if next write should be without version or not
+     *
+     * @param bool $flag
+     * @return DataObject owner
+     */
+    public function setNextWriteWithoutVersion($flag)
+    {
+        return $this->owner->setField(self::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
     }
 
     /**
@@ -965,7 +995,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function onAfterSkippedWrite()
     {
-        $this->migrateVersion(null);
+        $this->setMigratingVersion(null);
     }
 
     /**
@@ -979,7 +1009,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function findOwned($recursive = true, $list = null)
     {
         // Find objects in these relationships
-        return $this->findRelatedObjects('owns', $recursive, $list);
+        return $this->owner->findRelatedObjects('owns', $recursive, $list);
     }
 
     /**
@@ -1016,7 +1046,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function findOwnersRecursive($recursive, $list, $lookup)
     {
         // First pass: find objects that are explicitly owned_by (e.g. custom relationships)
-        $owners = $this->findRelatedObjects('owned_by', false);
+        /** @var DataObject $owner */
+        $owner = $this->owner;
+        $owners = $owner->findRelatedObjects('owned_by', false);
 
         // Second pass: Find owners via reverse lookup list
         foreach ($lookup as $ownedClass => $classLookups) {
@@ -1029,12 +1061,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 $ownerClass = $classLookup['class'];
                 $ownerRelation = $classLookup['relation'];
                 $result = $this->owner->inferReciprocalComponent($ownerClass, $ownerRelation);
-                $this->mergeRelatedObjects($owners, $result);
+                $owner->mergeRelatedObjects($owners, $result);
             }
         }
 
         // Merge all objects into the main list
-        $newItems = $this->mergeRelatedObjects($list, $owners);
+        $newItems = $owner->mergeRelatedObjects($list, $owners);
 
         // If recursing, iterate over all newly added items
         if ($recursive) {
@@ -1096,82 +1128,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             }
         }
         return $lookup;
-    }
-
-
-    /**
-     * Find objects in the given relationships, merging them into the given list
-     *
-     * @param array $source Config property to extract relationships from
-     * @param bool $recursive True if recursive
-     * @param ArrayList $list Optional list to add items to
-     * @return ArrayList The list
-     */
-    public function findRelatedObjects($source, $recursive = true, $list = null)
-    {
-        if (!$list) {
-            $list = new ArrayList();
-        }
-
-        // Skip search for unsaved records
-        $owner = $this->owner;
-        if (!$owner->isInDB()) {
-            return $list;
-        }
-
-        $relationships = $owner->config()->get($source);
-        foreach ($relationships as $relationship) {
-            // Warn if invalid config
-            if (!$owner->hasMethod($relationship)) {
-                trigger_error(sprintf(
-                    "Invalid %s config value \"%s\" on object on class \"%s\"",
-                    $source,
-                    $relationship,
-                    get_class($owner)
-                ), E_USER_WARNING);
-                continue;
-            }
-
-            // Inspect value of this relationship
-            $items = $owner->{$relationship}();
-
-            // Merge any new item
-            $newItems = $this->mergeRelatedObjects($list, $items);
-
-            // Recurse if necessary
-            if ($recursive) {
-                foreach ($newItems as $item) {
-                    /** @var Versioned|DataObject $item */
-                    $item->findRelatedObjects($source, true, $list);
-                }
-            }
-        }
-        return $list;
-    }
-
-    /**
-     * Helper method to merge owned/owning items into a list.
-     * Items already present in the list will be skipped.
-     *
-     * @param ArrayList $list Items to merge into
-     * @param mixed $items List of new items to merge
-     * @return ArrayList List of all newly added items that did not already exist in $list
-     */
-    protected function mergeRelatedObjects($list, $items)
-    {
-        $added = new ArrayList();
-        if (!$items) {
-            return $added;
-        }
-        if ($items instanceof DataObject) {
-            $items = [$items];
-        }
-
-        /** @var Versioned|DataObject $item */
-        foreach ($items as $item) {
-            $this->mergeRelatedObject($list, $added, $item);
-        }
-        return $added;
     }
 
     /**
@@ -1461,10 +1417,14 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (count($versionableExtensions)) {
             foreach ($versionableExtensions as $versionableExtension => $suffixes) {
                 if ($owner->hasExtension($versionableExtension)) {
+                    /** @var VersionableExtension|Extension $ext */
                     $ext = $owner->getExtensionInstance($versionableExtension);
-                    $ext->setOwner($owner);
-                    $table = $ext->extendWithSuffix($table);
-                    $ext->clearOwner();
+                    try {
+                        $ext->setOwner($owner);
+                        $table = $ext->extendWithSuffix($table);
+                    } finally {
+                        $ext->clearOwner();
+                    }
                 }
             }
         }
@@ -1635,6 +1595,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         return true;
     }
 
+    /**
+     * Remove this item from any changesets
+     *
+     * @return bool
+     */
     public function deleteFromChangeSets()
     {
         $owner = $this->owner;
@@ -1650,6 +1615,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         ChangeSetItem::get()
             ->filter(['ObjectID' => $ids])
             ->removeAll();
+        return true;
     }
 
     /**
@@ -1690,19 +1656,24 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Trigger unpublish of owning objects
+     * Determine if this object is published, and has any published owners.
+     * If this is true, a warning should be shown before this is published.
+     *
+     * Note: This method returns false if the object itself is unpublished,
+     * since owners are only considered on the same stage as the record itself.
+     *
+     * @return bool
      */
-    public function onAfterUnpublish()
+    public function hasPublishedOwners()
     {
-        $owner = $this->owner;
-
-        // Any objects which owned (and thus relied on the unpublished object) are now unpublished automatically.
-        foreach ($owner->findOwners(false) as $object) {
-            /** @var Versioned|DataObject $object */
-            $object->doUnpublish();
+        if (!$this->isPublished()) {
+            return false;
         }
+        // Count live owners
+        /** @var Versioned|DataObject $liveRecord */
+        $liveRecord = static::get_by_stage(get_class($this->owner), Versioned::LIVE)->byID($this->owner->ID);
+        return $liveRecord->findOwners(false)->count() > 0;
     }
-
 
     /**
      * Revert the draft changes: replace the draft content with the content on live
@@ -1787,7 +1758,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             // Clear version to be automatically created on write
             $from->Version = null;
         } else {
-            $from->migrateVersion($from->Version);
+            $from->setMigratingVersion($from->Version);
 
             // Mark this version as having been published at some stage
             $publisherID = isset(Security::getCurrentUser()->ID) ? Security::getCurrentUser()->ID : 0;
@@ -1825,13 +1796,34 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Set the migrating version.
+     * Get version migrated to
      *
+     * @return int|null
+     */
+    public function getMigratingVersion()
+    {
+        return $this->owner->getField(self::MIGRATING_VERSION);
+    }
+
+    /**
+     * @deprecated 4.0...5.0
      * @param string $version The version.
      */
     public function migrateVersion($version)
     {
-        $this->migratingVersion = $version;
+        Deprecation::notice('5.0', 'use setMigratingVersion instead');
+        $this->setMigratingVersion($version);
+    }
+
+    /**
+     * Set the migrating version.
+     *
+     * @param string $version The version.
+     * @return DataObject Owner
+     */
+    public function setMigratingVersion($version)
+    {
+        return $this->owner->setField(self::MIGRATING_VERSION, $version);
     }
 
     /**
@@ -2582,6 +2574,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function flushCache()
     {
         self::$cache_versionnumber = [];
+        $this->versionModifiedCache = [];
     }
 
     /**
@@ -2623,31 +2616,5 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function hasStages()
     {
         return $this->mode === static::STAGEDVERSIONED;
-    }
-
-    /**
-     * Merge single object into a list
-     *
-     * @param ArrayList $list Global list. Object will not be added if already added to this list.
-     * @param ArrayList $added Additional list to insert into
-     * @param DataObject $item Item to add
-     * @return mixed
-     */
-    protected function mergeRelatedObject($list, $added, $item)
-    {
-        // Identify item
-        $itemKey = get_class($item) . '/' . $item->ID;
-
-        // Write if saved, versioned, and not already added
-        if ($item->isInDB() && $item->has_extension(static::class) && !isset($list[$itemKey])) {
-            $list[$itemKey] = $item;
-            $added[$itemKey] = $item;
-        }
-
-        // Add joined record (from many_many through) automatically
-        $joined = $item->getJoin();
-        if ($joined) {
-            $this->mergeRelatedObject($list, $added, $joined);
-        }
     }
 }

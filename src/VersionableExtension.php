@@ -24,4 +24,13 @@ interface VersionableExtension
      * @param array $indexes List of indexes in this model
      */
     public function updateVersionableFields($suffix, &$fields, &$indexes);
+
+    /**
+     * Modify table name with suffix.
+     * Should return $table if not modified.
+     *
+     * @param string $table
+     * @return string
+     */
+    public function extendWithSuffix($table);
 }

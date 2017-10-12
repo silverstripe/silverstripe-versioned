@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 
 use SilverStripe\Dev\TestOnly;
-use SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 
 /**
  * Object which:

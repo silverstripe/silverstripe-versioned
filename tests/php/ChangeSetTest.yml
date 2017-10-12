@@ -1,6 +1,8 @@
 SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject:
   base:
     Foo: 1
+  base2:
+    Foo: 3
 SilverStripe\Versioned\Tests\ChangeSetTest\EndObject:
   end1:
     Baz: 1
@@ -19,3 +21,9 @@ SilverStripe\Versioned\Tests\ChangeSetTest\MidObject:
     Bar: 2
     Base: =>SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject.base
     End: =>SilverStripe\Versioned\Tests\ChangeSetTest\EndObject.end2
+  mid3:
+    Base: =>SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject.base2
+SilverStripe\Versioned\Tests\ChangeSetTest\UnversionedObject:
+  unversioned1:
+    Title: 'object'
+    Parent: =>SilverStripe\Versioned\Tests\ChangeSetTest\MidObject.mid1

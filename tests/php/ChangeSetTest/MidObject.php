@@ -24,8 +24,17 @@ class MidObject extends DataObject implements TestOnly
         'End' => EndObject::class,
     ];
 
+    private static $has_many = [
+        'Others' => UnversionedObject::class,
+    ];
+
     private static $owns = [
         'End',
+    ];
+
+    private static $cascade_deletes = [
+        'End',
+        'Others',
     ];
 
     private static $extensions = [

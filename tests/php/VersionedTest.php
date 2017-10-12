@@ -5,7 +5,6 @@ namespace SilverStripe\Versioned\Tests;
 use DateTime;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
@@ -17,6 +16,7 @@ use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\Tests\VersionedTest\SingleStage;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
@@ -868,6 +868,7 @@ class VersionedTest extends SapphireTest
             array_keys($tables),
             'Contains base table'
         );
+
         $this->assertContains(
             'versionedtest_singlestage_versions',
             array_keys($tables),
@@ -1166,14 +1167,10 @@ class VersionedTest extends SapphireTest
 
     public function testVersionedHandlesRenamedDataObjectFields()
     {
-        Config::inst()->remove(VersionedTest\RelatedWithoutversion::class, 'db', 'Name', 'Varchar');
-
-        Config::inst()->update(
+        Config::modify()->merge(
             VersionedTest\RelatedWithoutversion::class,
             'db',
-            [
-            "NewField" => "Varchar",
-            ]
+            [ "NewField" => "Varchar" ]
         );
 
         VersionedTest\RelatedWithoutversion::add_extension(Versioned::class);

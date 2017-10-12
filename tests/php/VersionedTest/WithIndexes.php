@@ -19,7 +19,7 @@ class WithIndexes extends DataObject implements TestOnly
     ];
 
     private static $extensions = [
-        Versioned::class
+        Versioned::class,
     ];
 
     private static $indexes = [

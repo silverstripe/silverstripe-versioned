@@ -22,7 +22,7 @@ class Attachment extends DataObject implements TestOnly
     ];
 
     private static $belongs_many_many = [
-        'AttachedTo' => 'SilverStripe\\Versioned\\Tests\\VersionedOwnershipTest\\Related.Attachments'
+        'AttachedTo' => Related::class . '.Attachments',
     ];
 
     private static $owned_by = [

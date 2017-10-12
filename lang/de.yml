@@ -20,6 +20,5 @@ de:
     has_many_Versions: Versionen
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiv
-    Archived: '%s %s archiviert'
     BUTTONPUBLISH: Veröffentlichen
     Published: '{name} {link} veröffentlicht'

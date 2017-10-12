@@ -15,12 +15,8 @@ cs:
     has_many_Versions: Verze
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiv
-    Archived: 'Archivováno %s %s'
     BUTTONARCHIVEDESC: 'Nezveřejnit a poslat do archivu'
     BUTTONPUBLISH: Zveřejnit
     BUTTONUNPUBLISH: Nezveřejnit
     BUTTONUNPUBLISHDESC: 'Odstranit tento záznam ze zveřejněného webu'
     Published: 'Zveřejněno {name} {link}'
-    Unpublished: 'Nezveřejněno %s %s'
-  SilverStripe\Versioned\VersionedRequestFilter:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte se přihlásit s vasím CMS heslem pro pohled na koncept nebo na archivovaný obsah. <a href="{link}">Kliknte sem pro návrat do zveřejněného webu.</a>'

@@ -18,6 +18,6 @@ class SingleStage extends DataObject implements TestOnly
     ];
 
     private static $extensions = [
-        'SilverStripe\\Versioned\\Versioned("Versioned")'
+        Versioned::class . '.versioned',
     ];
 }

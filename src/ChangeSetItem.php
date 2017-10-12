@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use InvalidArgumentException;
 use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
@@ -25,7 +26,8 @@ use SilverStripe\Security\Security;
  * @property int $ObjectID The numeric ID for the referenced object
  * @method ManyManyList ReferencedBy() List of explicit items that require this change
  * @method ManyManyList References() List of implicit items required by this change
- * @method ChangeSet ChangeSet()
+ * @method ChangeSet ChangeSet() Parent changeset
+ * @method DataObject Object() The object attached to this item
  */
 class ChangeSetItem extends DataObject implements Thumbnail
 {
@@ -192,24 +194,35 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function findReferenced()
     {
+        /** @var DataObject $liveRecord */
+        $liveRecord = $this->getObjectInStage(Versioned::LIVE);
+
+        // If we have deleted this record, recursively delete live objects on publish
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
-            // If deleted from stage, need to look at live record
-            $record = $this->getObjectInStage(Versioned::LIVE);
-            if ($record) {
-                return $record->findOwners(false);
+            if (!$liveRecord) {
+                return ArrayList::create();
             }
-        } else {
-            // If changed on stage, look at owned objects there
-            $record = $this->getObjectInStage(Versioned::DRAFT);
-            if ($record) {
-                return $record->findOwned()->filterByCallback(function ($owned) {
-                    /** @var Versioned|DataObject $owned */
-                    return $owned->stagesDiffer(Versioned::DRAFT, Versioned::LIVE);
-                });
+            return $liveRecord->findCascadeDeletes(true);
+        }
+
+        // If changed on stage, include all owned objects for publish
+        /** @var DataObject $draftRecord */
+        $draftRecord = $this->getObjectInStage(Versioned::DRAFT);
+        if (!$draftRecord) {
+            return ArrayList::create();
+        }
+        $references = $draftRecord->findOwned();
+
+        // When publishing, use cascade_deletes to partially unpublished sets
+        if ($liveRecord) {
+            foreach ($liveRecord->findCascadeDeletes(true) as $next) {
+                /** @var Versioned|DataObject $next */
+                if ($next->hasExtension(Versioned::class) && $next->isOnLiveOnly()) {
+                    $this->mergeRelatedObject($references, ArrayList::create(), $next);
+                }
             }
         }
-        // Empty set
-        return new ArrayList();
+        return $references;
     }
 
     /**
@@ -407,10 +420,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public static function get_for_object($object)
     {
-        return ChangeSetItem::get()->filter([
-            'ObjectID' => $object->ID,
-            'ObjectClass' => $object->baseClass(),
-        ]);
+        // Capture changesetitem for both changed and deleted objects
+        $id = $object->isInDB()
+            ? $object->ID
+            : $object->OldID;
+        return static::get_for_object_by_id($id, $object->baseClass());
     }
 
     /**
@@ -422,6 +436,9 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public static function get_for_object_by_id($objectID, $objectClass)
     {
+        if (!$objectID) {
+            throw new InvalidArgumentException("Cannot get ChangesetItem for object which was never saved");
+        }
         return ChangeSetItem::get()->filter([
             'ObjectID' => $objectID,
             'ObjectClass' => static::getSchema()->baseDataClass($objectClass)
