@@ -147,14 +147,16 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Version comparisons
         if ($draftVersion == $liveVersion) {
-            return self::CHANGE_NONE;
+            $type = self::CHANGE_NONE;
         } elseif (!$liveVersion) {
-            return self::CHANGE_CREATED;
+            $type = self::CHANGE_CREATED;
         } elseif (!$draftVersion) {
-            return self::CHANGE_DELETED;
+            $type = self::CHANGE_DELETED;
         } else {
-            return self::CHANGE_MODIFIED;
+            $type = self::CHANGE_MODIFIED;
         }
+        $this->extend('updateChangeType', $type, $draftVersion, $liveVersion);
+        return $type;
     }
 
     /**
