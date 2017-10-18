@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\Tests\VersionedTest\SingleStage;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
