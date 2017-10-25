@@ -20,10 +20,11 @@ class VersionedGridFieldDetailForm extends Extension
      */
     public function updateItemRequestClass(&$class, $gridField, $record, $requestHandler)
     {
-        // Conditionally use a versioned item handler
+        // Conditionally use a versioned item handler if it doesn't already have one.
         if ($record
             && $record->has_extension(Versioned::class)
             && $record->config()->get('versioned_gridfield_extensions')
+            && (!$class || !is_subclass_of($class, VersionedGridFieldItemRequest::class))
         ) {
             $class = VersionedGridFieldItemRequest::class;
         }
