@@ -1,21 +1,27 @@
 it:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_ITEM_PLURALS:
-      one: 'un elemento'
-      other: '{count} elementi'
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, e {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
-    DESCRIPTION_OTHER_ITEM_PLURALS:
-      one: 'un altro elemento'
-      other: '{count} altri elementi'
+    EMPTY: Vuota
+    ITEMS_CHANGES:
+      one: '{total} (1 modifica)'
+      other: '{total} ({count} modifiche)'
+    ITEMS_TOTAL:
+      one: '1 totale'
+      other: '{count} totale'
     NAME: Nome
     PLURALNAME: Campagne
     PLURALS:
       one: 'Una Campagna'
       other: '{count} Campagne'
+    PUBLISHED_DATE_BY: '{date} di {name}'
+    PUBLISHED_TODAY: 'Oggi {time}'
+    PUBLISHED_TODAY_BY: 'Oggi {time} di {name}'
+    PUBLISHER_NAME: 'Pubblicato da'
+    PUBLISH_DATE: 'Data pubblicazione'
     SINGULARNAME: Campagna
     STATE: Stato
+    STATE_OPEN: Attiva
+    STATE_PUBLISHED: Pubblicata
+    STATE_REVERTED: Ripristinata
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Elementi del Gruppo Modifiche'
     PLURALS:
