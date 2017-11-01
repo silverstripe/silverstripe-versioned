@@ -15,6 +15,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\Security\IdentityStore;
 use SilverStripe\Versioned\ChangeSet;
 use SilverStripe\Versioned\Versioned;
 
@@ -1022,6 +1023,14 @@ class VersionedTest extends SapphireTest
         $request->getSession()->clear('readingMode');
         Versioned::choose_site_stage($request);
         $this->assertEquals('Stage.Live', Versioned::get_reading_mode());
+
+        // Ensure stage is reset to Live when logging out
+        $request->getSession()->set('readingMode', 'Stage.Stage');
+        Versioned::choose_site_stage($request);
+
+        Injector::inst()->get(IdentityStore::class)->logOut($request);
+        Versioned::choose_site_stage($request);
+        $this->assertSame('Stage.Live', Versioned::get_reading_mode());
     }
 
     /**
