@@ -21,7 +21,7 @@ ru:
     INFERRED_TITLE: 'Сгенерировано автоматически при публикации ''{title}'' в {created}'
     has_many_Versions: Версии
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: 'Архив'
+    ARCHIVE: Архив
     BUTTONARCHIVEDESC: 'Отменить публикацию и добавить в архив'
     BUTTONPUBLISH: Опубликовать
     BUTTONUNPUBLISH: 'Отменить публикацию'
