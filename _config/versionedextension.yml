@@ -14,7 +14,3 @@ SilverStripe\Core\Injector\Injector:
       mode: StagedVersioned
   # Default is alias for .stagedversioned
   SilverStripe\Versioned\Versioned: '%$SilverStripe\Versioned\Versioned.stagedversioned'
-
-SilverStripe\Security\Member:
-  extensions:
-    - SilverStripe\Versioned\MemberExtension
