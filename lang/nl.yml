@@ -1,8 +1,5 @@
 nl:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, en {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
     NAME: Naam
     PLURALNAME: Campagnes
     SINGULARNAME: Campagne
