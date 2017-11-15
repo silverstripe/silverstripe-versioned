@@ -30,15 +30,45 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         // Add extra actions prior to extensions so that these can be modified too
         $this->beforeExtending('updateFormActions', function (FieldList $actions) use ($record) {
+            // Save action
+            if ($record->canEdit()) {
+                $save = $actions->fieldByName('action_doSave');
+                if (!is_null($save)) {
+                    $save
+                        ->setTitle(_t(__CLASS__.'.BUTTONSAVED', 'Saved'))
+                        ->removeExtraClass('btn-primary font-icon-save')
+                        ->addExtraClass('btn-outline-primary font-icon-tick')
+                        ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-save')
+                        ->setAttribute('data-btn-alternate-remove', 'btn-outline-primary font-icon-tick')
+                        ->setAttribute(
+                            'data-text-alternate',
+                            _t('SilverStripe\\CMS\\Controllers\\CMSMain.SAVEDRAFT', 'Save draft')
+                        );
+                }
+            }
+
             // Save & Publish action
             if ($record->canPublish()) {
                 // "publish", as with "save", it supports an alternate state to show when action is needed.
                 $publish = FormAction::create(
                     'doPublish',
-                    _t(__CLASS__.'.BUTTONPUBLISH', 'Publish')
+                    _t(__CLASS__.'.BUTTONSAVEPUBLISH', 'Save & publish')
                 )
                     ->setUseButtonTag(true)
                     ->addExtraClass('btn btn-primary font-icon-rocket');
+
+                if ($record->isPublished()) {
+                    $publish
+                        ->setTitle(_t(__CLASS__.'.BUTTONPUBLISHED', 'Published'))
+                        ->removeExtraClass('font-icon-rocket')
+                        ->addExtraClass('btn-outline-primary font-icon-tick')
+                        ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-rocket')
+                        ->setAttribute('data-btn-alternate-remove', 'btn-outline-primary font-icon-tick')
+                        ->setAttribute(
+                            'data-text-alternate',
+                            _t(__CLASS__.'.BUTTONSAVEPUBLISH', 'Save & publish')
+                        );
+                }
 
                 // Insert after save
                 if ($actions->fieldByName('action_doSave')) {
