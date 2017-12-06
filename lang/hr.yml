@@ -1,0 +1,25 @@
+hr:
+  SilverStripe\Versioned\ChangeSet:
+    EMPTY: Prazno
+    NAME: Naziv
+    PLURALNAME: Kampanje
+    PUBLISHER_NAME: Objavio
+    PUBLISH_DATE: 'Datum objave'
+    SINGULARNAME: Kampanja
+    STATE: Stanje
+    STATE_OPEN: Aktivan
+    STATE_PUBLISHED: Objavljen
+    STATE_REVERTED: Poništeno
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Promjena postavki stavki'
+    SINGULARNAME: 'Promjena postavki stavke'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Verzije
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Arhiviraj
+    BUTTONARCHIVEDESC: 'Poništi objavljivanje i pošalji u arhivu'
+    BUTTONPUBLISH: Objavi
+    BUTTONUNPUBLISH: 'Poništi objavljivanje'
+    BUTTONUNPUBLISHDESC: 'Ukloni ovaj zapis s objavljene strancie'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Morate se prijaviti s vašom CMS lozinkom kako bi ste vidjeti neobjavljeni ili arhivirani sadržaj. <a href="{link}">Kliknite ovdje da se vratite na objavljenu stranicu.</a>'
