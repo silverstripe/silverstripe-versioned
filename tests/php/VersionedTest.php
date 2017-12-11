@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned\Tests;
 
 use DateTime;
+use InvalidArgumentException;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
@@ -11,6 +12,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
@@ -150,10 +152,8 @@ class VersionedTest extends SapphireTest
         $obj->ExtraField = 'Foo'; // ensure that child version table gets written
         $obj->write();
         $class = VersionedTest\TestObject::class;
-        $this->setExpectedException(
-            'InvalidArgumentException',
-            "Can't find {$class}#{$obj->ID} in stage Live"
-        );
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Can't find {$class}#{$obj->ID} in stage Live");
 
         // Fail publishing from live to stage
         $obj->copyVersionToStage(Versioned::LIVE, Versioned::DRAFT);
@@ -207,6 +207,7 @@ class VersionedTest extends SapphireTest
 
         // Modify a page, ensuring that the Version ID and Record ID will differ,
         // and then subsequently delete it
+        /** @var VersionedTest\TestObject $targetPage */
         $targetPage = $this->objFromFixture(VersionedTest\TestObject::class, 'page3');
         $targetPage->Content = 'To be deleted';
         $targetPage->write();
@@ -286,7 +287,9 @@ class VersionedTest extends SapphireTest
         $this->assertTrue($firstVersion < $secondVersion, 'write creates new version');
 
         $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, true);
-        $thirdVersion = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID)->Version;
+        /** @var VersionedTest\TestObject $thirdVersionObject */
+        $thirdVersionObject = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID);
+        $thirdVersion = $thirdVersionObject->Version;
         $liveVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Live', $page1->ID);
         $stageVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Stage', $page1->ID);
         $this->assertTrue(
@@ -307,6 +310,7 @@ class VersionedTest extends SapphireTest
 
     public function testRollbackTo()
     {
+        /** @var VersionedTest\AnotherSubclass $page1 */
         $page1 = $this->objFromFixture(VersionedTest\AnotherSubclass::class, 'subclass1');
         $page1->Content = 'orig';
         $page1->write();
@@ -346,6 +350,7 @@ class VersionedTest extends SapphireTest
 
     public function testDeleteFromStage()
     {
+        /** @var VersionedTest\TestObject $page1 */
         $page1 = $this->objFromFixture(VersionedTest\TestObject::class, 'page1');
         $pageID = $page1->ID;
 
@@ -391,42 +396,77 @@ class VersionedTest extends SapphireTest
 
     public function testDeleteFromChangeSets()
     {
+        /** @var VersionedTest\ChangeSetTestObject $page1 */
         $page1 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page1');
+        /** @var VersionedTest\ChangeSetTestObject $page2 */
         $page2 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2');
+        /** @var VersionedTest\ChangeSetTestObject $page2a */
         $page2a = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2a');
-        $page2b = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page2b');
+        /** @var VersionedTest\ChangeSetTestObject $page3 */
         $page3 = $this->objFromFixture(VersionedTest\ChangeSetTestObject::class, 'page3');
 
+        // "cs1" will contain 4 items (1 and 2 explicit, 2a and 2b implicit)
         $cs1 = new ChangeSet();
         $cs1->write();
-
-        $cs2 = new ChangeSet();
-        $cs2->write();
-
-        // "cs1" will contain 2 items
         $cs1->addObject($page1);
         $cs1->addObject($page2);
+        $this->assertEquals(
+            [
+                'Page 1',
+                'Page 2',
+                'Page 2a',
+                'Page 2b',
+            ],
+            ArrayList::create($cs1->Changes()->toArray())
+                ->sort('Title')
+                ->column('Title')
+        );
 
-        // "cs2" will contain 3 items
+        // "cs2" adds 2, 2a, and 3, but will include 2a explicitly
+        $cs2 = new ChangeSet();
+        $cs2->write();
+        $cs2->addObject($page2);
         $cs2->addObject($page2a);
-        $cs2->addObject($page2b);
         $cs2->addObject($page3);
+        $this->assertEquals(
+            [
+                'Page 2',
+                'Page 2a',
+                'Page 2b',
+                'Page 3'
+            ],
+            ArrayList::create($cs2->Changes()->toArray())
+                ->sort('Title')
+                ->column('Title')
+        );
 
-        $this->assertEquals(2, $cs1->Changes()->count());
-        $this->assertEquals(3, $cs2->Changes()->count());
-
-        // "cs1" will now contain 1 item
+        // "cs1" will now contain 3 item, but "cs2" is unchanged
         $page1->deleteFromChangeSets();
+        $this->assertEquals(
+            [
+                'Page 2',
+                'Page 2a',
+                'Page 2b',
+            ],
+            ArrayList::create($cs1->Changes()->toArray())
+                ->sort('Title')
+                ->column('Title')
+        );
 
-        $this->assertEquals(1, $cs1->Changes()->count());
-        $this->assertEquals(3, $cs2->Changes()->count());
-
-        // "cs2" will now contain 1 ("page3") since deleting "page2" from "cs1" will also
-        // delete "page2a" and "page2b" from change "cs2"
+        // Will remove all remaining changes from cs1
         $page2->deleteFromChangeSets();
         $this->assertEquals(0, $cs1->Changes()->count());
-        $this->assertEquals(1, $cs2->Changes()->count());
-        $this->assertEquals('Page 3', $cs2->Changes()->first()->Title);
+
+        // 2a was added explicitly, so isn't automatically removed from cs2
+        $this->assertEquals(
+            [
+                'Page 2a',
+                'Page 3'
+            ],
+            ArrayList::create($cs2->Changes()->toArray())
+                ->sort('Title')
+                ->column('Title')
+        );
     }
 
     public function testWritingNewToStage()
@@ -436,7 +476,6 @@ class VersionedTest extends SapphireTest
         Versioned::set_stage(Versioned::DRAFT);
         $page = new VersionedTest\TestObject();
         $page->Title = "testWritingNewToStage";
-        $page->URLSegment = "testWritingNewToStage";
         $page->write();
 
         $live = Versioned::get_by_stage(
@@ -466,12 +505,9 @@ class VersionedTest extends SapphireTest
      */
     public function testWritingNewToLive()
     {
-        $origReadingMode = Versioned::get_reading_mode();
-
         Versioned::set_stage(Versioned::LIVE);
         $page = new VersionedTest\TestObject();
         $page->Title = "testWritingNewToLive";
-        $page->URLSegment = "testWritingNewToLive";
         $page->write();
 
         $live = Versioned::get_by_stage(
@@ -482,6 +518,7 @@ class VersionedTest extends SapphireTest
             ]
         );
         $this->assertEquals(1, $live->count());
+        /** @var Versioned|DataObject $liveRecord */
         $liveRecord = $live->First();
         $this->assertEquals($liveRecord->Title, 'testWritingNewToLive');
 
@@ -493,13 +530,12 @@ class VersionedTest extends SapphireTest
             ]
         );
         $this->assertEquals(1, $stage->count());
+        /** @var Versioned|DataObject $stageRecord */
         $stageRecord = $stage->first();
         $this->assertEquals($stageRecord->Title, 'testWritingNewToLive');
 
         // Both records have the same version
         $this->assertEquals($liveRecord->Version, $stageRecord->Version);
-
-        Versioned::set_reading_mode($origReadingMode);
     }
 
     /**
@@ -596,7 +632,7 @@ class VersionedTest extends SapphireTest
         $version2Date = $page2->LastEdited;
         $version2 = $page2->Version;
         $this->assertGreaterThan($version1, $version2);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Page 2a - v2'],
                 ['Title' => 'Page 2b'],
@@ -617,7 +653,7 @@ class VersionedTest extends SapphireTest
         ];
         $this->assertEquals($archiveParms, $page2v1->getInheritableQueryParams());
         $this->assertArraySubset($archiveParms, $page2v1->Children()->getQueryParams());
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Page 2a'],
                 ['Title' => 'Page 2b'],
@@ -638,7 +674,7 @@ class VersionedTest extends SapphireTest
         ];
         $this->assertEquals($archiveParms, $page2v2->getInheritableQueryParams());
         $this->assertArraySubset($archiveParms, $page2v2->Children()->getQueryParams());
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Page 2a - v2'],
                 ['Title' => 'Page 2b'],
@@ -662,10 +698,12 @@ class VersionedTest extends SapphireTest
         $obj->write();
 
         // We should be able to pass the subclass and still get the correct class back
+        /** @var VersionedTest\Subclass $obj2 */
         $obj2 = Versioned::get_version(VersionedTest\Subclass::class, $obj->ID, $subclassVersion);
         $this->assertInstanceOf(VersionedTest\Subclass::class, $obj2);
         $this->assertEquals("test2", $obj2->Name);
 
+        /** @var VersionedTest\Subclass $obj3 */
         $obj3 = Versioned::get_latest_version(VersionedTest\Subclass::class, $obj->ID);
         $this->assertEquals("test3", $obj3->Name);
         $this->assertInstanceOf(VersionedTest\TestObject::class, $obj3);
@@ -699,6 +737,7 @@ class VersionedTest extends SapphireTest
         // Test 1 - 2006 Content
         singleton(VersionedTest\Subclass::class)->flushCache(true);
         Versioned::set_reading_mode('Archive.2006-01-01 00:00:00');
+        /** @var VersionedTest\Subclass $testPage2006 */
         $testPage2006 = DataObject::get(VersionedTest\Subclass::class)->filter(['Title' => 'Archived page'])->first();
         $this->assertInstanceOf(VersionedTest\Subclass::class, $testPage2006);
         $this->assertEquals("2005", $testPage2006->ExtraField);
@@ -707,6 +746,7 @@ class VersionedTest extends SapphireTest
         // Test 2 - 2008 Content
         singleton(VersionedTest\Subclass::class)->flushCache(true);
         Versioned::set_reading_mode('Archive.2008-01-01 00:00:00');
+        /** @var VersionedTest\Subclass $testPage2008 */
         $testPage2008 = DataObject::get(VersionedTest\Subclass::class)->filter(['Title' => 'Archived page'])->first();
         $this->assertInstanceOf(VersionedTest\Subclass::class, $testPage2008);
         $this->assertEquals("2007", $testPage2008->ExtraField);
@@ -715,6 +755,7 @@ class VersionedTest extends SapphireTest
         // Test 3 - Today
         singleton(VersionedTest\Subclass::class)->flushCache(true);
         Versioned::set_reading_mode('Stage.Stage');
+        /** @var VersionedTest\Subclass $testPageCurrent */
         $testPageCurrent = DataObject::get(VersionedTest\Subclass::class)->filter(['Title' => 'Archived page'])
             ->first();
         $this->assertInstanceOf(VersionedTest\Subclass::class, $testPageCurrent);
@@ -849,9 +890,11 @@ class VersionedTest extends SapphireTest
 
         Versioned::reading_archived_date('2009-01-01 19:00:00');
 
+        /** @var VersionedTest\TestObject $fetchedData */
         $fetchedData = VersionedTest\TestObject::get()->byId($id);
         $this->assertEquals('Before Content', $fetchedData->Content, 'We see the correct content of the older version');
 
+        /** @var VersionedTest\RelatedWithoutversion $relatedData */
         $relatedData = VersionedTest\RelatedWithoutversion::get()->byId($relatedDataId);
         $this->assertEquals(
             1,
@@ -920,6 +963,7 @@ class VersionedTest extends SapphireTest
         Versioned::set_stage(Versioned::LIVE);
 
         // Check fields are unloaded prior to access
+        /** @var VersionedTest\TestObject $objLazy */
         $objLazy = Versioned::get_one_by_stage(VersionedTest\TestObject::class, 'Stage', $filter, false);
         $lazyFields = $objLazy->getQueriedDatabaseFields();
         $this->assertTrue(isset($lazyFields['ExtraField_Lazy']));
@@ -1198,8 +1242,10 @@ class VersionedTest extends SapphireTest
         // Test that all (and only) public pages are viewable in stage mode
         $this->logOut();
         Versioned::set_stage(Versioned::DRAFT);
+        /** @var VersionedTest\PublicStage $public1 */
         $public1 = Versioned::get_one_by_stage(VersionedTest\PublicStage::class, 'Stage', ['"ID"' => $public1ID]);
         $public2 = Versioned::get_one_by_stage(VersionedTest\PublicViaExtension::class, 'Stage', ['"ID"' => $public2ID]);
+        /** @var VersionedTest\TestObject $private */
         $private = Versioned::get_one_by_stage(VersionedTest\TestObject::class, 'Stage', ['"ID"' => $privateID]);
         // Also test an object that has just a single-stage (eg. is only versioned)
         $single = Versioned::get_one_by_stage(VersionedTest\SingleStage::class, 'Stage', ['"ID"' => $singleID]);
@@ -1246,7 +1292,9 @@ class VersionedTest extends SapphireTest
 
     public function testCanViewStage()
     {
+        /** @var VersionedTest\PublicStage $public */
         $public = $this->objFromFixture(VersionedTest\PublicStage::class, 'public1');
+        /** @var VersionedTest\TestObject $private */
         $private = $this->objFromFixture(VersionedTest\TestObject::class, 'page1');
         $this->logOut();
         Versioned::set_stage(Versioned::DRAFT);
@@ -1287,6 +1335,7 @@ class VersionedTest extends SapphireTest
         $record->Title = "Test A";
         $record->write();
 
+        /** @var VersionedTest\Subclass $version */
         $version = Versioned::get_latest_version($record->ClassName, $record->ID);
 
         $this->assertEquals(1, $version->Version);

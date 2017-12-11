@@ -194,7 +194,6 @@ class ChangeSet extends DataObject
         $item->Added = ChangeSetItem::EXPLICITLY;
         $item->write();
 
-
         $this->sync();
     }
 
