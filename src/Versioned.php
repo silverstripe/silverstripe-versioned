@@ -1878,7 +1878,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         static::set_stage(static::DRAFT);
 
         $owner = $this->owner;
-        $list = DataObject::get(get_class($owner), $filter, $sort, $join, $limit);
+        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
         if ($having) {
             // @todo - This method doesn't exist on DataList
             $list->having($having);
