@@ -5,11 +5,13 @@ namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
  * Object which is owned via a custom PHP method rather than DB relation
  *
+ * @mixin RecursivePublishable
  * @mixin Versioned
  */
 class CustomRelation extends DataObject implements TestOnly

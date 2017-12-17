@@ -56,6 +56,21 @@ SilverStripe\Versioned\Tests\VersionedOwnershipTest\Image:
   image2_published:
     Title: 'Image 2'
 
+SilverStripe\Versioned\Tests\VersionedOwnershipTest\UnversionedOwner:
+  unversioned1:
+    Title: 'Unversioned 1'
+
+SilverStripe\Versioned\Tests\VersionedOwnershipTest\OwnedByUnversioned:
+  book1:
+    Title: 'Book 1'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedOwnershipTest\UnversionedOwner.unversioned1
+  book2:
+    Title: 'Book 2'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedOwnershipTest\UnversionedOwner.unversioned1
+  book3_published:
+    Title: 'Book 3'
+    Parent: =>SilverStripe\Versioned\Tests\VersionedOwnershipTest\UnversionedOwner.unversioned1
+
 SilverStripe\Versioned\Tests\VersionedOwnershipTest\Banner:
   banner1_published:
     Title: 'Banner 1'
