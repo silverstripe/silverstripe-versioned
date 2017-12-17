@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned\Tests;
 
 use BadMethodCallException;
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit_Framework_ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
 use SilverStripe\Dev\SapphireTest;
@@ -72,7 +73,7 @@ class ChangeSetTest extends SapphireTest
                 }
             }
 
-            throw new PHPUnit_Framework_ExpectationFailedException(
+            throw new ExpectationFailedException(
                 'Change set didn\'t include expected item',
                 new ComparisonFailure(
                     ['Class' => $class, 'ID' => $objectID, 'Added' => $mode],
@@ -93,11 +94,12 @@ class ChangeSetTest extends SapphireTest
                     'ChangeType' => $item->getChangeType()
                 ];
             }
-            throw new PHPUnit_Framework_ExpectationFailedException(
+            throw new ExpectationFailedException(
                 'Change set included items that weren\'t expected',
                 new ComparisonFailure([], $extra, '', print_r($extra, true))
             );
         }
+        $this->assertTrue(true, 'No exceptions were thrown during assertion process');
     }
 
     public function testAddObject()
