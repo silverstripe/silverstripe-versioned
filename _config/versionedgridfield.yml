@@ -4,3 +4,5 @@ Name: versionedgridfield
 SilverStripe\Forms\GridField\GridFieldDetailForm:
   extensions:
     - SilverStripe\Versioned\VersionedGridFieldDetailForm
+SilverStripe\ORM\DataObject:
+  versioned_gridfield_extensions: true
