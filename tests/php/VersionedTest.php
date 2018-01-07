@@ -16,7 +16,6 @@ use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\Tests\VersionedTest\SingleStage;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
@@ -150,10 +149,8 @@ class VersionedTest extends SapphireTest
         $obj->ExtraField = 'Foo'; // ensure that child version table gets written
         $obj->write();
         $class = VersionedTest\TestObject::class;
-        $this->setExpectedException(
-            'InvalidArgumentException',
-            "Can't find {$class}#{$obj->ID} in stage Live"
-        );
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage("Can't find {$class}#{$obj->ID} in stage Live");
 
         // Fail publishing from live to stage
         $obj->copyVersionToStage(Versioned::LIVE, Versioned::DRAFT);
@@ -1177,7 +1174,7 @@ class VersionedTest extends SapphireTest
         $this->resetDBSchema(true);
         $testData = new VersionedTest\RelatedWithoutversion();
         $testData->NewField = 'Test';
-        $testData->write();
+        $this->assertGreaterThan(0, $testData->write(), 'Failed to successfully write object');
     }
 
     public function testCanView()
