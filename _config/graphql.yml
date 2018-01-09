@@ -1,0 +1,17 @@
+---
+Name: versioned-graphql
+Only:
+  moduleexists: 'silverstripe/graphql'
+---
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\Read
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Update:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\Update
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\Delete
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Create:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\Create
