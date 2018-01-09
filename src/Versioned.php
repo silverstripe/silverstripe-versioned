@@ -1495,11 +1495,21 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (!$owner->canPublish()) {
             return false;
         }
+        if ($this->isPublished()) {
+            // get the last published version
+            $baseClass = $owner->baseClass();
+            $baseTable = $owner->baseTable();
 
-        $owner->invokeWithExtensions('onBeforePublish');
+            $original = self::get_one_by_stage($baseClass, self::LIVE, [
+                "\"$baseTable\".\"ID\" = ?" => $owner->ID,
+            ]);
+        } else {
+            $original = null;
+        }
+        $owner->invokeWithExtensions('onBeforePublish', $original);
         $owner->write();
         $owner->copyVersionToStage(static::DRAFT, static::LIVE);
-        $owner->invokeWithExtensions('onAfterPublish');
+        $owner->invokeWithExtensions('onAfterPublish', $original);
         return true;
     }
 
