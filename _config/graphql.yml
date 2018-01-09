@@ -15,3 +15,8 @@ SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete:
 SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Create:
   extensions:
     - SilverStripe\Versioned\GraphQL\Extensions\Create
+SilverStripe\GraphQL\Controller:
+  schema:
+    types:
+      VersionedMutationInputType: SilverStripe\Versioned\GraphQL\Types\VersionedMutationInputType
+      VersionedQueryInputType: SilverStripe\Versioned\GraphQL\Types\VersionedQueryInputType

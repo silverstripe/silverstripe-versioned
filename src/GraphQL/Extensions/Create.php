@@ -15,7 +15,7 @@ class Create extends Extension
     public function updateArgs($args)
     {
         $args['Versioning'] = [
-            'type' => new VersionedMutationInputType()
+            'type' => // need manager here to getType('VersionedMutationInputType')
         ];
     }
 }

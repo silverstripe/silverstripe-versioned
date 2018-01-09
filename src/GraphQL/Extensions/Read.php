@@ -16,7 +16,7 @@ class Read extends Extension
     public function updateArgs($args)
     {
         $args['Versioning'] = [
-            'type' => new VersionedQueryInputType()
+            'type' => // need manager here to getType('VersionedQueryInputType')
         ];
     }
 }
