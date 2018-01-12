@@ -329,17 +329,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function __construct($mode = self::STAGEDVERSIONED)
     {
-        // Handle deprecated behaviour
-        if ($mode === 'Stage' && func_num_args() === 1) {
-            Deprecation::notice("5.0", "Versioned now takes a mode as a single parameter");
-            $mode = static::VERSIONED;
-        } elseif (is_array($mode) || func_num_args() > 1) {
-            Deprecation::notice("5.0", "Versioned now takes a mode as a single parameter");
-            $mode = func_num_args() > 1 || count($mode ?? []) > 1
-                ? static::STAGEDVERSIONED
-                : static::VERSIONED;
-        }
-
         if (!in_array($mode, [static::STAGEDVERSIONED, static::VERSIONED])) {
             throw new InvalidArgumentException("Invalid mode: {$mode}");
         }
@@ -1460,11 +1449,6 @@ SQL
      */
     public function canPublish($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1484,6 +1468,12 @@ SQL
         return $owner->canEdit($member);
     }
 
+    protected function extendCanPublish()
+    {
+        // prevent canPublish() from extending itself
+        return null;
+    }
+
     /**
      * Check if the current user can delete this record from live
      *
@@ -1492,11 +1482,6 @@ SQL
      */
     public function canUnpublish($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1516,6 +1501,12 @@ SQL
         return $owner->canPublish($member);
     }
 
+    protected function extendCanUnpublish()
+    {
+        // prevent canUnpublish() extending itself
+        return null;
+    }
+
     /**
      * Check if the current user is allowed to archive this record.
      * If extended, ensure that both canDelete and canUnpublish are extended also
@@ -1525,11 +1516,6 @@ SQL
      */
     public function canArchive($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1559,6 +1545,12 @@ SQL
         return true;
     }
 
+    protected function extendCanArchive()
+    {
+        // Prevent canArchive() extending itself
+        return null;
+    }
+
     /**
      * Check if the user can revert this record to live
      *
@@ -1568,11 +1560,6 @@ SQL
     public function canRevertToLive($member = null)
     {
         $owner = $this->owner;
-
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
 
         // Can't revert if not on live
         if (!$owner->isPublished()) {
@@ -1597,6 +1584,12 @@ SQL
         return $owner->canEdit($member);
     }
 
+    protected function extendCanRevertToLive()
+    {
+        // Prevent canRevertToLive() extending itself
+        return null;
+    }
+
     /**
      * Check if the user can restore this record to draft
      *
@@ -1606,11 +1599,6 @@ SQL
     public function canRestoreToDraft($member = null)
     {
         $owner = $this->owner;
-
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
 
         if (!$member) {
             $member = Security::getCurrentUser();
@@ -1628,6 +1616,12 @@ SQL
 
         // Default to canEdit
         return $owner->canEdit($member);
+    }
+
+    protected function extendcanRestoreToDraft()
+    {
+        // Prevent canRestoreToDraft() extending itself
+        return null;
     }
 
     /**
@@ -1816,15 +1810,6 @@ SQL
     }
 
     /**
-     * @deprecated 4.0..5.0
-     */
-    public function doPublish()
-    {
-        Deprecation::notice('5.0', 'Use publishRecursive instead');
-        return $this->owner->publishRecursive();
-    }
-
-    /**
      * Publishes this object to Live, but doesn't publish owned objects.
      *
      * User code should call {@see canPublish()} prior to invoking this method.
@@ -1964,22 +1949,6 @@ SQL
     }
 
     /**
-     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
-     */
-    public function onAfterRevertToLive()
-    {
-    }
-
-    /**
-     * @deprecated 4.0..5.0
-     */
-    public function publish($fromStage, $toStage, $createNewVersion = true)
-    {
-        Deprecation::notice('5.0', 'Use copyVersionToStage instead');
-        $this->owner->copyVersionToStage($fromStage, $toStage, true);
-    }
-
-    /**
      * Move a database record from one stage to the other.
      *
      * @param int|string|null $fromStage Place to copy from.  Can be either a stage name or a version number.
@@ -2017,16 +1986,6 @@ SQL
     public function getMigratingVersion()
     {
         return $this->owner->getField(self::MIGRATING_VERSION);
-    }
-
-    /**
-     * @deprecated 4.0...5.0
-     * @param string $version The version.
-     */
-    public function migrateVersion($version)
-    {
-        Deprecation::notice('5.0', 'use setMigratingVersion instead');
-        $this->setMigratingVersion($version);
     }
 
     /**
@@ -2679,31 +2638,6 @@ SQL
                 $owner->setSourceQueryParams($oldParams);
             }
         });
-    }
-
-    /**
-     * Roll the draft version of this record to match the published record.
-     * Caution: Doesn't overwrite the object properties with the rolled back version.
-     *
-     * {@see doRevertToLive()} to reollback to live
-     *
-     * @deprecated 4.2..5.0 Use rollbackRecursive() instead
-     * @param int $version Version number
-     */
-    public function doRollbackTo($version)
-    {
-        Deprecation::notice('5.0', 'Use rollbackRecursive() instead');
-        $owner = $this->owner;
-        $owner->extend('onBeforeRollback', $version);
-        $owner->rollbackRecursive($version);
-        $owner->extend('onAfterRollback', $version);
-    }
-
-    /**
-     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
-     */
-    public function onAfterRollback()
-    {
     }
 
     /**
