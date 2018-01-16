@@ -1313,11 +1313,21 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (!$owner->canPublish()) {
             return false;
         }
+        if ($this->isPublished()) {
+            // get the last published version
+            $baseClass = $owner->baseClass();
+            $baseTable = $owner->baseTable();
 
-        $owner->invokeWithExtensions('onBeforePublish');
+            $original = self::get_one_by_stage($baseClass, self::LIVE, [
+                "\"$baseTable\".\"ID\" = ?" => $owner->ID,
+            ]);
+        } else {
+            $original = null;
+        }
+        $owner->invokeWithExtensions('onBeforePublish', $original);
         $owner->write();
         $owner->copyVersionToStage(static::DRAFT, static::LIVE);
-        $owner->invokeWithExtensions('onAfterPublish');
+        $owner->invokeWithExtensions('onAfterPublish', $original);
         return true;
     }
 
@@ -1606,7 +1616,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         static::set_stage(static::DRAFT);
 
         $owner = $this->owner;
-        $list = DataObject::get(get_class($owner), $filter, $sort, $join, $limit);
+        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
         if ($having) {
             // @todo - This method doesn't exist on DataList
             $list->having($having);
