@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned;
 
 use InvalidArgumentException;
+use SilverStripe\Core\Extensible;
 use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
@@ -24,6 +25,9 @@ use SilverStripe\Security\Security;
  * @property string $Added
  * @property string $ObjectClass The _base_ data class for the referenced DataObject
  * @property int $ObjectID The numeric ID for the referenced object
+ * @property int $ChangeSetID ID of parent ChangeSet object
+ * @property int $VersionBefore
+ * @property int $VersionAfter
  * @method ManyManyList ReferencedBy() List of explicit items that require this change
  * @method ManyManyList References() List of implicit items required by this change
  * @method ChangeSet ChangeSet() Parent changeset
@@ -45,14 +49,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
     /** Represents an object added */
     const CHANGE_CREATED = 'created';
 
-    /** Represents an object which hasn't been changed directly, but owns a modified many_many relationship. */
-    //const CHANGE_MANYMANY = 'manymany';
-
     private static $table_name = 'ChangeSetItem';
 
     /**
      * Represents that an object has not yet been changed, but
-     * should be included in this changeset as soon as any changes exist
+     * should be included in this changeset as soon as any changes exist.
+     * Also used for unversioned objects that have no non-recursive publish.
      */
     const CHANGE_NONE = 'none';
 
@@ -72,7 +74,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     ];
 
     private static $belongs_many_many = [
-        'References' => 'SilverStripe\\Versioned\\ChangeSetItem.ReferencedBy'
+        'References' => ChangeSetItem::class . '.ReferencedBy',
     ];
 
     private static $indexes = [
@@ -126,6 +128,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
+        // Unversioned classes have no change type
+        if (!$this->isVersioned()) {
+            return self::CHANGE_NONE;
+        }
+
         // Get change versions
         if ($this->VersionBefore || $this->VersionAfter) {
             $draftVersion = $this->VersionAfter; // After publishing draft was written to stage
@@ -147,21 +154,24 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Version comparisons
         if ($draftVersion == $liveVersion) {
-            return self::CHANGE_NONE;
+            $type = self::CHANGE_NONE;
         } elseif (!$liveVersion) {
-            return self::CHANGE_CREATED;
+            $type = self::CHANGE_CREATED;
         } elseif (!$draftVersion) {
-            return self::CHANGE_DELETED;
+            $type = self::CHANGE_DELETED;
         } else {
-            return self::CHANGE_MODIFIED;
+            $type = self::CHANGE_MODIFIED;
         }
+        $this->extend('updateChangeType', $type, $draftVersion, $liveVersion);
+        return $type;
     }
 
     /**
-     * Find version of this object in the given stage
+     * Find version of this object in the given stage.
+     * If the object isn't versioned it will return the normal record.
      *
      * @param string $stage
-     * @return DataObject|Versioned
+     * @return DataObject|Versioned|RecursivePublishable Object in this stage (may not be Versioned)
      * @throws UnexpectedDataException
      */
     protected function getObjectInStage($stage)
@@ -170,6 +180,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
+        // Ignore stage for unversioned objects
+        if (!$this->isVersioned()) {
+            return DataObject::get_by_id($this->ObjectClass, $this->ObjectID);
+        }
+
+        // Get versioned object
         return Versioned::get_by_stage($this->ObjectClass, $stage)->byID($this->ObjectID);
     }
 
@@ -184,6 +200,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
+        // Ignore version for unversioned objects
+        if (!$this->isVersioned()) {
+            return DataObject::get_by_id($this->ObjectClass, $this->ObjectID);
+        }
+
+        // Get versioned object
         return Versioned::get_latest_version($this->ObjectClass, $this->ObjectID);
     }
 
@@ -194,8 +216,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function findReferenced()
     {
-        /** @var DataObject $liveRecord */
         $liveRecord = $this->getObjectInStage(Versioned::LIVE);
+
+        // For unversioned objects, simply return all owned objects
+        if (!$this->isVersioned()) {
+            return $liveRecord->findOwned();
+        }
 
         // If we have deleted this record, recursively delete live objects on publish
         if ($this->getChangeType() === ChangeSetItem::CHANGE_DELETED) {
@@ -206,7 +232,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // If changed on stage, include all owned objects for publish
-        /** @var DataObject $draftRecord */
+        /** @var DataObject|RecursivePublishable $draftRecord */
         $draftRecord = $this->getObjectInStage(Versioned::DRAFT);
         if (!$draftRecord) {
             return ArrayList::create();
@@ -242,6 +268,14 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
         if ($this->VersionBefore || $this->VersionAfter) {
             throw new BadMethodCallException("This ChangeSetItem has already been published");
+        }
+
+        // Skip unversioned records
+        if (!$this->isVersioned()) {
+            $this->VersionBefore = 0;
+            $this->VersionAfter = 0;
+            $this->write();
+            return;
         }
 
         // Record state changed
@@ -326,6 +360,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function canRevert($member)
     {
+        // No action for unversiond objects so no action to deny
+        if (!$this->isVersioned()) {
+            return true;
+        }
+
         // Just get the best version as this object may not even exist on either stage anymore.
         /** @var Versioned|DataObject $object */
         $object = $this->getObjectLatestVersion();
@@ -354,6 +393,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function canPublish($member = null)
     {
+        // No action for unversiond objects so no action to deny
+        if (!$this->isVersioned()) {
+            return true;
+        }
+
         // Check canMethod to invoke on object
         switch ($this->getChangeType()) {
             case static::CHANGE_DELETED: {
@@ -409,7 +453,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // Default permissions
-        return (bool)Permission::checkMember($member, ChangeSet::config()->required_permission);
+        return (bool)Permission::checkMember($member, ChangeSet::config()->get('required_permission'));
     }
 
     /**
@@ -465,13 +509,15 @@ class ChangeSetItem extends DataObject implements Thumbnail
             ];
         }
 
-        // Preview live
-        $live = $this->getObjectInStage(Versioned::LIVE);
-        if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
-            $links[Versioned::LIVE] = [
-                'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
-                'type' => $live->getMimeType(),
-            ];
+        // Preview live if versioned
+        if ($this->isVersioned()) {
+            $live = $this->getObjectInStage(Versioned::LIVE);
+            if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
+                $links[Versioned::LIVE] = [
+                    'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
+                    'type' => $live->getMimeType(),
+                ];
+            }
         }
 
         return $links;
@@ -489,5 +535,15 @@ class ChangeSetItem extends DataObject implements Thumbnail
             return $link->CMSEditLink();
         }
         return null;
+    }
+
+    /**
+     * Check if the object attached to this changesetitem is versionable
+     *
+     * @return bool
+     */
+    public function isVersioned()
+    {
+        return $this->ObjectClass && Extensible::has_extension($this->ObjectClass, Versioned::class);
     }
 }

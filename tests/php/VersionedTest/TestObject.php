@@ -6,6 +6,7 @@ use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\ORM\ManyManyList;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -16,6 +17,7 @@ use SilverStripe\Versioned\Versioned;
  * @method HasManyList Children()
  * @method ManyManyList Related()
  * @mixin Versioned
+ * @mixin RecursivePublishable
  */
 class TestObject extends DataObject implements TestOnly
 {

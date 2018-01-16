@@ -3,11 +3,16 @@
 namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 
 use SilverStripe\Dev\TestOnly;
+use SilverStripe\ORM\HasManyList;
 
 /**
  * Object which:
  * - owns a has_one object
  * - owns has_many objects
+ *
+ * @property string $Description
+ * @method Related Related()
+ * @method HasManyList Banners()
  */
 class Subclass extends TestObject implements TestOnly
 {

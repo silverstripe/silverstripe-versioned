@@ -26,6 +26,8 @@ class VersionedOwnershipTest extends SapphireTest
         VersionedOwnershipTest\Banner::class,
         VersionedOwnershipTest\Image::class,
         VersionedOwnershipTest\CustomRelation::class,
+        VersionedOwnershipTest\UnversionedOwner::class,
+        VersionedOwnershipTest\OwnedByUnversioned::class,
     ];
 
     protected static $fixture_file = 'VersionedOwnershipTest.yml';
@@ -68,7 +70,7 @@ class VersionedOwnershipTest extends SapphireTest
     {
         /** @var VersionedOwnershipTest\Subclass $subclass1 */
         $subclass1 = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass1_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Attachment 1'],
@@ -82,7 +84,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Non-recursive search
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Related Many 1'],
@@ -92,9 +94,21 @@ class VersionedOwnershipTest extends SapphireTest
             $subclass1->findOwned(false)
         );
 
+        // Search for unversioned parent
+        /** @var VersionedOwnershipTest\UnversionedOwner $unversioned */
+        $unversioned = $this->objFromFixture(VersionedOwnershipTest\UnversionedOwner::class, 'unversioned1');
+        $this->assertListEquals(
+            [
+                ['Title' => 'Book 1'],
+                ['Title' => 'Book 2'],
+                ['Title' => 'Book 3'],
+            ],
+            $unversioned->findOwned()
+        );
+
         /** @var VersionedOwnershipTest\Subclass $subclass2 */
         $subclass2 = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass2_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2'],
                 ['Title' => 'Attachment 3'],
@@ -106,7 +120,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Non-recursive search
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2'],
                 ['Title' => 'Related Many 4'],
@@ -116,7 +130,7 @@ class VersionedOwnershipTest extends SapphireTest
 
         /** @var VersionedOwnershipTest\Related $related1 */
         $related1 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related1');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Attachment 1'],
                 ['Title' => 'Attachment 2'],
@@ -127,7 +141,7 @@ class VersionedOwnershipTest extends SapphireTest
 
         /** @var VersionedOwnershipTest\Related $related2 */
         $related2 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related2_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Attachment 3'],
                 ['Title' => 'Attachment 4'],
@@ -144,7 +158,7 @@ class VersionedOwnershipTest extends SapphireTest
     {
         /** @var VersionedOwnershipTest\Attachment $attachment1 */
         $attachment1 = $this->objFromFixture(VersionedOwnershipTest\Attachment::class, 'attachment1');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Subclass 1'],
@@ -153,7 +167,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Non-recursive search
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
             ],
@@ -162,7 +176,7 @@ class VersionedOwnershipTest extends SapphireTest
 
         /** @var VersionedOwnershipTest\Attachment $attachment5 */
         $attachment5 = $this->objFromFixture(VersionedOwnershipTest\Attachment::class, 'attachment5_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Related 2'],
@@ -173,7 +187,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Non-recursive
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Related 2'],
@@ -183,11 +197,21 @@ class VersionedOwnershipTest extends SapphireTest
 
         /** @var VersionedOwnershipTest\Related $related1 */
         $related1 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related1');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Subclass 1'],
             ],
             $related1->findOwners()
+        );
+
+        // Can find unversioned owners
+        /** @var VersionedOwnershipTest\OwnedByUnversioned $image */
+        $image = $this->objFromFixture(VersionedOwnershipTest\OwnedByUnversioned::class, 'book1');
+        $this->assertListEquals(
+            [
+                [ 'Title' => 'Unversioned 1' ],
+            ],
+            $image->findOwners()
         );
     }
 
@@ -210,7 +234,7 @@ class VersionedOwnershipTest extends SapphireTest
         // Check that stage record is ok
         /** @var VersionedOwnershipTest\Subclass $subclass2Stage */
         $subclass2Stage = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, 'Stage')->byID($subclass2ID);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2 Modified'],
                 ['Title' => 'Attachment 3 Modified'],
@@ -221,7 +245,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Non-recursive
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2 Modified'],
                 ['Title' => 'Related Many 4'],
@@ -232,7 +256,7 @@ class VersionedOwnershipTest extends SapphireTest
         // Live records are unchanged
         /** @var VersionedOwnershipTest\Subclass $subclass2Live */
         $subclass2Live = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, 'Live')->byID($subclass2ID);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2'],
                 ['Title' => 'Attachment 3'],
@@ -244,7 +268,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Test non-recursive
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2'],
                 ['Title' => 'Related Many 4'],
@@ -286,12 +310,14 @@ class VersionedOwnershipTest extends SapphireTest
             ['Title' => 'Related Many 3'], // Published without changes
             ['Title' => 'New Banner'], // Created
         ];
+        /** @var VersionedOwnershipTest\Subclass $parentDraft */
         $parentDraft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($parentID);
-        $this->assertDOSEquals($newBanners, $parentDraft->Banners());
+        $this->assertListEquals($newBanners, $parentDraft->Banners());
+        /** @var VersionedOwnershipTest\Subclass $parentLive */
         $parentLive = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::LIVE)
             ->byID($parentID);
-        $this->assertDOSEquals($oldLiveBanners, $parentLive->Banners());
+        $this->assertListEquals($oldLiveBanners, $parentLive->Banners());
 
         // On publishing of owner, all children should now be updated
         $now = DBDatetime::now();
@@ -301,13 +327,14 @@ class VersionedOwnershipTest extends SapphireTest
         // Now check each object has the correct state
         $parentDraft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($parentID);
-        $this->assertDOSEquals($newBanners, $parentDraft->Banners());
+        $this->assertListEquals($newBanners, $parentDraft->Banners());
         $parentLive = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::LIVE)
             ->byID($parentID);
-        $this->assertDOSEquals($newBanners, $parentLive->Banners());
+        $this->assertListEquals($newBanners, $parentLive->Banners());
 
         // Check that the deleted banner hasn't actually been deleted from the live stage,
         // but in fact has been unlinked.
+        /** @var VersionedOwnershipTest\RelatedMany $banner2Live */
         $banner2Live = Versioned::get_by_stage(VersionedOwnershipTest\RelatedMany::class, Versioned::LIVE)
             ->byID($banner2ID);
         $this->assertEmpty($banner2Live->PageID);
@@ -325,7 +352,7 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Test that this changeset contains all items
-        $this->assertDOSContains(
+        $this->assertListContains(
             [
                 [
                     'ObjectID' => $parent->ID,
@@ -347,8 +374,91 @@ class VersionedOwnershipTest extends SapphireTest
         );
 
         // Objects that are unlinked should not need to be a part of the changeset
-        $this->assertNotDOSContains(
+        $this->assertListNotContains(
             [[ 'ObjectID' => $banner2ID, 'ObjectClass' => $banner2->baseClass() ]],
+            $changeset->Changes()
+        );
+    }
+
+    /**
+     * Test that unversioned objects that own versioned items can be published
+     */
+    public function testUnversionedPublish()
+    {
+        /** @var VersionedOwnershipTest\UnversionedOwner $unversioned1 */
+        $unversioned1 = $this->objFromFixture(VersionedOwnershipTest\UnversionedOwner::class, 'unversioned1');
+        /** @var VersionedOwnershipTest\OwnedByUnversioned $book1 */
+        $book1 = $this->objFromFixture(VersionedOwnershipTest\OwnedByUnversioned::class, 'book1');
+        /** @var VersionedOwnershipTest\OwnedByUnversioned $book2 */
+        $book2 = $this->objFromFixture(VersionedOwnershipTest\OwnedByUnversioned::class, 'book2');
+        /** @var VersionedOwnershipTest\OwnedByUnversioned $book3 */
+        $book3 = $this->objFromFixture(VersionedOwnershipTest\OwnedByUnversioned::class, 'book3_published');
+
+        // Remove book3 from draft
+        $book3ID = $book3->ID;
+        $book3->delete();
+
+        // Check initial state
+        $this->assertFalse($book1->isPublished());
+        $this->assertFalse($book2->isPublished());
+        $this->assertTrue($book3->isPublished()); // live-only not on draft
+
+        // On publishing of owner, all children should now be updated
+        $now = DBDatetime::now();
+        DBDatetime::set_mock_now($now); // Lock 'now' to predictable time
+
+        // Publish this object recursively
+        $unversioned1->publishRecursive();
+
+        // Check that all images were published
+        $this->assertTrue($book1->isPublished());
+        $this->assertTrue($book2->isPublished());
+        $this->assertTrue($book3->isPublished()); // live-only not on draft
+
+        // Check that the deleted banner hasn't actually been deleted from the live stage,
+        // but in fact has been unlinked.
+        /** @var VersionedOwnershipTest\OwnedByUnversioned $book3Live */
+        $book3Live = Versioned::get_by_stage(VersionedOwnershipTest\OwnedByUnversioned::class, Versioned::LIVE)
+            ->byID($book3ID);
+        $this->assertEmpty($book3Live->ParentID);
+
+        // Test that a changeset was created
+        /** @var ChangeSet $changeset */
+        $changeset = ChangeSet::get()->sort('"ChangeSet"."ID" DESC')->first();
+        $this->assertNotEmpty($changeset);
+
+        // Test that this changeset is inferred
+        $this->assertTrue((bool)$changeset->IsInferred);
+        $this->assertEquals(
+            "Generated by publish of 'Unversioned 1' at ".$now->Nice(),
+            $changeset->getTitle()
+        );
+
+        // Test that this changeset contains all items
+        $this->assertListContains(
+            [
+                [
+                    'ObjectID' => $unversioned1->ID,
+                    'ObjectClass' => $unversioned1->baseClass(),
+                    'Added' => ChangeSetItem::EXPLICITLY
+                ],
+                [
+                    'ObjectID' => $book1->ID,
+                    'ObjectClass' => $book1->baseClass(),
+                    'Added' => ChangeSetItem::IMPLICITLY
+                ],
+                [
+                    'ObjectID' => $book2->ID,
+                    'ObjectClass' => $book2->baseClass(),
+                    'Added' => ChangeSetItem::IMPLICITLY
+                ]
+            ],
+            $changeset->Changes()
+        );
+
+        // Objects that are unlinked should not need to be a part of the changeset
+        $this->assertListNotContains(
+            [[ 'ObjectID' => $book3ID, 'ObjectClass' => $book3->baseClass() ]],
             $changeset->Changes()
         );
     }
@@ -439,7 +549,6 @@ class VersionedOwnershipTest extends SapphireTest
         $parentID = $parent->ID;
         $banner1 = $this->objFromFixture(VersionedOwnershipTest\RelatedMany::class, 'relatedmany1_published');
         $banner2 = $this->objFromFixture(VersionedOwnershipTest\RelatedMany::class, 'relatedmany2_published');
-        $banner2ID = $banner2->ID;
 
         // Modify, Add, and Delete banners on stage
         $banner1->Title = 'Renamed Banner 1';
@@ -462,12 +571,14 @@ class VersionedOwnershipTest extends SapphireTest
             ['Title' => 'Related Many 3'], // Published without changes
             ['Title' => 'New Banner'], // Created
         ];
+        /** @var VersionedOwnershipTest\Subclass $parentDraft */
         $parentDraft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($parentID);
-        $this->assertDOSEquals($modifiedBanners, $parentDraft->Banners());
+        $this->assertListEquals($modifiedBanners, $parentDraft->Banners());
+        /** @var VersionedOwnershipTest\Subclass $parentLive */
         $parentLive = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::LIVE)
             ->byID($parentID);
-        $this->assertDOSEquals($liveBanners, $parentLive->Banners());
+        $this->assertListEquals($liveBanners, $parentLive->Banners());
 
         // When reverting parent, all records should be put back on stage
         $this->assertTrue($parent->doRevertToLive());
@@ -475,10 +586,10 @@ class VersionedOwnershipTest extends SapphireTest
         // Now check each object has the correct state
         $parentDraft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($parentID);
-        $this->assertDOSEquals($liveBanners, $parentDraft->Banners());
+        $this->assertListEquals($liveBanners, $parentDraft->Banners());
         $parentLive = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::LIVE)
             ->byID($parentID);
-        $this->assertDOSEquals($liveBanners, $parentLive->Banners());
+        $this->assertListEquals($liveBanners, $parentLive->Banners());
 
         // Check that the newly created banner, even though it still exist, has been
         // unlinked from the reverted draft record
@@ -523,7 +634,7 @@ class VersionedOwnershipTest extends SapphireTest
         $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($subclass2->ID);
         $this->assertEquals('Subclass 2 - v1', $subclass2Draft->Title);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2 - v1'],
                 ['Title' => 'Attachment 3 - v1'],
@@ -541,7 +652,7 @@ class VersionedOwnershipTest extends SapphireTest
         $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($subclass2->ID);
         $this->assertEquals('Subclass 2 - v1 - v2 - v3', $subclass2Draft->Title);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2 - v1 - v2 - v3'],
                 ['Title' => 'Attachment 3 - v1 - v2 - v3'],
@@ -559,7 +670,7 @@ class VersionedOwnershipTest extends SapphireTest
         $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
             ->byID($subclass2->ID);
         $this->assertEquals('Subclass 2 - v1 - v2', $subclass2Draft->Title);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 2 - v1 - v2'],
                 ['Title' => 'Attachment 3 - v1 - v2'],
@@ -581,7 +692,7 @@ class VersionedOwnershipTest extends SapphireTest
         $page1 = $this->objFromFixture(VersionedOwnershipTest\TestPage::class, 'page1_published');
         /** @var VersionedOwnershipTest\TestPage $page2 */
         $page2 = $this->objFromFixture(VersionedOwnershipTest\TestPage::class, 'page2_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 1'],
                 ['Title' => 'Image 1'],
@@ -589,7 +700,7 @@ class VersionedOwnershipTest extends SapphireTest
             ],
             $page1->findOwned()
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 2'],
                 ['Title' => 'Banner 3'],
@@ -606,7 +717,7 @@ class VersionedOwnershipTest extends SapphireTest
         /** @var VersionedOwnershipTest\Image $image2 */
         $image2 = $this->objFromFixture(VersionedOwnershipTest\Image::class, 'image2_published');
 
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 1'],
                 ['Title' => 'Banner 2'],
@@ -615,21 +726,21 @@ class VersionedOwnershipTest extends SapphireTest
             ],
             $image1->findOwners()
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 1'],
                 ['Title' => 'Banner 2'],
             ],
             $image1->findOwners(false)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 3'],
                 ['Title' => 'Page 2'],
             ],
             $image2->findOwners()
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Banner 3'],
             ],
@@ -639,7 +750,7 @@ class VersionedOwnershipTest extends SapphireTest
         // Test custom relation can findOwners()
         /** @var VersionedOwnershipTest\CustomRelation $custom1 */
         $custom1 = $this->objFromFixture(VersionedOwnershipTest\CustomRelation::class, 'custom1_published');
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [['Title' => 'Page 1']],
             $custom1->findOwners()
         );

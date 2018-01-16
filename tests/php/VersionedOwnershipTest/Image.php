@@ -4,11 +4,13 @@ namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
  * Simple versioned dataobject
  *
+ * @mixin RecursivePublishable
  * @mixin Versioned
  */
 class Image extends DataObject implements TestOnly

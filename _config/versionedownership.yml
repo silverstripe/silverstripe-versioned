@@ -1,0 +1,20 @@
+---
+Name: versionedownership
+---
+SilverStripe\ORM\DataObject:
+  extensions:
+    RecursivePublishable: SilverStripe\Versioned\RecursivePublishable
+---
+Name: versionedownership-admin
+OnlyIf:
+  ModuleExists: silverstripe/admin
+---
+SilverStripe\Admin\LeftAndMain:
+  extensions:
+    RecursivePublishableHandler: SilverStripe\Versioned\RecursivePublishableHandler
+---
+Name: versionedownership-gridfield
+---
+SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest:
+  extensions:
+    RecursivePublishableHandler: SilverStripe\Versioned\RecursivePublishableHandler

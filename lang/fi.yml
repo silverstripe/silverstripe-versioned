@@ -1,14 +1,5 @@
 fi:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_ITEM_PLURALS:
-      one: 'yksi kohde'
-      other: '{count} kohdetta'
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, ja {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
-    DESCRIPTION_OTHER_ITEM_PLURALS:
-      one: 'yksi muu kohde'
-      other: '{count} muuta kohdetta'
     NAME: Nimi
     PLURALNAME: Kampanjat
     PLURALS:

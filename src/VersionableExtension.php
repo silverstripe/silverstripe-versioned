@@ -7,7 +7,6 @@ namespace SilverStripe\Versioned;
  */
 interface VersionableExtension
 {
-
     /**
      * Determine if the given table is versionable
      *

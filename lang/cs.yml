@@ -1,8 +1,5 @@
 cs:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, a {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
     NAME: Název
     PLURALNAME: Kampaně
     SINGULARNAME: Kampaň

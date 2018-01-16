@@ -1,12 +1,5 @@
 sk:
   SilverStripe\Versioned\ChangeSet:
-    DESCRIPTION_ITEM_PLURALS:
-      one: 'jedna položka'
-      few: '{count} položky'
-      other: '{count} položiek'
-    DESCRIPTION_LIST_FIRST: '{item}'
-    DESCRIPTION_LIST_LAST: '{list}, a {item}'
-    DESCRIPTION_LIST_MID: '{list}, {item}'
     NAME: Názov
     PLURALNAME: Kampane
     SINGULARNAME: Kampaň
