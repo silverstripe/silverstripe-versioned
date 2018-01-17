@@ -19,6 +19,23 @@ use SilverStripe\ORM\ValidationResult;
 class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 {
 
+    public function Breadcrumbs($unlinked = false)
+    {
+        $items = parent::Breadcrumbs($unlinked);
+        if ($this->record->hasExtension(Versioned::class) && $this->record->config()->get('versioned_gridfield_extensions')) {
+            $status = $this->getRecordStatus();
+            $lastItem = $items->last();
+            if ($status) {
+                $badge = sprintf(
+                    '<span class="badge version-status version-status--%s">%s</span>',
+                    $status['class'],
+                    $status['title']
+                );
+                $lastItem->setField('Extra', $badge);
+            }
+        }
+        return $items;
+    }
     protected function getFormActions()
     {
         // Check if record is versionable
@@ -204,5 +221,24 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $backForm = $controller->getEditForm();
             $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         }
+    }
+
+    protected function getRecordStatus()
+    {
+        $record = $this->record;
+
+        if ($record->isOnDraftOnly()) {
+            return [
+                'class' => 'addedtodraft',
+                'title' => _t('SilverStripe\\Forms\\GridField\\GridFieldVersionedState.ADDEDTODRAFTSHORT', 'Draft')
+            ];
+        } elseif ($record->isModifiedOnDraft()) {
+            return [
+                'class' => 'modified',
+                'title' => _t('SilverStripe\\Forms\\GridField\\GridFieldVersionedState.MODIFIEDONDRAFTSHORT', 'Modified')
+            ];
+        }
+
+        return null;
     }
 }
