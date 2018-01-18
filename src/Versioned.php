@@ -1587,76 +1587,15 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * @param string $filter
-     * @param string $sort
-     * @param string $limit
-     * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
-     * @param string $having
-     * @return ArrayList
-     */
-    public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
-    {
-        return $this->allVersions($filter, $sort, $limit, $join, $having);
-    }
-
-    /**
-     * Return a list of all the versions available.
+     * Return all versions of the current object
      *
-     * @param  string $filter
-     * @param  string $sort
-     * @param  string $limit
-     * @param  string $join @deprecated use leftJoin($table, $joinClause) instead
-     * @param  string $having @deprecated
-     * @return ArrayList
+     * @return DataList
      */
-    public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
+    public function Versions()
     {
-        // Make sure the table names are not postfixed (e.g. _Live)
-        $oldMode = static::get_reading_mode();
-        static::set_stage(static::DRAFT);
-
-        $owner = $this->owner;
-        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
-        if ($having) {
-            // @todo - This method doesn't exist on DataList
-            $list->having($having);
-        }
-
-        $query = $list->dataQuery()->query();
-
-        $baseTable = null;
-        foreach ($query->getFrom() as $table => $tableJoin) {
-            if (is_string($tableJoin) && $tableJoin[0] == '"') {
-                $baseTable = str_replace('"', '', $tableJoin);
-            } elseif (is_string($tableJoin) && substr($tableJoin, 0, 5) != 'INNER') {
-                $query->setFrom([
-                    $table => "LEFT JOIN \"$table\" ON \"$table\".\"RecordID\"=\"{$baseTable}_Versions\".\"RecordID\""
-                        . " AND \"$table\".\"Version\" = \"{$baseTable}_Versions\".\"Version\""
-                ]);
-            }
-            $query->renameTable($table, $table . '_Versions');
-        }
-
-        // Add all <basetable>_Versions columns
-        foreach (Config::inst()->get(static::class, 'db_for_versions_table') as $name => $type) {
-            $query->selectField(sprintf('"%s_Versions"."%s"', $baseTable, $name), $name);
-        }
-
-        $query->addWhere([
-            "\"{$baseTable}_Versions\".\"RecordID\" = ?" => $owner->ID
-        ]);
-        $query->setOrderBy(($sort) ? $sort
-            : "\"{$baseTable}_Versions\".\"LastEdited\" DESC, \"{$baseTable}_Versions\".\"Version\" DESC");
-
-        $records = $query->execute();
-        $versions = new ArrayList();
-
-        foreach ($records as $record) {
-            $versions->push(new Versioned_Version($record));
-        }
-
-        Versioned::set_reading_mode($oldMode);
-        return $versions;
+        $id = $this->owner->ID ?: $this->owner->OldID;
+        $class = get_class($this->owner);
+        return Versioned::get_all_versions($class, $id);
     }
 
     /**
@@ -2347,5 +2286,37 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function hasStages()
     {
         return $this->mode === static::STAGEDVERSIONED;
+    }
+
+    /**
+     * Get author of this record.
+     * Note: Only works on records selected via Versions()
+     *
+     * @return Member|null
+     */
+    public function Author()
+    {
+        if (!$this->owner->AuthorID) {
+            return null;
+        }
+        /** @var Member $member */
+        $member = Member::get()->byID($this->owner->AuthorID);
+        return $member;
+    }
+
+    /**
+     * Get publisher of this record.
+     * Note: Only works on records selected via Versions()
+     *
+     * @return Member|null
+     */
+    public function Publisher()
+    {
+        if (!$this->owner->PublisherID) {
+            return null;
+        }
+        /** @var Member $member */
+        $member = Member::get()->byID($this->owner->PublisherID);
+        return $member;
     }
 }
