@@ -9,7 +9,9 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\ValidationResult;
+use SilverStripe\View\ArrayData;
 
 /**
  * Provides versioned dataobject support to {@see GridFieldDetailForm_ItemRequest}
@@ -22,20 +24,21 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     public function Breadcrumbs($unlinked = false)
     {
         $items = parent::Breadcrumbs($unlinked);
-        if ($this->record->hasExtension(Versioned::class) && $this->record->config()->get('versioned_gridfield_extensions')) {
-            $status = $this->getRecordStatus();
+        $status = $this->getRecordStatus();
+        if ($status) {
+            // Generate badge
+            $badge = DBField::create_field('HTMLFragment', sprintf(
+                '<span class="badge version-status version-status--%s">%s</span>',
+                $status['class'],
+                $status['title']
+            ));
+            /** @var ArrayData $lastItem */
             $lastItem = $items->last();
-            if ($status) {
-                $badge = sprintf(
-                    '<span class="badge version-status version-status--%s">%s</span>',
-                    $status['class'],
-                    $status['title']
-                );
-                $lastItem->setField('Extra', $badge);
-            }
+            $lastItem->setField('Extra', $badge);
         }
         return $items;
     }
+
     protected function getFormActions()
     {
         // Check if record is versionable
@@ -52,7 +55,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 // "publish", as with "save", it supports an alternate state to show when action is needed.
                 $publish = FormAction::create(
                     'doPublish',
-                    _t(__CLASS__.'.BUTTONPUBLISH', 'Publish')
+                    _t(__CLASS__ . '.BUTTONPUBLISH', 'Publish')
                 )
                     ->setUseButtonTag(true)
                     ->addExtraClass('btn btn-primary font-icon-rocket');
@@ -71,11 +74,11 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 $actions->push(
                     FormAction::create(
                         'doUnpublish',
-                        _t(__CLASS__.'.BUTTONUNPUBLISH', 'Unpublish')
+                        _t(__CLASS__ . '.BUTTONUNPUBLISH', 'Unpublish')
                     )
                         ->setUseButtonTag(true)
                         ->setDescription(_t(
-                            __CLASS__.'.BUTTONUNPUBLISHDESC',
+                            __CLASS__ . '.BUTTONUNPUBLISHDESC',
                             'Remove this record from the published site'
                         ))
                         ->addExtraClass('btn-secondary')
@@ -89,9 +92,9 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
                 // "archive"
                 $actions->push(
-                    FormAction::create('doArchive', _t(__CLASS__.'.ARCHIVE', 'Archive'))
+                    FormAction::create('doArchive', _t(__CLASS__ . '.ARCHIVE', 'Archive'))
                         ->setDescription(_t(
-                            __CLASS__.'.BUTTONARCHIVEDESC',
+                            __CLASS__ . '.BUTTONARCHIVEDESC',
                             'Unpublish and send to archive'
                         ))
                         ->addExtraClass('delete btn-secondary')
@@ -119,7 +122,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         // Record name before it's deleted
         $title = $record->Title;
-            $record->doArchive();
+        $record->doArchive();
 
         $message = _t(
             __CLASS__ . '.Archived',
@@ -147,7 +150,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
      */
     public function doPublish($data, $form)
     {
-        /** @var Versioned|DataObject $record */
+        /** @var Versioned|RecursivePublishable|DataObject $record */
         $record = $this->getRecord();
         $isNewRecord = $record->ID == 0;
 
@@ -156,14 +159,14 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             return $this->httpError(403);
         }
 
-            // Initial save and reload
-            $record = $this->saveFormIntoRecord($data, $form);
-            $record->publishRecursive();
+        // Initial save and reload
+        $record = $this->saveFormIntoRecord($data, $form);
+        $record->publishRecursive();
         $editURL = $this->Link('edit');
         $xmlTitle = Convert::raw2xml($record->Title);
         $link = "<a href=\"{$editURL}\">{$xmlTitle}</a>";
         $message = _t(
-            __CLASS__.'.Published',
+            __CLASS__ . '.Published',
             'Published {name} {link}',
             [
                 'name' => $record->i18n_singular_name(),
@@ -192,7 +195,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         // Record name before it's deleted
         $title = $record->Title;
-            $record->doUnpublish();
+        $record->doUnpublish();
 
         $message = _t(
             __CLASS__ . '.Unpublished',
@@ -223,19 +226,32 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
     }
 
+    /**
+     * Return list of class / title to add on the end of record status in breadcrumbs
+     *
+     * @return array|null
+     */
     protected function getRecordStatus()
     {
+        /** @var DataObject|Versioned $record */
         $record = $this->record;
+
+        // No status if un-versioned
+        if (!$this->record->hasExtension(Versioned::class)) {
+            return null;
+        }
 
         if ($record->isOnDraftOnly()) {
             return [
                 'class' => 'addedtodraft',
-                'title' => _t('SilverStripe\\Forms\\GridField\\GridFieldVersionedState.ADDEDTODRAFTSHORT', 'Draft')
+                'title' => _t(__CLASS__ . '.DRAFT', 'Draft')
             ];
-        } elseif ($record->isModifiedOnDraft()) {
+        }
+
+        if ($record->isModifiedOnDraft()) {
             return [
                 'class' => 'modified',
-                'title' => _t('SilverStripe\\Forms\\GridField\\GridFieldVersionedState.MODIFIEDONDRAFTSHORT', 'Modified')
+                'title' => _t(__CLASS__ . '.MODIFIED', 'Modified')
             ];
         }
 
