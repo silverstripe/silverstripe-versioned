@@ -5,18 +5,25 @@ Only:
 ---
 SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
   extensions:
-    - SilverStripe\Versioned\GraphQL\Extensions\Read
-SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Update:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne:
   extensions:
-    - SilverStripe\Versioned\GraphQL\Extensions\Update
-SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadOneExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder:
   extensions:
-    - SilverStripe\Versioned\GraphQL\Extensions\Delete
-SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Create:
-  extensions:
-    - SilverStripe\Versioned\GraphQL\Extensions\Create
+    - SilverStripe\Versioned\GraphQL\Extensions\SchemaScaffolderExtension
+
+# Register the versioned operations
+SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:
+  operations:
+    copyToStage: SilverStripe\Versioned\GraphQL\Operations\CopyToStage
+    publish: SilverStripe\Versioned\GraphQL\Operations\Publish
+    unpublish: SilverStripe\Versioned\GraphQL\Operations\Unpublish
 SilverStripe\GraphQL\Controller:
   schema:
     types:
-      VersionedMutationInputType: SilverStripe\Versioned\GraphQL\Types\VersionedMutationInputType
-      VersionedQueryInputType: SilverStripe\Versioned\GraphQL\Types\VersionedQueryInputType
+      VersionedStage: SilverStripe\Versioned\GraphQL\Types\VersionedStage
+      VersionedItemQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedItemQueryMode
+      VersionedListQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedListQueryMode
+      VersionedReadInputType: SilverStripe\Versioned\GraphQL\Types\VersionedReadInputType
+      VersionedReadOneInputType: SilverStripe\Versioned\GraphQL\Types\VersionedReadOneInputType

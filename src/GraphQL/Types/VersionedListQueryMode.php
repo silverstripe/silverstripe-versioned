@@ -3,18 +3,18 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\EnumType;
+use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
-class VersionedQueryModeType extends EnumType
+class VersionedListQueryMode extends TypeCreator
 {
     /**
-     * VersionedQueryModeType constructor.
-     * @param $config
+     * @return EnumType
      */
-    public function __construct($config)
+    public function toType()
     {
-        parent::__construct([
-            'name' => 'VersionedQueryMode',
+        return new EnumType([
+            'name' => 'VersionedListQueryMode',
             'description' => 'The versioned mode to use',
             'values' => [
                 'ARCHIVE' => [
@@ -24,10 +24,6 @@ class VersionedQueryModeType extends EnumType
                 'LATEST' => [
                     'value' => 'latest_versions',
                     'description' => 'Read the latest version'
-                ],
-                'VERSION' => [
-                    'value' => 'version',
-                    'description' => 'Read a specific version'
                 ],
                 'DRAFT' => [
                     'value' => Versioned::DRAFT,

@@ -3,8 +3,10 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use SilverStripe\GraphQL\TypeCreator;
+use SilverStripe\Versioned\Versioned;
+use GraphQL\Type\Definition\Type;
 
-class VersionedQueryInputType extends TypeCreator
+class VersionedReadInputType extends TypeCreator
 {
     /**
      * @var bool
@@ -17,7 +19,7 @@ class VersionedQueryInputType extends TypeCreator
     public function attributes()
     {
         return [
-            'name' => 'QueryVersioning'
+            'name' => 'VersionedReadInputType'
         ];
     }
 
@@ -28,10 +30,12 @@ class VersionedQueryInputType extends TypeCreator
     {
         return [
             'Mode' => [
-                'type' => new VersionedQueryInputType(),
+                'type' => $this->manager->getType('VersionedListQueryMode'),
+                'defaultValue' => Versioned::LIVE,
             ],
-            'Version' => Type::int(),
-            'Date' => Type::string(),
+            'ArchiveDate' => [
+                'type' => Type::string(),
+            ],
         ];
     }
 }
