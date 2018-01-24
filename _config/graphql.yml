@@ -12,6 +12,9 @@ SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne:
 SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder:
   extensions:
     - SilverStripe\Versioned\GraphQL\Extensions\SchemaScaffolderExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\DataObjectScaffolderExtension
 
 # Register the versioned operations
 SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:

@@ -54,15 +54,14 @@ class CopyToStage extends MutationScaffolder
                 } else {
                     throw new InvalidArgumentException('You must provide either a FromStage or FromVersion argument');
                 }
-                $member = Member::singleton();
                 $can = $to === Versioned::LIVE
-                    ? $member->canPublish($context['currentUser'])
-                    : $member->canEdit($context['currentUser']);
+                    ? $record->canPublish($context['currentUser'])
+                    : $record->canEdit($context['currentUser']);
 
                 if (!$can) {
                     throw new InvalidArgumentException(sprintf(
                         'Copying %s from %s to %s is not allowed',
-                        $class,
+                        $this->typeName(),
                         $from,
                         $to
                     ));
@@ -125,26 +124,6 @@ class CopyToStage extends MutationScaffolder
                         'description' => 'The destination stage to copy to',
                     ],
                 ];
-                $instance = $this->getDataObjectInstance();
-
-                // Setup default input args.. Placeholder!
-                $schema = Injector::inst()->get(DataObjectSchema::class);
-                $db = $schema->fieldSpecs($this->dataObjectClass);
-
-                unset($db['ID']);
-
-                foreach ($db as $dbFieldName => $dbFieldType) {
-                    /** @var DBField $result */
-                    $result = $instance->obj($dbFieldName);
-                    // Skip complex fields, e.g. composite, as that would require scaffolding a new input type.
-                    if (!$result->isInternalGraphQLType()) {
-                        continue;
-                    }
-                    $arr = [
-                        'type' => $result->getGraphQLType($manager),
-                    ];
-                    $fields[$dbFieldName] = $arr;
-                }
 
                 return $fields;
             },

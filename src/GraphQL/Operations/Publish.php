@@ -24,12 +24,8 @@ class Publish extends PublishOperation
      */
     protected function doMutation(DataObjectInterface $obj)
     {
-        var_dump($obj->isOnDraft());
-        var_dump($obj->isPublished());
-        die();
-        $obj->write();
         if ($obj->isOnDraftOnly()) {
-            $obj->copyToStage(Versioned::DRAFT, Versioned::LIVE);
+            $obj->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         } else {
             $obj->publishRecursive();
         }

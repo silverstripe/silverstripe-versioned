@@ -60,7 +60,7 @@ class ReadVersions extends ListQueryScaffolder
     {
         $args = [
             'Stage' => [
-                'type' => Type::nonNull($manager->getType('VersionedStage')),
+                'type' => $manager->getType('VersionedStage'),
                 'defaultValue' => Versioned::LIVE,
             ]
         ];
