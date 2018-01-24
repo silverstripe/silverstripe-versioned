@@ -54,7 +54,9 @@ class SchemaScaffolderExtension extends Extension
                                 'type' => Type::boolean(),
                             ]
                         ];
-
+                        // Remove this recursive madness.
+                        unset($coreFields['Versions']);
+                        
                         return array_merge($coreFields, $versionFields);
                     }
                 ]);
@@ -64,6 +66,7 @@ class SchemaScaffolderExtension extends Extension
                 $dataObjectScaffold
                     ->addFields(['Version'])
                     ->nestedQuery('Versions', new ReadVersions($class, $versionName));
+
             }
         }
 

@@ -59,7 +59,7 @@ class ReadExtension extends Extension
     public function updateArgs(&$args, Manager $manager)
     {
         $args['Versioning'] = [
-            'type' => $manager->getType('VersionedReadInputType')
+            'type' => $manager->getType('VersionedReadInputType'),
         ];
     }
 
