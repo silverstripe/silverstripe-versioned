@@ -35,6 +35,11 @@ class VersionedReadInputType extends TypeCreator
             ],
             'ArchiveDate' => [
                 'type' => Type::string(),
+                'description' => 'The date to use for archive '
+            ],
+            'Status' => [
+                'type' => Type::listOf($this->manager->getType('VersionedStatus')),
+                'description' => 'If mode is STATUS, specify which versioned statuses'
             ],
         ];
     }

@@ -76,65 +76,16 @@ class CopyToStage extends MutationScaffolder
 
     /**
      * @param Manager $manager
-     */
-    public function addToManager(Manager $manager)
-    {
-        $manager->addType($this->generateInputType($manager));
-        parent::addToManager($manager);
-    }
-
-    /**
-     * @param Manager $manager
      * @return array
      */
     protected function createArgs(Manager $manager)
     {
         $args = [
-            'Input' => Type::nonNull($manager->getType($this->inputTypeName())),
+            'Input' => Type::nonNull($manager->getType('CopyToStageInputType')),
         ];
         $this->extend('updateArgs', $args, $manager);
 
         return $args;
     }
 
-    /**
-     * @param Manager $manager
-     * @return InputObjectType
-     */
-    protected function generateInputType(Manager $manager)
-    {
-        return new InputObjectType([
-            'name' => $this->inputTypeName(),
-            'fields' => function () use ($manager) {
-                $fields = [
-                    'ID' => [
-                        'type' => Type::nonNull(Type::id()),
-                        'description' => 'The ID of the record to copy',
-                    ],
-                    'FromVersion' => [
-                        'type' => Type::int(),
-                        'description' => 'The source version number to copy.'
-                    ],
-                    'FromStage' => [
-                        'type' => $manager->getType('VersionedStage'),
-                        'description' => 'The source stage to copy',
-                    ],
-                    'ToStage' => [
-                        'type' => Type::nonNull($manager->getType('VersionedStage')),
-                        'description' => 'The destination stage to copy to',
-                    ],
-                ];
-
-                return $fields;
-            },
-        ]);
-    }
-
-    /**
-     * @return string
-     */
-    protected function inputTypeName()
-    {
-        return $this->typeName().'CopyToStageInputType';
-    }
 }

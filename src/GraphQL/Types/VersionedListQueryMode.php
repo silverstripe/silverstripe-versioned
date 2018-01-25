@@ -33,6 +33,10 @@ class VersionedListQueryMode extends TypeCreator
                     'value' => Versioned::LIVE,
                     'description' => 'Read from the live stage',
                 ],
+                'STATUS' => [
+                    'value' => 'status',
+                    'description' => 'Read only records with a specific status',
+                ],
             ]
         ]);
     }

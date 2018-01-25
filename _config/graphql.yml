@@ -26,7 +26,9 @@ SilverStripe\GraphQL\Controller:
   schema:
     types:
       VersionedStage: SilverStripe\Versioned\GraphQL\Types\VersionedStage
+      VersionedStatus: SilverStripe\Versioned\GraphQL\Types\VersionedStatus
       VersionedItemQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedItemQueryMode
       VersionedListQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedListQueryMode
       VersionedReadInputType: SilverStripe\Versioned\GraphQL\Types\VersionedReadInputType
       VersionedReadOneInputType: SilverStripe\Versioned\GraphQL\Types\VersionedReadOneInputType
+      CopyToStageInputType: SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType
