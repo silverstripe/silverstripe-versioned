@@ -25,7 +25,6 @@ class VersionedStatus extends TypeCreator
                     'value' => 'draft',
                     'description' => 'Only draft records',
                 ],
-
                 'ARCHIVED' => [
                     'value' => 'archived',
                     'description' => 'Only records that have been archived',

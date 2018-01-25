@@ -3,12 +3,17 @@
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
 use SilverStripe\Core\Extension;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
 use SilverStripe\ORM\DataList;
 use SilverStripe\GraphQL\Manager;
+use SilverStripe\ORM\DataQuery_SubGroup;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
 
+/**
+ * @property Read $owner
+ */
 class ReadExtension extends Extension
 {
     public function updateList(DataList &$list, $args)
@@ -20,80 +25,100 @@ class ReadExtension extends Extension
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
-                $list = $list->setDataQueryParam('Versioned.mode', 'stage')
-                             ->setDataQueryParam('Versioned.stage', $mode);
+                $list = $list
+                    ->setDataQueryParam('Versioned.mode', 'stage')
+                    ->setDataQueryParam('Versioned.stage', $mode);
                 break;
             case 'archive':
-                if (!isset($args['ArchiveDate'])) {
+                if (empty($args['Versioning']['ArchiveDate'])) {
                     throw new InvalidArgumentException(sprintf(
                         'You must provide a Date parameter when using the "%s" mode',
                         $mode
                     ));
                 }
-                $date = $args['ArchiveDate'];
+                $date = $args['Versioning']['ArchiveDate'];
                 if (!$this->isValidDate($date)) {
                     throw new InvalidArgumentException(sprintf(
                         'Invalid date: "%s". Must be YYYY-MM-DD format'
                     ));
                 }
 
-                $list->setDataQueryParam('Versioned.mode', $mode)
-                     ->setDataQueryParam('Versioned.date', $date);
+                $list = $list
+                    ->setDataQueryParam('Versioned.mode', 'archive')
+                    ->setDataQueryParam('Versioned.date', $date);
                 break;
             case 'latest_versions':
-                $list = $list->setDataQueryParam('Versioned.mode', $mode);
+                $list = $list->setDataQueryParam('Versioned.mode', 'latest_versions');
                 break;
             case 'status':
-                if (!isset($args['Status'])) {
+                if (empty($args['Versioning']['Status'])) {
                     throw new InvalidArgumentException(sprintf(
                         'You must provide a Status parameter when using the "%s" mode',
                         $mode
                     ));
                 }
 
-                $baseTable = $owner->getDataObjectInstance()->baseTable();
+                // When querying by Status we need to ensure both stage / live tables are present
+                $baseTable = $this->owner->getDataObjectInstance()->baseTable();
                 $liveTable = $baseTable . '_Live';
-                $versionsTable = $baseTable . '_Versions';
-                $draftTable = $baseTable . '_Draft';
-                $statuses = $args['Status'];
-                $usingArchive = in_array('archived', $statuses);
-                if ($usingArchive) {
-                    $queryMode = 'latest_versions';
-                    $mainTable = $versionsTable;
-                    $idField = 'RecordID';
-                    $list = $list->leftJoin(
-                        $baseTable,
-                        "\"{$baseTable}\".\"ID\" = \"{$mainTable}\".\"{$idField}\"",
-                        $draftTable
-                    );
-                    $list->dataQuery()->query()->renameTable($draftTable, $baseTable);
+                $statuses = $args['Versioning']['Status'];
+
+                // If we need to search archived records, we need to manually join draft table
+                if (in_array('archived', $statuses)) {
+                    $list = $list
+                        ->setDataQueryParam('Versioned.mode', 'latest_versions');
+                    // Join a temporary alias BaseTable_Draft, renaming this on execution to BaseTable
+                    // See Versioned::augmentSQL() For reference on this alias
+                    $draftTable = $baseTable . '_Draft';
+                    $list = $list
+                        ->leftJoin(
+                            $draftTable,
+                            "\"{$baseTable}\".\"ID\" = \"{$draftTable}\".\"ID\""
+                        );
                 } else {
-                    $queryMode = Versioned::DRAFT;
-                    $mainTable = $baseTable;
-                    $idField = 'ID';
+                    // Use draft as base query mode (base join live)
+                    $draftTable = $baseTable;
+                    $list = $list
+                        ->setDataQueryParam('Versioned.mode', 'stage')
+                        ->setDataQueryParam('Versioned.stage', Versioned::DRAFT);
                 }
-                $list = $list->setDataQueryParam('Versioned.mode', $queryMode);
+
+                // Always include live table
                 $list = $list->leftJoin(
                     $liveTable,
-                    "\"{$liveTable}\".\"ID\" = \"{$mainTable}\".\"{$idField}\""
+                    "\"{$baseTable}\".\"ID\" = \"{$liveTable}\".\"ID\""
                 );
-                $conditions = [
-                    in_array('modified', $statuses)
-                        ? "\"{$draftTable}\".\"Version\" <> \"{$liveTable}\".\"Version\" && \"{$liveTable}\".\"ID\" IS NOT NULL"
-                        : null,
-                    in_array('archived', $statuses)
-                        ? "\"{$liveTable}\".\"ID\" IS NULL AND \"SiteTree_Draft\".\"ID\" IS NULL"
-                        : null,
-                    in_array('draft', $statuses)
-                        ? "\"{$liveTable}\".\"ID\" IS NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL"
-                        : null
-                ];
+
+                // Add all conditions
+                $conditions = [];
+
+                // Modified exist on both stages, but differ
+                if (in_array('modified', $statuses)) {
+                    $conditions[] = "\"{$liveTable}\".\"ID\" IS NOT NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL"
+                        . " AND \"{$draftTable}\".\"Version\" <> \"{$liveTable}\".\"Version\"";
+                }
+
+                // Is deleted and sent to archive
+                if (in_array('archived', $statuses)) {
+                    // Note: Include items staged for deletion for the time being, as these are effectively archived
+                    // we could split this out into "staged for deletion" in the future
+                    $conditions[] = "\"{$draftTable}\".\"ID\" IS NULL";
+                }
+
+                // Is on draft only
+                if (in_array('draft', $statuses)) {
+                    $conditions[] = "\"{$liveTable}\".\"ID\" IS NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL";
+                }
+
+                // Validate that all statuses have been handled
+                if (empty($conditions) || count($statuses) !== count($conditions)) {
+                    throw new InvalidArgumentException("Invalid statuses provided");
+                }
                 $list = $list->whereAny(array_filter($conditions));
-
                 break;
+            default:
+                throw new InvalidArgumentException("Unsupported read mode {$mode}");
         }
-
-        return $list;
     }
 
     /**
