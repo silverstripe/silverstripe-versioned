@@ -37,9 +37,8 @@ abstract class PublishOperation extends MutationScaffolder
         );
 
         $this->setResolver(function ($object, array $args, $context, $info) {
-            $oldMode = Versioned::get_reading_mode();
-            $this->setReadingStage();
-            $obj = DataObject::get_by_id($this->dataObjectClass, $args['ID']);
+            Versioned::get_by_stage($this->dataObjectClass, $this->getReadingStage())
+                ->byID($args['ID']);
             if (!$obj) {
                 throw new Exception(sprintf(
                     '%s with ID %s not found',
@@ -62,7 +61,6 @@ abstract class PublishOperation extends MutationScaffolder
                         );
                     }
                 }
-                Versioned::set_reading_mode($oldMode);
                 return $obj;
             } else {
                 throw new Exception(sprintf(
@@ -97,5 +95,5 @@ abstract class PublishOperation extends MutationScaffolder
 
     abstract protected function createOperationName();
 
-    abstract protected function setReadingStage();
+    abstract protected function getReadingStage();
 }

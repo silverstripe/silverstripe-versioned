@@ -31,7 +31,7 @@ class VersionedReadInputType extends TypeCreator
         return [
             'Mode' => [
                 'type' => $this->manager->getType('VersionedListQueryMode'),
-                'defaultValue' => Versioned::LIVE,
+                'defaultValue' => Versioned::DRAFT,
             ],
             'ArchiveDate' => [
                 'type' => Type::string(),

@@ -40,8 +40,8 @@ class Unpublish extends PublishOperation
     /**
      * Set the stage for the read query
      */
-    protected function setReadingStage()
+    protected function getReadingStage()
     {
-        Versioned::set_stage(Versioned::LIVE);
+        return Versioned::LIVE;
     }
 }

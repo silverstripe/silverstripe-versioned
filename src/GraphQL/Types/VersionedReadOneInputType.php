@@ -31,7 +31,7 @@ class VersionedReadOneInputType extends TypeCreator
         return [
             'Mode' => [
                 'type' => $this->manager->getType('VersionedItemQueryMode'),
-                'defaultValue' => Versioned::LIVE,
+                'defaultValue' => Versioned::DRAFT,
             ],
             'Version' => [
                 'type' => Type::int(),
