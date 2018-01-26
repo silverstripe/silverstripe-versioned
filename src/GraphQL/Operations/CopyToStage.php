@@ -2,19 +2,15 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use GraphQL\Type\Definition\Type;
+use InvalidArgumentException;
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
-use GraphQL\Type\Definition\InputObjectType;
-use SilverStripe\Core\Injector\Injector;
-use GraphQL\Type\Definition\Type;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DataObjectSchema;
-use SilverStripe\ORM\FieldType\DBField;
-use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
-use InvalidArgumentException;
+
 /**
  * A generic "create" operation for a DataObject.
  */
@@ -38,26 +34,26 @@ class CopyToStage extends MutationScaffolder
             function ($object, array $args, $context, $info) {
                 $input = $args['Input'];
                 $id = $input['ID'];
-                $record = DataObject::get_by_id($this->dataObjectClass, $id);
-                if (!$record) {
-                    throw new InvalidArgumentException(sprintf(
-                        'Record %s not found',
-                        $id
-                    ));
-                }
-
                 $to = $input['ToStage'];
+                /** @var Versioned|DataObject $record */
+                $record = null;
                 if (isset($input['FromVersion'])) {
                     $from = $input['FromVersion'];
+                    $record = Versioned::get_version($this->dataObjectClass, $id, $from);
                 } else if(isset($input['FromStage'])) {
                     $from = $input['FromStage'];
+                    $record = Versioned::get_by_stage($this->dataObjectClass, $from)->byID($id);
                 } else {
                     throw new InvalidArgumentException('You must provide either a FromStage or FromVersion argument');
                 }
+                if (!$record) {
+                    throw new InvalidArgumentException("Record {$id} not found");
+                }
+
+                // Permission check object
                 $can = $to === Versioned::LIVE
                     ? $record->canPublish($context['currentUser'])
                     : $record->canEdit($context['currentUser']);
-
                 if (!$can) {
                     throw new InvalidArgumentException(sprintf(
                         'Copying %s from %s to %s is not allowed',
@@ -67,8 +63,8 @@ class CopyToStage extends MutationScaffolder
                     ));
                 }
 
+                /** @var DataObject|Versioned $record */
                 $record->copyVersionToStage($from, $to);
-
                 return $record;
             }
         );

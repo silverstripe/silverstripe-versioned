@@ -2,16 +2,10 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
-use GraphQL\Type\Definition\Type;
-use SebastianBergmann\Version;
-use SilverStripe\ORM\DataList;
-use SilverStripe\GraphQL\Scaffolding\Scaffolders\UnionScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
-use SilverStripe\GraphQL\Manager;
-use SilverStripe\Core\ClassInfo;
 use Exception;
-use SilverStripe\Security\Member;
+use SilverStripe\GraphQL\Manager;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -28,6 +22,7 @@ class ReadVersions extends ListQueryScaffolder
     public function __construct($dataObjectClass, $versionTypeName)
     {
         $resolver = function ($object, array $args, $context, $info) use ($dataObjectClass) {
+            /** @var DataObject|Versioned $object */
             if (!$object->hasExtension(Versioned::class)) {
                 throw new Exception(sprintf(
                     'Types using the %s query scaffolder must have the Versioned extension applied. (See %s)',
@@ -41,12 +36,9 @@ class ReadVersions extends ListQueryScaffolder
                     $dataObjectClass
                 ));
             }
-            $oldMode = Versioned::get_reading_mode();
-            Versioned::set_stage($args['Stage']);
-            $versions = $object->Versions();
-            Versioned::set_reading_mode($oldMode);
 
-            return $versions;
+            // Get all versions
+            return $object->Versions();
         };
         $operationName = 'read' . ucfirst($versionTypeName);
         parent::__construct($operationName, $versionTypeName, $resolver);

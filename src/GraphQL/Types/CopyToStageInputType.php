@@ -2,8 +2,8 @@
 
 namespace SilverStripe\Versioned\GraphQL\Types;
 
-use SilverStripe\GraphQL\TypeCreator;
 use GraphQL\Type\Definition\Type;
+use SilverStripe\GraphQL\TypeCreator;
 
 class CopyToStageInputType extends TypeCreator
 {

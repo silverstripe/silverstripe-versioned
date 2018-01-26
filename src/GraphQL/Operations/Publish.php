@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\Security\Member;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -16,7 +17,7 @@ class Publish extends PublishOperation
      */
     protected function createOperationName()
     {
-        return 'publish'.ucfirst($this->typeName());
+        return 'publish' . ucfirst($this->typeName());
     }
 
     /**
@@ -24,12 +25,8 @@ class Publish extends PublishOperation
      */
     protected function doMutation(DataObjectInterface $obj)
     {
-        if ($obj->isOnDraftOnly()) {
-            $obj->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        } else {
-            $obj->publishRecursive();
-        }
-
+        /** @var RecursivePublishable $obj */
+        $obj->publishRecursive();
     }
 
     /**
@@ -39,6 +36,7 @@ class Publish extends PublishOperation
      */
     protected function checkPermission(DataObjectInterface $obj, Member $member)
     {
+        /** @var Versioned $obj */
         return $obj->canPublish($member);
     }
 

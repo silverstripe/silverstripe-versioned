@@ -2,15 +2,14 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use Exception;
+use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
-use GraphQL\Type\Definition\Type;
-use Exception;
-use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
 
@@ -37,7 +36,7 @@ abstract class PublishOperation extends MutationScaffolder
         );
 
         $this->setResolver(function ($object, array $args, $context, $info) {
-            Versioned::get_by_stage($this->dataObjectClass, $this->getReadingStage())
+            $obj = Versioned::get_by_stage($this->dataObjectClass, $this->getReadingStage())
                 ->byID($args['ID']);
             if (!$obj) {
                 throw new Exception(sprintf(

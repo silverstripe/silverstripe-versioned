@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
@@ -24,6 +25,7 @@ class Unpublish extends PublishOperation
      */
     protected function doMutation(DataObjectInterface $obj)
     {
+        /** @var Versioned|DataObject $obj */
         $obj->doUnpublish();
     }
 
@@ -34,6 +36,7 @@ class Unpublish extends PublishOperation
      */
     protected function checkPermission(DataObjectInterface $obj, Member $member)
     {
+        /** @var Versioned|DataObject $obj */
         return $obj->canUnpublish($member);
     }
 

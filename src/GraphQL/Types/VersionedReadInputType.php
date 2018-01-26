@@ -2,9 +2,9 @@
 
 namespace SilverStripe\Versioned\GraphQL\Types;
 
+use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
-use GraphQL\Type\Definition\Type;
 
 class VersionedReadInputType extends TypeCreator
 {

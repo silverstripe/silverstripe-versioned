@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\EnumType;
 use SilverStripe\GraphQL\TypeCreator;
-use SilverStripe\Versioned\Versioned;
 
 class VersionedStatus extends TypeCreator
 {
