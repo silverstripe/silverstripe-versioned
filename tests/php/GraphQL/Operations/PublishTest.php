@@ -28,7 +28,7 @@ class PublishTest extends SapphireTest
 
         $publish = new Publish(Fake::class);
         $scaffold = $publish->scaffold($manager);
-        $this->assertTrue(is_callable($scaffold['resolve']));
+        $this->assertInternalType('callable', $scaffold['resolve']);
 
         $record = new Fake();
         $record->Name = 'First';

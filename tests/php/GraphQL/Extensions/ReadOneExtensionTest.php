@@ -28,7 +28,7 @@ class ReadOneExtensionTest extends SapphireTest
         $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
         $read = new ReadOne(Fake::class);
         $readScaffold = $read->scaffold($manager);
-        $this->assertTrue(is_callable($readScaffold['resolve']));
+        $this->assertInternalType('callable', $readScaffold['resolve']);
         $doResolve = function ($mode, $ID, $version = null) use ($readScaffold) {
             $args = [
                 'ID' => $ID,

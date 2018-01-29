@@ -38,7 +38,7 @@ class ReadExtensionTest extends SapphireTest
         $read = new Read(Fake::class);
         $read->setUsePagination(false);
         $readScaffold = $read->scaffold($manager);
-        $this->assertTrue(is_callable($readScaffold['resolve']));
+        $this->assertInternalType('callable', $readScaffold['resolve']);
         $readScaffold['resolve'](null, ['Versioning' => true], ['currentUser' => new Member()], new ResolveInfo([]));
     }
 }
