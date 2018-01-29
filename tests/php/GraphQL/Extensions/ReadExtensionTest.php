@@ -11,14 +11,14 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
 use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedReadInputType;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Core\Injector\Injector;
 
 class ReadExtensionTest extends SapphireTest
 {
 
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
 
     public function testReadExtensionAppliesFilters()
@@ -34,8 +34,8 @@ class ReadExtensionTest extends SapphireTest
 
         $manager = new Manager();
         $manager->addType((new VersionedReadInputType())->toType());
-        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(TestObject::class)]));
-        $read = new Read(TestObject::class);
+        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
+        $read = new Read(Fake::class);
         $read->setUsePagination(false);
         $readScaffold = $read->scaffold($manager);
         $this->assertTrue(is_callable($readScaffold['resolve']));

@@ -11,32 +11,32 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\CopyToStage;
 use SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
 class CopyToStageTest extends SapphireTest
 {
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
 
     public function testCopyToStage()
     {
-        $typeName = ScaffoldingUtil::typeNameForDataObject(TestObject::class);
+        $typeName = ScaffoldingUtil::typeNameForDataObject(Fake::class);
         $manager = new Manager();
         $manager->addType((new CopyToStageInputType())->toType());
         $manager->addType(new ObjectType(['name' => $typeName]));
-        $copyToStage = new CopyToStage(TestObject::class);
+        $copyToStage = new CopyToStage(Fake::class);
         $scaffold = $copyToStage->scaffold($manager);
         $this->assertTrue(is_callable($scaffold['resolve']));
 
-        /* @var TestObject|Versioned $record */
-        $record = new TestObject();
+        /* @var Fake|Versioned $record */
+        $record = new Fake();
         $record->Name = 'First';
         $record->write();
 
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
         $this->assertNull($result);
         $this->logInWithPermission('ADMIN');
@@ -53,7 +53,7 @@ class CopyToStageTest extends SapphireTest
             [ 'currentUser' => $member ],
             new ResolveInfo([])
         );
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
         $this->assertNotNull($result);
         $this->assertEquals($record->ID, $result->ID);
@@ -63,7 +63,7 @@ class CopyToStageTest extends SapphireTest
         $record->write();
         $newVersion = $record->Version;
 
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
         $this->assertEquals($oldVersion, $result->Version);
         $scaffold['resolve'](
@@ -78,24 +78,9 @@ class CopyToStageTest extends SapphireTest
             [ 'currentUser' => $member ],
             new ResolveInfo([])
         );
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
         $this->assertEquals($newVersion, $result->Version);
-        $scaffold['resolve'](
-            null,
-            [
-                'Input' => [
-                    'FromVersion' => $newVersion,
-                    'ToStage' => Versioned::DRAFT,
-                    'ID' => $record->ID,
-                ],
-            ],
-            [ 'currentUser' => $member ],
-            new ResolveInfo([])
-        );
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
-            ->byID($record->ID);
-        $this->assertNull($result);
 
         $this->expectException(InvalidArgumentException::class);
         $scaffold['resolve'](

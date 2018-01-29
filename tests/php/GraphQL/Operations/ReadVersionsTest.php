@@ -11,7 +11,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 use Exception;
 use SilverStripe\Versioned\Versioned_Version;
@@ -19,7 +19,7 @@ use SilverStripe\Versioned\Versioned_Version;
 class ReadVersionsTest extends SapphireTest
 {
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
 
     public function testItThrowsIfAppliedToAnUnversionedObject()
@@ -47,7 +47,7 @@ class ReadVersionsTest extends SapphireTest
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
         $manager->addType(new ObjectType(['name' => 'Test']));
-        $readVersions = new ReadVersions(TestObject::class, 'Test');
+        $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
         $this->assertTrue(is_callable($scaffold['resolve']));
@@ -55,7 +55,7 @@ class ReadVersionsTest extends SapphireTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessageRegExp('/Cannot view versions/');
         $scaffold['resolve'](
-            new TestObject(),
+            new Fake(),
             [],
             ['currentUser' => new Member()],
             new ResolveInfo([])
@@ -67,14 +67,14 @@ class ReadVersionsTest extends SapphireTest
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
         $manager->addType(new ObjectType(['name' => 'Test']));
-        $readVersions = new ReadVersions(TestObject::class, 'Test');
+        $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
         $this->assertTrue(is_callable($scaffold['resolve']));
         $this->logInWithPermission('ADMIN');
         $member = Security::getCurrentUser();
 
-        $record = new TestObject();
+        $record = new Fake();
         $record->Name = 'First';
         $record->write();
 

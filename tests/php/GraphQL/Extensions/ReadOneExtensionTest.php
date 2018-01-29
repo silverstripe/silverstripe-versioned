@@ -10,7 +10,7 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedReadOneInputType;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
@@ -18,15 +18,15 @@ class ReadOneExtensionTest extends SapphireTest
 {
 
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
 
     public function testReadOneExtensionAppliesFilters()
     {
         $manager = new Manager();
         $manager->addType((new VersionedReadOneInputType())->toType());
-        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(TestObject::class)]));
-        $read = new ReadOne(TestObject::class);
+        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
+        $read = new ReadOne(Fake::class);
         $readScaffold = $read->scaffold($manager);
         $this->assertTrue(is_callable($readScaffold['resolve']));
         $doResolve = function ($mode, $ID, $version = null) use ($readScaffold) {
@@ -48,8 +48,8 @@ class ReadOneExtensionTest extends SapphireTest
             );
         };
 
-        /* @var TestObject|Versioned $record */
-        $record = new TestObject();
+        /* @var Fake|Versioned $record */
+        $record = new Fake();
         $record->Name = 'First';
         $record->write();
 
@@ -60,13 +60,13 @@ class ReadOneExtensionTest extends SapphireTest
         $this->assertNull($result);
 
         $result = $doResolve(Versioned::DRAFT, $record->ID);
-        $this->assertInstanceOf(TestObject::class, $result);
+        $this->assertInstanceOf(Fake::class, $result);
         $this->assertEquals($record->ID, $result->ID);
         $this->assertEquals(2, $record->Version);
 
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $result = $doResolve(Versioned::LIVE, $record->ID);
-        $this->assertInstanceOf(TestObject::class, $result);
+        $this->assertInstanceOf(Fake::class, $result);
         $this->assertEquals($record->ID, $result->ID);
         $this->assertEquals(2, $record->Version);
 
@@ -74,7 +74,7 @@ class ReadOneExtensionTest extends SapphireTest
         $record->write();
 
         $result = $doResolve('version', $record->ID, 1);
-        $this->assertInstanceOf(TestObject::class, $result);
+        $this->assertInstanceOf(Fake::class, $result);
         $this->assertEquals($record->ID, $result->ID);
         $this->assertEquals('First', $result->Name);
 

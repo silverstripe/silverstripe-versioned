@@ -10,31 +10,31 @@ use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\Publish;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use Exception;
 
 class PublishTest extends SapphireTest
 {
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
 
     public function testPublish()
     {
-        $typeName = ScaffoldingUtil::typeNameForDataObject(TestObject::class);
+        $typeName = ScaffoldingUtil::typeNameForDataObject(Fake::class);
         $manager = new Manager();
         $manager->addType(new ObjectType(['name' => $typeName]));
 
-        $publish = new Publish(TestObject::class);
+        $publish = new Publish(Fake::class);
         $scaffold = $publish->scaffold($manager);
         $this->assertTrue(is_callable($scaffold['resolve']));
 
-        $record = new TestObject();
+        $record = new Fake();
         $record->Name = 'First';
         $record->write();
 
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
 
         $this->assertNull($result);
@@ -48,11 +48,11 @@ class PublishTest extends SapphireTest
             [ 'currentUser' => $member ],
             new ResolveInfo([])
         );
-        $result = Versioned::get_by_stage(TestObject::class, Versioned::LIVE)
+        $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
 
         $this->assertNotNull($result);
-        $this->assertInstanceOf(TestObject::class, $result);
+        $this->assertInstanceOf(Fake::class, $result);
         $this->assertEquals('First', $result->Name);
 
         $this->expectException(Exception::class);

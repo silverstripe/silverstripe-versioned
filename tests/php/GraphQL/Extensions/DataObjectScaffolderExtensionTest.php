@@ -7,33 +7,21 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
-use SilverStripe\Versioned\Tests\VersionedTest\AnotherSubclass;
-use SilverStripe\Versioned\Tests\VersionedTest\ChangeSetTestObject;
-use SilverStripe\Versioned\Tests\VersionedTest\PublicViaExtension;
-use SilverStripe\Versioned\Tests\VersionedTest\SingleStage;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
-use SilverStripe\Versioned\Tests\VersionedTest\PublicStage;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 use SilverStripe\Versioned\Versioned;
 
 class DataObjectScaffolderExtensionTest extends SapphireTest
 {
-    protected static $fixture_file = '../../VersionedTest.yml';
-
     public static $extra_dataobjects = [
-        TestObject::class,
-        PublicStage::class,
-        PublicViaExtension::class,
-        AnotherSubclass::class,
-        SingleStage::class,
-        ChangeSetTestObject::class,
+        Fake::class,
     ];
 
     public function testDataObjectScaffolderAddsVersionedFields()
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
-        $scaffolder = new DataObjectScaffolder(TestObject::class);
+        $scaffolder = new DataObjectScaffolder(Fake::class);
         $scaffolder->addFields(['Name', 'Title']);
         $scaffolder->addToManager($manager);
         $typeName = $scaffolder->typeName();
@@ -49,7 +37,7 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
 
     public function testDataObjectScaffolderDoesntAddVersionedFieldsToUnversionedObjects()
     {
-        TestObject::remove_extension(Versioned::class);
+        Fake::remove_extension(Versioned::class);
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
         $scaffolder = new DataObjectScaffolder(UnversionedWithField::class);

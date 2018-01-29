@@ -4,36 +4,45 @@ namespace SilverStripe\Versioned\Tests\GraphQL\Resolvers;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\ORM\DB;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
 class ApplyVersionFiltersTest extends SapphireTest
 {
     public static $extra_dataobjects = [
-        TestObject::class,
+        Fake::class,
     ];
+
+    public function setUp()
+    {
+        parent::setUp();
+        $table = Fake::getSchema()->tableName(Fake::class);
+        DB::query("DELETE FROM $table");
+        DB::query("DELETE FROM {$table}_Live");
+        DB::query("DELETE FROM {$table}_Versions");
+    }
 
     public function testItFiltersByStage()
     {
         $filter = new ApplyVersionFilters();
-        $record1 = new TestObject();
+        $record1 = new Fake();
         $record1->Name = 'First version draft';
         $record1->write();
 
-        $record2 = new TestObject();
+        $record2 = new Fake();
         $record2->Name = 'First version live';
         $record2->write();
         $record2->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList($list, ['Mode' => Versioned::DRAFT]);
         $this->assertCount(2, $list);
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList($list, ['Mode' => Versioned::LIVE]);
         $this->assertCount(1, $list);
-
     }
 
     public function testItThrowsIfArchiveAndNoDate()
@@ -55,7 +64,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItSetsArchiveQueryParams()
     {
         $filter = new ApplyVersionFilters();
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -72,7 +81,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItSetsLatestVersionQueryParams()
     {
         $filter = new ApplyVersionFilters();
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -88,37 +97,36 @@ class ApplyVersionFiltersTest extends SapphireTest
         $filter = new ApplyVersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Status parameter/');
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'status']);
     }
 
     public function testStatus()
     {
         $filter = new ApplyVersionFilters();
-        $record1 = new TestObject();
+        $record1 = new Fake();
         $record1->Name = 'Only on draft';
         $record1->write();
 
-        $record2 = new TestObject();
+        $record2 = new Fake();
         $record2->Name = 'Published';
         $record2->write();
         $record2->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
 
-        $record3 = new TestObject();
+        $record3 = new Fake();
         $record2->Name = 'Will be modified';
         $record3->write();
         $record3->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $record3->Name = 'Modified';
         $record3->write();
 
-        $record4 = new TestObject();
+        $record4 = new Fake();
         $record4->Name = 'Will be archived';
         $record4->write();
         $record4->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $oldID = $record4->ID;
         $record4->delete();
-
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -129,7 +137,7 @@ class ApplyVersionFiltersTest extends SapphireTest
         $this->assertCount(1, $list);
         $this->assertEquals($record3->ID, $list->first()->ID);
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -140,7 +148,7 @@ class ApplyVersionFiltersTest extends SapphireTest
         $this->assertCount(1, $list);
         $this->assertEquals($oldID, $list->first()->ID);
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -148,13 +156,13 @@ class ApplyVersionFiltersTest extends SapphireTest
                 'Status' => ['draft']
             ]
         );
-        $this->assertCount(2, $list);
+
+        $this->assertCount(1, $list);
         $ids = $list->column('ID');
-        $this->assertTrue(in_array($record3->ID, $ids));
         $this->assertTrue(in_array($record1->ID, $ids));
 
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
@@ -165,10 +173,11 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertCount(2, $list);
         $ids = $list->column('ID');
+
         $this->assertTrue(in_array($record3->ID, $ids));
         $this->assertTrue(in_array($record1->ID, $ids));
 
-        $list = TestObject::get();
+        $list = Fake::get();
         $filter->applyToList(
             $list,
             [
