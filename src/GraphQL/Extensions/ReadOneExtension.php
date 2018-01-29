@@ -11,7 +11,7 @@ use DateTime;
 
 class ReadOneExtension extends Extension
 {
-    public function updateList(DataList $list, $args)
+    public function updateList(DataList &$list, $args)
     {
         if (!isset($args['Versioning']) || !isset($args['Versioning']['Mode'])) {
             return;
@@ -32,11 +32,8 @@ class ReadOneExtension extends Extension
                         'When using the "version" mode, you must specify a Version parameter'
                     );
                 }
-
-
+                $list = Versioned::get_version($list->dataClass(), $args['ID'], $args['Version']);
         }
-
-        return $list;
     }
 
     /**

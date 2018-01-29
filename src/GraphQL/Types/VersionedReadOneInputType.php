@@ -19,7 +19,7 @@ class VersionedReadOneInputType extends TypeCreator
     public function attributes()
     {
         return [
-            'name' => 'VersionedOneReadInputType'
+            'name' => 'VersionedReadOneInputType'
         ];
     }
 

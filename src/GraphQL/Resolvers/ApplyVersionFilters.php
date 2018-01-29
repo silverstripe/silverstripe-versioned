@@ -14,7 +14,7 @@ class ApplyVersionFilters
      * @param DataList $list
      * @param array $versioningArgs
      */
-    public function applyToList($list, $versioningArgs)
+    public function applyToList(&$list, $versioningArgs)
     {
         if (!isset($versioningArgs['Mode'])) {
             return;
@@ -31,14 +31,15 @@ class ApplyVersionFilters
             case 'archive':
                 if (empty($versioningArgs['ArchiveDate'])) {
                     throw new InvalidArgumentException(sprintf(
-                        'You must provide a Date parameter when using the "%s" mode',
+                        'You must provide an ArchiveDate parameter when using the "%s" mode',
                         $mode
                     ));
                 }
                 $date = $versioningArgs['ArchiveDate'];
                 if (!$this->isValidDate($date)) {
                     throw new InvalidArgumentException(sprintf(
-                        'Invalid date: "%s". Must be YYYY-MM-DD format'
+                        'Invalid date: "%s". Must be YYYY-MM-DD format',
+                        $date
                     ));
                 }
 

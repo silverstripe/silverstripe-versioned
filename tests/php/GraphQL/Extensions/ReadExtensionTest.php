@@ -1,0 +1,44 @@
+<?php
+
+namespace SilverStripe\Versioned\Tests\GraphQL\Extensions;
+
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\GraphQL\Manager;
+use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
+use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
+use SilverStripe\Security\Member;
+use SilverStripe\Versioned\GraphQL\Types\VersionedReadInputType;
+use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Core\Injector\Injector;
+
+class ReadExtensionTest extends SapphireTest
+{
+
+    public static $extra_dataobjects = [
+        TestObject::class,
+    ];
+
+    public function testReadExtensionAppliesFilters()
+    {
+        $mock = $this->getMockBuilder(ApplyVersionFilters::class)
+            ->setMethods(['applyToList'])
+            ->getMock();
+        $mock
+            ->expects($this->once())
+            ->method('applyToList');
+
+        Injector::inst()->registerService($mock, ApplyVersionFilters::class);
+
+        $manager = new Manager();
+        $manager->addType((new VersionedReadInputType())->toType());
+        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(TestObject::class)]));
+        $read = new Read(TestObject::class);
+        $read->setUsePagination(false);
+        $readScaffold = $read->scaffold($manager);
+        $this->assertTrue(is_callable($readScaffold['resolve']));
+        $readScaffold['resolve'](null, ['Versioning' => true], ['currentUser' => new Member()], new ResolveInfo([]));
+    }
+}
