@@ -61,6 +61,15 @@ class ApplyVersionFiltersTest extends SapphireTest
         $filter->applyToList($list, ['Mode' => 'archive', 'ArchiveDate' => 'foo']);
     }
 
+
+    public function testItThrowsIfVersionAndNoVersion()
+    {
+        $filter = new ApplyVersionFilters();
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageRegExp('/Version parameter/');
+        $filter->applyToList($list, ['Mode' => 'version']);
+    }
+
     public function testItSetsArchiveQueryParams()
     {
         $filter = new ApplyVersionFilters();
@@ -75,6 +84,23 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertEquals('archive', $list->dataQuery()->getQueryParam('Versioned.mode'));
         $this->assertEquals('2016-11-08', $list->dataQuery()->getQueryParam('Versioned.date'));
+
+    }
+
+    public function testItSetsVersionQueryParams()
+    {
+        $filter = new ApplyVersionFilters();
+        $list = Fake::get();
+        $filter->applyToList(
+            $list,
+            [
+                'Mode' => 'version',
+                'Version' => '5',
+            ]
+        );
+
+        $this->assertEquals('version', $list->dataQuery()->getQueryParam('Versioned.mode'));
+        $this->assertEquals('5', $list->dataQuery()->getQueryParam('Versioned.version'));
 
     }
 

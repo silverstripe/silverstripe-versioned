@@ -44,20 +44,4 @@ class ReadVersions extends ListQueryScaffolder
         parent::__construct($operationName, $versionTypeName, $resolver);
     }
 
-    /**
-     * @param Manager $manager
-     * @return array
-     */
-    protected function createArgs(Manager $manager)
-    {
-        $args = [
-            'Stage' => [
-                'type' => $manager->getType('VersionedStage'),
-                'defaultValue' => Versioned::LIVE,
-            ]
-        ];
-
-        return $args;
-    }
-
 }
