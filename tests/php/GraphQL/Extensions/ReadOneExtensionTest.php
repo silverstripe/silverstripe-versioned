@@ -16,7 +16,6 @@ use InvalidArgumentException;
 
 class ReadOneExtensionTest extends SapphireTest
 {
-
     public static $extra_dataobjects = [
         Fake::class,
     ];
@@ -37,7 +36,7 @@ class ReadOneExtensionTest extends SapphireTest
                 ],
             ];
             if ($version) {
-                $args['Version'] = $version;
+                $args['Versioning']['Version'] = $version;
             }
 
             return $readScaffold['resolve'](
@@ -80,6 +79,5 @@ class ReadOneExtensionTest extends SapphireTest
 
         $this->expectException(InvalidArgumentException::class);
         $doResolve('version', $record->ID, null);
-
     }
 }
