@@ -53,7 +53,7 @@ class ReadVersionsTest extends SapphireTest
         $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
-        $this->assertTrue(is_callable($scaffold['resolve']));
+        $this->assertInternalType('callable', $scaffold['resolve']);
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessageRegExp('/Cannot view versions/');

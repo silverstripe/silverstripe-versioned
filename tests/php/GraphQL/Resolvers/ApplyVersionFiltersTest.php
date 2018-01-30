@@ -150,8 +150,7 @@ class ApplyVersionFiltersTest extends SapphireTest
                 'Status' => ['modified']
             ]
         );
-        $this->assertCount(1, $list);
-        $this->assertEquals($record3->ID, $list->first()->ID);
+        $this->assertListEquals([['ID' => $record3->ID]], $list);
 
         $list = Fake::get();
         $filter->applyToList(
@@ -175,7 +174,7 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertCount(1, $list);
         $ids = $list->column('ID');
-        $this->assertTrue(in_array($record1->ID, $ids));
+        $this->assertContains($record1->ID, $ids);
 
 
         $list = Fake::get();
@@ -190,8 +189,8 @@ class ApplyVersionFiltersTest extends SapphireTest
         $this->assertCount(2, $list);
         $ids = $list->column('ID');
 
-        $this->assertTrue(in_array($record3->ID, $ids));
-        $this->assertTrue(in_array($record1->ID, $ids));
+        $this->assertContains($record3->ID, $ids);
+        $this->assertContains($record1->ID, $ids);
 
         $list = Fake::get();
         $filter->applyToList(
