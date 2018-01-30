@@ -3,10 +3,8 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\EnumType;
-use SilverStripe\GraphQL\TypeCreator;
-use SilverStripe\Versioned\Versioned;
 
-class VersionedItemQueryMode extends TypeCreator
+class VersionedItemQueryMode extends VersionedListQueryMode
 {
     /**
      * @return EnumType
@@ -16,20 +14,20 @@ class VersionedItemQueryMode extends TypeCreator
         return new EnumType([
             'name' => 'VersionedItemQueryMode',
             'description' => 'The versioned mode to use',
-            'values' => [
+            'values' => $this->getValues(),
+        ]);
+    }
+
+    protected function getValues()
+    {
+        return array_merge(
+            parent::getValues(),
+            [
                 'VERSION' => [
                     'value' => 'version',
                     'description' => 'Read a specific version'
-                ],
-                'DRAFT' => [
-                    'value' => Versioned::DRAFT,
-                    'description' => 'Read from the draft stage',
-                ],
-                'LIVE' => [
-                    'value' => Versioned::LIVE,
-                    'description' => 'Read from the live stage',
-                ],
+                ]
             ]
-        ]);
+        );
     }
 }

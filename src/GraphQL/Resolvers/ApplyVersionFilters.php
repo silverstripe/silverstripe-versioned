@@ -116,6 +116,18 @@ class ApplyVersionFilters
                 }
                 $list = $list->whereAny(array_filter($conditions));
                 break;
+            case 'version':
+                // Note: Only valid for ReadOne
+                if (!isset($versioningArgs['Version'])) {
+                    throw new InvalidArgumentException(
+                        'When using the "version" mode, you must specify a Version parameter'
+                    );
+                }
+                $list = $list->setDataQueryParam([
+                    "Versioned.mode" => 'version',
+                    "Versioned.version" => $versioningArgs['Version'],
+                ]);
+                break;
             default:
                 throw new InvalidArgumentException("Unsupported read mode {$mode}");
         }

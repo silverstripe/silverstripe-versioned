@@ -3,10 +3,9 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\Type;
-use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
-class VersionedReadOneInputType extends TypeCreator
+class VersionedReadOneInputType extends VersionedReadInputType
 {
     /**
      * @var bool
@@ -28,14 +27,17 @@ class VersionedReadOneInputType extends TypeCreator
      */
     public function fields()
     {
-        return [
-            'Mode' => [
-                'type' => $this->manager->getType('VersionedItemQueryMode'),
-                'defaultValue' => Versioned::DRAFT,
-            ],
-            'Version' => [
-                'type' => Type::int(),
-            ],
-        ];
+        return array_merge(
+            parent::fields(),
+            [
+                'Mode' => [
+                    'type' => $this->manager->getType('VersionedItemQueryMode'),
+                    'defaultValue' => Versioned::DRAFT,
+                ],
+                'Version' => [
+                    'type' => Type::int(),
+                ],
+            ]
+        );
     }
 }
