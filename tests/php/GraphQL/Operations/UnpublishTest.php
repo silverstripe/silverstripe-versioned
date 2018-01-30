@@ -67,6 +67,5 @@ class UnpublishTest extends SapphireTest
             [ 'currentUser' => new Member() ],
             new ResolveInfo([])
         );
-
     }
 }

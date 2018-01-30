@@ -7,7 +7,6 @@ use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
 
-
 class ApplyVersionFilters
 {
     /**
@@ -131,7 +130,6 @@ class ApplyVersionFilters
             default:
                 throw new InvalidArgumentException("Unsupported read mode {$mode}");
         }
-
     }
 
     /**
@@ -145,5 +143,4 @@ class ApplyVersionFilters
 
         return ($dt !== false && !array_sum($dt->getLastErrors()));
     }
-
 }

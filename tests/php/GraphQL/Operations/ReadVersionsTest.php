@@ -96,6 +96,5 @@ class ReadVersionsTest extends SapphireTest
         $this->assertInstanceOf(Versioned_Version::class, $result->first());
         $this->assertEquals(3, $result->first()->Version);
         $this->assertEquals(1, $result->last()->Version);
-
     }
 }

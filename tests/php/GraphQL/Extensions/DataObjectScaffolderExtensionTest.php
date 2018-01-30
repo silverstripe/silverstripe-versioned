@@ -50,5 +50,4 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         $this->assertArrayNotHasKey('Version', $fields);
         $this->assertArrayNotHasKey('Versions', $fields);
     }
-
 }

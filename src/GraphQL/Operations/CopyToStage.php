@@ -40,7 +40,7 @@ class CopyToStage extends MutationScaffolder
                 if (isset($input['FromVersion'])) {
                     $from = $input['FromVersion'];
                     $record = Versioned::get_version($this->dataObjectClass, $id, $from);
-                } else if(isset($input['FromStage'])) {
+                } elseif (isset($input['FromStage'])) {
                     $from = $input['FromStage'];
                     $record = Versioned::get_by_stage($this->dataObjectClass, $from)->byID($id);
                 } else {
@@ -83,5 +83,4 @@ class CopyToStage extends MutationScaffolder
 
         return $args;
     }
-
 }

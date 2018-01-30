@@ -65,6 +65,5 @@ class PublishTest extends SapphireTest
             [ 'currentUser' => new Member() ],
             new ResolveInfo([])
         );
-
     }
 }

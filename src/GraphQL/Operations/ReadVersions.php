@@ -43,5 +43,4 @@ class ReadVersions extends ListQueryScaffolder
         $operationName = 'read' . ucfirst($versionTypeName);
         parent::__construct($operationName, $versionTypeName, $resolver);
     }
-
 }

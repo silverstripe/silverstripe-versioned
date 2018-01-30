@@ -42,5 +42,4 @@ class SchemaScaffolderExtensionTest extends SapphireTest
         $scaffolder->addToManager($manager);
         $this->assertFalse($manager->hasType($memberType));
     }
-
 }

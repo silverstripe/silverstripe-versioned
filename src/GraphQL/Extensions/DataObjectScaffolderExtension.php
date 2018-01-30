@@ -69,7 +69,6 @@ class DataObjectScaffolderExtension extends Extension
         $owner
             ->addFields(['Version'])
             ->nestedQuery('Versions', new ReadVersions($class, $versionName));
-
     }
 
     /**
@@ -80,5 +79,4 @@ class DataObjectScaffolderExtension extends Extension
     {
         return ScaffoldingUtil::typeNameForDataObject($class).'Version';
     }
-
 }

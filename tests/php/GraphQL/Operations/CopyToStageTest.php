@@ -94,7 +94,5 @@ class CopyToStageTest extends SapphireTest
             [ 'currentUser' => new Member() ],
             new ResolveInfo([])
         );
-
-
     }
 }

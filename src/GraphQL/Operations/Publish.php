@@ -47,5 +47,4 @@ class Publish extends PublishOperation
     {
         return Versioned::DRAFT;
     }
-
 }

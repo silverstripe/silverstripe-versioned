@@ -84,7 +84,6 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertEquals('archive', $list->dataQuery()->getQueryParam('Versioned.mode'));
         $this->assertEquals('2016-11-08', $list->dataQuery()->getQueryParam('Versioned.date'));
-
     }
 
     public function testItSetsVersionQueryParams()
@@ -101,7 +100,6 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertEquals('version', $list->dataQuery()->getQueryParam('Versioned.mode'));
         $this->assertEquals('5', $list->dataQuery()->getQueryParam('Versioned.version'));
-
     }
 
     public function testItSetsLatestVersionQueryParams()
@@ -216,7 +214,5 @@ class ApplyVersionFiltersTest extends SapphireTest
         $ids = $list->column('ID');
         $this->assertTrue(in_array($record3->ID, $ids));
         $this->assertTrue(in_array($oldID, $ids));
-
     }
 }
-

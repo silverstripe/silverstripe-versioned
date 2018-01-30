@@ -32,5 +32,4 @@ class Fake extends DataObject implements TestOnly
         }
         return true;
     }
-
 }

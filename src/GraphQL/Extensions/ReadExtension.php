@@ -37,5 +37,4 @@ class ReadExtension extends Extension
             'type' => $manager->getType('VersionedInputType'),
         ];
     }
-
 }
