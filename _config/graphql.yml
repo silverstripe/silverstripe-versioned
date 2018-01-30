@@ -1,0 +1,32 @@
+---
+Name: versioned-graphql
+Only:
+  moduleexists: 'silverstripe/graphql'
+---
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\SchemaScaffolderExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\DataObjectScaffolderExtension
+
+# Register the versioned operations
+SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:
+  operations:
+    copyToStage: SilverStripe\Versioned\GraphQL\Operations\CopyToStage
+    publish: SilverStripe\Versioned\GraphQL\Operations\Publish
+    unpublish: SilverStripe\Versioned\GraphQL\Operations\Unpublish
+SilverStripe\GraphQL\Controller:
+  schema:
+    types:
+      VersionedStage: SilverStripe\Versioned\GraphQL\Types\VersionedStage
+      VersionedStatus: SilverStripe\Versioned\GraphQL\Types\VersionedStatus
+      VersionedQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedQueryMode
+      VersionedInputType: SilverStripe\Versioned\GraphQL\Types\VersionedInputType
+      CopyToStageInputType: SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType
