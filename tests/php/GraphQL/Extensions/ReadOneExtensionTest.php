@@ -4,15 +4,15 @@ namespace SilverStripe\Versioned\Tests\GraphQL\Extensions;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
+use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
 use SilverStripe\Security\Member;
-use SilverStripe\Versioned\GraphQL\Types\VersionedReadOneInputType;
+use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
-use InvalidArgumentException;
 
 class ReadOneExtensionTest extends SapphireTest
 {
@@ -23,7 +23,7 @@ class ReadOneExtensionTest extends SapphireTest
     public function testReadOneExtensionAppliesFilters()
     {
         $manager = new Manager();
-        $manager->addType((new VersionedReadOneInputType())->toType());
+        $manager->addType((new VersionedInputType())->toType());
         $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
         $read = new ReadOne(Fake::class);
         $readScaffold = $read->scaffold($manager);

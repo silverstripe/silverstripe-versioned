@@ -10,7 +10,7 @@ use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
 use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
 use SilverStripe\Security\Member;
-use SilverStripe\Versioned\GraphQL\Types\VersionedReadInputType;
+use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Core\Injector\Injector;
 
@@ -33,7 +33,7 @@ class ReadExtensionTest extends SapphireTest
         Injector::inst()->registerService($mock, ApplyVersionFilters::class);
 
         $manager = new Manager();
-        $manager->addType((new VersionedReadInputType())->toType());
+        $manager->addType((new VersionedInputType())->toType());
         $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
         $read = new Read(Fake::class);
         $read->setUsePagination(false);

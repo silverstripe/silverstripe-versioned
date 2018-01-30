@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\EnumType;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
-class VersionedListQueryMode extends TypeCreator
+class VersionedQueryMode extends TypeCreator
 {
     /**
      * @return EnumType
@@ -14,7 +14,7 @@ class VersionedListQueryMode extends TypeCreator
     public function toType()
     {
         return new EnumType([
-            'name' => 'VersionedListQueryMode',
+            'name' => 'VersionedQueryMode',
             'description' => 'The versioned mode to use',
             'values' => $this->getValues()
         ]);
@@ -32,7 +32,7 @@ class VersionedListQueryMode extends TypeCreator
             ],
             'LATEST' => [
                 'value' => 'latest_versions',
-                'description' => 'Read the latest version'
+                'description' => 'Read the latest version',
             ],
             'DRAFT' => [
                 'value' => Versioned::DRAFT,
@@ -45,6 +45,10 @@ class VersionedListQueryMode extends TypeCreator
             'STATUS' => [
                 'value' => 'status',
                 'description' => 'Read only records with a specific status',
+            ],
+            'VERSION' => [
+                'value' => 'version',
+                'description' => 'Read a specific version',
             ],
         ];
     }

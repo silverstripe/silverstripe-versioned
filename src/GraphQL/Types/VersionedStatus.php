@@ -32,7 +32,7 @@ class VersionedStatus extends TypeCreator
                     'value' => 'modified',
                     'description' => 'Only records that have unpublished changes',
                 ],
-            ]
+            ],
         ]);
     }
 }

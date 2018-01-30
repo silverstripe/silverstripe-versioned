@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
-class VersionedReadInputType extends TypeCreator
+class VersionedInputType extends TypeCreator
 {
     /**
      * @var bool
@@ -19,7 +19,7 @@ class VersionedReadInputType extends TypeCreator
     public function attributes()
     {
         return [
-            'name' => 'VersionedReadInputType'
+            'name' => 'VersionedInputType'
         ];
     }
 
@@ -30,7 +30,7 @@ class VersionedReadInputType extends TypeCreator
     {
         return [
             'Mode' => [
-                'type' => $this->manager->getType('VersionedListQueryMode'),
+                'type' => $this->manager->getType('VersionedQueryMode'),
                 'defaultValue' => Versioned::DRAFT,
             ],
             'ArchiveDate' => [
@@ -40,6 +40,9 @@ class VersionedReadInputType extends TypeCreator
             'Status' => [
                 'type' => Type::listOf($this->manager->getType('VersionedStatus')),
                 'description' => 'If mode is STATUS, specify which versioned statuses'
+            ],
+            'Version' => [
+                'type' => Type::int(),
             ],
         ];
     }

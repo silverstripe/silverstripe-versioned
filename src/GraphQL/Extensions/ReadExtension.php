@@ -6,11 +6,14 @@ use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
+use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\ORM\DataList;
 use SilverStripe\GraphQL\Manager;
 
 /**
- * @property Read $owner
+ * Decorator for either a Read or ReadOne query scaffolder
+ *
+ * @property Read|ReadOne $owner
  */
 class ReadExtension extends Extension
 {
@@ -31,7 +34,7 @@ class ReadExtension extends Extension
     public function updateArgs(&$args, Manager $manager)
     {
         $args['Versioning'] = [
-            'type' => $manager->getType('VersionedReadInputType'),
+            'type' => $manager->getType('VersionedInputType'),
         ];
     }
 
