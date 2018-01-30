@@ -16,6 +16,9 @@ use Exception;
 
 class UnpublishTest extends SapphireTest
 {
+
+    protected $usesDatabase = true;
+
     public static $extra_dataobjects = [
         Fake::class,
     ];

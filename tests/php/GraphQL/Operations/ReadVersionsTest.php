@@ -18,6 +18,9 @@ use SilverStripe\Versioned\Versioned_Version;
 
 class ReadVersionsTest extends SapphireTest
 {
+
+    protected $usesDatabase = true;
+
     public static $extra_dataobjects = [
         Fake::class,
     ];
