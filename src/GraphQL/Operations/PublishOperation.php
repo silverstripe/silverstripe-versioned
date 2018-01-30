@@ -19,7 +19,6 @@ use SilverStripe\Versioned\Versioned;
 abstract class PublishOperation extends MutationScaffolder
 {
     use DataObjectTypeTrait;
-    use Extensible;
 
     /**
      * UpdateOperationScaffolder constructor.

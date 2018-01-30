@@ -2,27 +2,19 @@
 
 namespace SilverStripe\Versioned\Tests\GraphQL\Resolvers;
 
+use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
-use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
-use InvalidArgumentException;
 
 class ApplyVersionFiltersTest extends SapphireTest
 {
-    public static $extra_dataobjects = [
+    protected $usesDatabase = true;
+
+    protected static $extra_dataobjects = [
         Fake::class,
     ];
-
-    public function setUp()
-    {
-        parent::setUp();
-        $table = Fake::getSchema()->tableName(Fake::class);
-        DB::query("DELETE FROM $table");
-        DB::query("DELETE FROM {$table}_Live");
-        DB::query("DELETE FROM {$table}_Versions");
-    }
 
     public function testItFiltersByStage()
     {

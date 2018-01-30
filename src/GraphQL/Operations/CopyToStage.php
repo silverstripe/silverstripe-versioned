@@ -17,7 +17,6 @@ use SilverStripe\Versioned\Versioned;
 class CopyToStage extends MutationScaffolder
 {
     use DataObjectTypeTrait;
-    use Extensible;
 
     /**
      * CreateOperationScaffolder constructor.
