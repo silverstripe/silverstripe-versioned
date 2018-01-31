@@ -6,6 +6,10 @@ use GraphQL\Type\Definition\EnumType;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
+if (!class_exists(TypeCreator::class)) {
+    return;
+}
+
 class VersionedStage extends TypeCreator
 {
     /**

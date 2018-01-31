@@ -5,6 +5,10 @@ namespace SilverStripe\Versioned\GraphQL\Types;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\TypeCreator;
 
+if (!class_exists(TypeCreator::class)) {
+    return;
+}
+
 class CopyToStageInputType extends TypeCreator
 {
     /**

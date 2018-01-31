@@ -7,6 +7,10 @@ use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
 
+if (!class_exists(PublishOperation::class)) {
+    return;
+}
+
 /**
  * Scaffolds a generic update operation for DataObjects.
  */

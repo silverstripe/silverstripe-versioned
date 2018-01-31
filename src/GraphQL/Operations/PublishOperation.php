@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use Exception;
 use GraphQL\Type\Definition\Type;
-use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
@@ -12,6 +11,10 @@ use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
+
+if (!class_exists(MutationScaffolder::class)) {
+    return;
+}
 
 /**
  * Scaffolds a generic update operation for DataObjects.
