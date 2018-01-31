@@ -4,12 +4,15 @@ namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
-use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
 use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
+
+if (!class_exists(MutationScaffolder::class)) {
+    return;
+}
 
 /**
  * A generic "create" operation for a DataObject.

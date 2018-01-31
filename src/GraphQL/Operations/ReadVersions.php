@@ -8,6 +8,10 @@ use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
+if (!class_exists(ListQueryScaffolder::class)) {
+    return;
+}
+
 /**
  * Scaffolds a generic read operation for DataObjects.
  */
