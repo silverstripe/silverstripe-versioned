@@ -9,6 +9,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\ValidationResult;
@@ -22,6 +23,10 @@ use SilverStripe\View\ArrayData;
 class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 {
 
+    /**
+     * @param bool $unlinked
+     * @return ArrayList
+     */
     public function Breadcrumbs($unlinked = false)
     {
         $items = parent::Breadcrumbs($unlinked);
@@ -40,6 +45,9 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         return $items;
     }
 
+    /**
+     * @return FieldList
+     */
     protected function getFormActions()
     {
         // Check if record is versionable
@@ -69,11 +77,14 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
      * Ensures that an unversioned object calls publishRecursive() to its ownees
      * @param array $data
      * @param Form $form
+     * @return DataObject $record
      */
     public function saveFormIntoRecord($data, $form)
     {
         $record = parent::saveFormIntoRecord($data, $form);
         $record->publishRecursive();
+
+        return $record;
     }
 
     /**
@@ -229,10 +240,15 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         return null;
     }
 
+    /**
+     * Getting buttons that are for versioned objects
+     *
+     * @param DataObject|Versioned $record
+     * @param FieldList $actions
+     */
     protected function addVersionedButtons(DataObject $record, FieldList $actions)
     {
         // Save & Publish action
-        /* @var DataObject|Versioned|RecursivePublishable $record */
         if ($record->canPublish()) {
             // "publish", as with "save", it supports an alternate state to show when action is needed.
             $publish = FormAction::create(
@@ -284,6 +300,12 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
     }
 
+    /**
+     * Getting buttons that are for unversioned objects
+     *
+     * @param DataObject $record
+     * @param FieldList $actions
+     */
     protected function addUnversionedButtons(DataObject $record, FieldList $actions)
     {
         if (!$record->canEdit()) {
@@ -308,7 +330,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 'warning',
                 '<span class="btn actions-warning font-icon-info-circled">'
                     ._t(
-                        __CLASS__ . '.WARNINGAPPLYCHANGES',
+                        __CLASS__ . '.PUBLISHITEMSWARNING',
                         'Draft/modified items will be published'
                     )
                 .'</span>'
