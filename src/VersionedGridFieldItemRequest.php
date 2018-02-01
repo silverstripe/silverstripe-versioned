@@ -45,8 +45,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // Check if record is versionable
         /** @var Versioned|RecursivePublishable|DataObject $record */
         $record = $this->getRecord();
-        $ownerIsVersioned = $record->hasExtension(Versioned::class);
-        $ownerIsPublishable = $record->hasExtension(RecursivePublishable::class);
+        $ownerIsVersioned = $record && $record->hasExtension(Versioned::class);
+        $ownerIsPublishable = $record && $record->hasExtension(RecursivePublishable::class);
         if (!$record || !($ownerIsVersioned || $ownerIsPublishable)) {
             return parent::getFormActions();
         }
@@ -63,6 +63,17 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         );
 
         return parent::getFormActions();
+    }
+
+    /**
+     * Ensures that an unversioned object calls publishRecursive() to its ownees
+     * @param array $data
+     * @param Form $form
+     */
+    public function saveFormIntoRecord($data, $form)
+    {
+        $record = parent::saveFormIntoRecord($data, $form);
+        $record->publishRecursive();
     }
 
     /**
@@ -216,7 +227,6 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
 
         return null;
-
     }
 
     protected function addVersionedButtons(DataObject $record, FieldList $actions)
@@ -296,10 +306,12 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if ($warn) {
             $actions->push(LiteralField::create(
                 'warning',
-                _t(
-                    __CLASS__ . '.WARNINGAPPLYCHANGES',
-                    'Draft/modified items will be published'
-                )
+                '<span class="btn actions-warning font-icon-info-circled">'
+                    ._t(
+                        __CLASS__ . '.WARNINGAPPLYCHANGES',
+                        'Draft/modified items will be published'
+                    )
+                .'</span>'
             ));
         }
     }
