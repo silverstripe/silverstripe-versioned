@@ -22,7 +22,7 @@ class VersionedGridFieldDetailForm extends Extension
     {
         // Conditionally use a versioned item handler if it doesn't already have one.
         if ($record
-            && $record->has_extension(Versioned::class)
+            && ($record->has_extension(Versioned::class) || $record->hasExtension(RecursivePublishable::class))
             && $record->config()->get('versioned_gridfield_extensions')
             && (!$class || !is_subclass_of($class, VersionedGridFieldItemRequest::class))
         ) {
