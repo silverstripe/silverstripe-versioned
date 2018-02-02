@@ -75,15 +75,16 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
     /**
      * Ensures that an unversioned object calls publishRecursive() to its ownees
+     *
      * @param array $data
      * @param Form $form
      * @return DataObject $record
      */
     public function saveFormIntoRecord($data, $form)
     {
+        /** @var DataObject|RecursivePublishable $record */
         $record = parent::saveFormIntoRecord($data, $form);
         $record->publishRecursive();
-
         return $record;
     }
 
@@ -143,7 +144,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         // Initial save and reload
         $record = $this->saveFormIntoRecord($data, $form);
-        $record->publishRecursive();
+
         $editURL = $this->Link('edit');
         $xmlTitle = Convert::raw2xml($record->Title);
         $link = "<a href=\"{$editURL}\">{$xmlTitle}</a>";
@@ -311,30 +312,28 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if (!$record->canEdit()) {
             return;
         }
-
-        /* @var FormAction $action */
-        $action = $actions->fieldByName('action_doSave');
-
-        if (!$action) {
+        $saveAction = $actions->fieldByName('action_doSave');
+        if (!$saveAction) {
+            return;
+        }
+        $ownsObjects = !empty($record->config()->get('owns'));
+        if (!$ownsObjects) {
             return;
         }
 
-        $warn = !empty($record->config()->get('owns'));
-        $action->setTitle(_t(
+        $saveAction->setTitle(_t(
             __CLASS__ . '.BUTTONAPPLYCHANGES',
             'Apply changes'
         ))->addExtraClass('btn-primary font-icon-save');
 
-        if ($warn) {
-            $actions->push(LiteralField::create(
-                'warning',
-                '<span class="btn actions-warning font-icon-info-circled">'
-                    ._t(
-                        __CLASS__ . '.PUBLISHITEMSWARNING',
-                        'Draft/modified items will be published'
-                    )
-                .'</span>'
-            ));
-        }
+        $actions->push(LiteralField::create(
+            'warning',
+            '<span class="btn actions-warning font-icon-info-circled">'
+                ._t(
+                    __CLASS__ . '.PUBLISHITEMSWARNING',
+                    'Draft/modified items will be published'
+                )
+            .'</span>'
+        ));
     }
 }
