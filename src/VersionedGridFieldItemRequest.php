@@ -22,7 +22,6 @@ use SilverStripe\View\ArrayData;
  */
 class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 {
-
     /**
      * @param bool $unlinked
      * @return ArrayList
@@ -74,7 +73,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     }
 
     /**
-     * Ensures that an unversioned object calls publishRecursive() to its ownees
+     * If a record is recursive publishable, but not versioned, all saves should trigger a recursive publish.
      *
      * @param array $data
      * @param Form $form
@@ -82,9 +81,16 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
      */
     public function saveFormIntoRecord($data, $form)
     {
-        /** @var DataObject|RecursivePublishable $record */
         $record = parent::saveFormIntoRecord($data, $form);
-        $record->publishRecursive();
+
+        // Note: Don't publish if versioned, since that's a separate action
+        $ownerIsVersioned = $record && $record->hasExtension(Versioned::class);
+        $ownerIsPublishable = $record && $record->hasExtension(RecursivePublishable::class);
+        if ($ownerIsPublishable && !$ownerIsVersioned) {
+            /** @var RecursivePublishable $record */
+            $record->publishRecursive();
+        }
+
         return $record;
     }
 
@@ -144,6 +150,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         // Initial save and reload
         $record = $this->saveFormIntoRecord($data, $form);
+        $record->publishRecursive();
 
         $editURL = $this->Link('edit');
         $xmlTitle = Convert::raw2xml($record->Title);
