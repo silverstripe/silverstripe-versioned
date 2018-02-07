@@ -18,7 +18,6 @@ ru:
       other: '{count} объектов набора изменений'
     SINGULARNAME: 'Объект набора изменений'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Сгенерировано автоматически при публикации ''{title}'' в {created}'
     has_many_Versions: Версии
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Архив

@@ -307,4 +307,32 @@ class RecursivePublishable extends DataExtension
             $disowned->execute();
         }
     }
+
+    /**
+     * If `cascade_duplications` is empty, default to `owns` config
+     *
+     * @param DataObject $original
+     * @param bool $doWrite
+     * @param array|null|false $relations
+     */
+    public function onBeforeDuplicate($original, &$doWrite, &$relations)
+    {
+        // If relations to duplicate are declared (or forced off) don't rewrite
+        if ($relations || $relations === false) {
+            return;
+        }
+
+        // Only duplicate owned relationships that are either exclusively owned,
+        // or require additional writes. Also exclude any custom non-relation ownerships.
+        $allowed = array_merge(
+            array_keys($this->owner->manyMany()), // Require mapping table duplications
+            array_keys($this->owner->belongsTo()), // Exclusive record must be duplicated
+            array_keys($this->owner->hasMany()) // Exclusive records should be duplicated
+        );
+        // Note: don't assume that owned has_one needs duplication, as these can be
+        // shared non-exclusively by both clone and original.
+        // Get candidates from ownership and intersect
+        $owns = $this->owner->config()->get('owns');
+        $relations = array_intersect($allowed, $owns);
+    }
 }

@@ -434,7 +434,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                             . " AND \"{$alias}_Versions\".\"Version\" = \"{$baseTable}_Versions\".\"Version\""
                         );
                     }
+
+                    // Rewrite all usages of `Table` to `Table_Versions`
+                    // However, add an alias back to the base table in case this must later be joined
                     $query->renameTable($alias, $alias . '_Versions');
+                    $query->renameTable($alias . '_Draft', $alias);
                 }
 
                 // Add all <basetable>_Versions columns
