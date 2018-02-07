@@ -29,7 +29,6 @@ it:
       other: '{count} Elementi del Gruppo Modifiche'
     SINGULARNAME: 'Elemento del Gruppo Modifiche'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Generato pubblicando ''{title}'' il {created}'
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archivia

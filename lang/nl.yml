@@ -5,7 +5,6 @@ nl:
     SINGULARNAME: Campagne
     STATE: Status
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'gegenereerd bij het publiceren van ''{title}'' op {created}'
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiveren

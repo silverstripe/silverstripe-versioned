@@ -29,7 +29,6 @@ eo:
       other: '{count} ŝanĝaraj eroj'
     SINGULARNAME: 'Ŝangi agordon'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Generita pro publikigo de ''{title}'' je {created}'
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Enarkivigi
