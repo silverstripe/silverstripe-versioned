@@ -1487,14 +1487,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Publishes this object to Live, but doesn't publish owned objects.
      *
+     * User code should call {@see canPublish()} prior to invoking this method.
+     *
      * @return bool True if publish was successful
      */
     public function publishSingle()
     {
         $owner = $this->owner;
-        if (!$owner->canPublish()) {
-            return false;
-        }
         if ($this->isPublished()) {
             // get the last published version
             $baseClass = $owner->baseClass();
@@ -1587,36 +1586,29 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Removes the record from both live and stage
      *
+     * User code should call {@see canArchive()} prior to invoking this method.
+     *
      * @return bool Success
      */
     public function doArchive()
     {
         $owner = $this->owner;
-        if (!$owner->canArchive()) {
-            return false;
-        }
-
         $owner->invokeWithExtensions('onBeforeArchive', $this);
         $owner->deleteFromChangeSets();
         $owner->doUnpublish();
         $owner->deleteFromStage(static::DRAFT);
         $owner->invokeWithExtensions('onAfterArchive', $this);
-
         return true;
     }
 
     /**
-     * Remove this item from any changesets
+     * Remove this item from any changesets.
      *
      * @return bool
      */
     public function deleteFromChangeSets()
     {
         $owner = $this->owner;
-        if (!$owner->canArchive()) {
-            return false;
-        }
-
         $ids = [$owner->ID];
         if ($owner->hasMethod('getDescendantIDList')) {
             $ids = array_merge($ids, $owner->getDescendantIDList());
@@ -1631,15 +1623,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Removes this record from the live site
      *
+     * User code should call {@see canUnpublish()} prior to invoking this method.
+     *
      * @return bool Flag whether the unpublish was successful
      */
     public function doUnpublish()
     {
         $owner = $this->owner;
-        if (!$owner->canUnpublish()) {
-            return false;
-        }
-
         // Skip if this record isn't saved
         if (!$owner->isInDB()) {
             return false;
@@ -1688,15 +1678,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Revert the draft changes: replace the draft content with the content on live
      *
+     * User code should call {@see canRevertToLive()} prior to invoking this method.
+     *
      * @return bool True if the revert was successful
      */
     public function doRevertToLive()
     {
         $owner = $this->owner;
-        if (!$owner->canRevertToLive()) {
-            return false;
-        }
-
         $owner->invokeWithExtensions('onBeforeRevertToLive');
         $owner->copyVersionToStage(static::LIVE, static::DRAFT, false);
         $owner->invokeWithExtensions('onAfterRevertToLive');
