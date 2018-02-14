@@ -508,13 +508,13 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Preview live if versioned
         if ($this->isVersioned()) {
-        $live = $this->getObjectInStage(Versioned::LIVE);
-        if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
-            $links[Versioned::LIVE] = [
+            $live = $this->getObjectInStage(Versioned::LIVE);
+            if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
+                $links[Versioned::LIVE] = [
                 'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
                 'type' => $live->getMimeType(),
-            ];
-        }
+                ];
+            }
         }
 
         return $links;
