@@ -11,6 +11,7 @@ use SilverStripe\Versioned\ChangeSet;
 use SilverStripe\Versioned\ChangeSetItem;
 use SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject;
 use SilverStripe\Versioned\Tests\ChangeSetTest\MidObject;
+use SilverStripe\Versioned\Tests\ChangeSetTest\Permissions;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -28,6 +29,16 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\EndObjectChild::class,
         ChangeSetTest\UnversionedObject::class,
     ];
+
+    protected function tearDown()
+    {
+        // Reset overridden permissions
+        foreach ($this->getExtraDataObjects() as $dataObjectClass) {
+            /** @var Permissions $dataObjectClass */
+            $dataObjectClass::reset();
+        }
+        parent::tearDown();
+    }
 
     /**
      * Automatically publish all objects
@@ -213,7 +224,7 @@ class ChangeSetTest extends SapphireTest
             $endItem->ReferencedBy()->column("ID")
         );
 
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 [
                     'Added' => ChangeSetItem::EXPLICITLY,
@@ -252,7 +263,7 @@ class ChangeSetTest extends SapphireTest
         $this->assertEquals(ChangeSetItem::CHANGE_DELETED, $mid2Item->getChangeType());
         $this->assertEquals(ChangeSetItem::CHANGE_DELETED, $end2Item->getChangeType());
 
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 [
                     'Added' => ChangeSetItem::EXPLICITLY,
@@ -324,10 +335,6 @@ class ChangeSetTest extends SapphireTest
         $this->logOut();
         $this->assertFalse($changeSet->canPublish());
 
-        // campaign admin only permission doesn't grant publishing rights
-        $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
-        $this->assertFalse($changeSet->canPublish());
-
         // With model publish permissions only publish is allowed
         $this->logInWithPermission('PERM_canPublish');
         $this->assertTrue($changeSet->canPublish());
@@ -340,6 +347,52 @@ class ChangeSetTest extends SapphireTest
             ]
         );
         $this->assertTrue($changeSet->canPublish());
+
+        // campaign admin only permission doesn't grant publishing rights
+        $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+        $this->assertFalse($changeSet->canPublish());
+
+        // Test that you can still publish a changeset, even if canPublish()
+        // returns false (e.g. externally rather than internally enforced)
+        $changeSet->publish();
+    }
+
+    /**
+     * Test that nested can publish correctly respects implicit / explicit items
+     */
+    public function testCanPublishNested()
+    {
+        // Create changeset containing all items (unpublished)
+        $this->logInWithPermission('PERM_canPublish');
+        $changeSet = new ChangeSet();
+        $changeSet->write();
+        /** @var ChangeSetTest\BaseObject $base */
+        $base = $this->objFromFixture(ChangeSetTest\BaseObject::class, 'base');
+        /** @var ChangeSetTest\MidObject $mid1 */
+        $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
+        $changeSet->addObject($base);
+        $changeSet->addObject($mid1);
+        $changeSet->sync();
+        $this->assertEquals(5, $changeSet->Changes()->count());
+
+        // With model publish permissions only publish is allowed
+        $this->assertTrue($changeSet->canPublish());
+
+        // setting canPublish = false on any implicit items in the changeset doesn't
+        // deny publishing permissions
+        /** @var ChangeSetTest\MidObject $mid2 */
+        $mid2 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid2');
+        $mid2->setCan('canPublish', false);
+        $this->assertTrue($changeSet->canPublish());
+
+        // Setting canPublish = false on any explicit item in the changeset
+        // does deny publishing permissions
+        $mid1->setCan('canPublish', false);
+        $this->assertFalse($changeSet->canPublish());
+
+        // Test that you can still publish a changeset, even if canPublish()
+        // returns false (e.g. externally rather than internally enforced)
+        $changeSet->publish();
     }
 
     public function testHasChanges()

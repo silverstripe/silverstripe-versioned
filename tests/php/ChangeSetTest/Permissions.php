@@ -14,6 +14,8 @@ use SilverStripe\Security\Permission;
  */
 trait Permissions
 {
+    public static $can_overrides = [];
+
     public function canEdit($member = null)
     {
         return $this->can(__FUNCTION__, $member);
@@ -41,10 +43,34 @@ trait Permissions
 
     public function can($perm, $member = null, $context = [])
     {
+        // Check object overrides
+        if (isset(static::$can_overrides[$this->ID][$perm])) {
+            return static::$can_overrides[$this->ID][$perm];
+        }
+
         $perms = [
             "PERM_{$perm}",
             'CAN_ALL',
         ];
         return Permission::checkMember($member, $perms);
+    }
+
+    /**
+     * Set can override
+     *
+     * @param string $perm
+     * @param bool $can
+     */
+    public function setCan($perm, $can)
+    {
+        static::$can_overrides[$this->ID][$perm] = (bool)$can;
+    }
+
+    /**
+     * Reset overrides
+     */
+    public static function reset()
+    {
+        static::$can_overrides = [];
     }
 }

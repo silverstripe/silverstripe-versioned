@@ -16,7 +16,6 @@ use SilverStripe\ORM\UnexpectedDataException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use BadMethodCallException;
-use Exception;
 use SilverStripe\Security\Security;
 
 /**
@@ -263,9 +262,6 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // Logical checks prior to publish
-        if (!$this->canPublish()) {
-            throw new Exception("The current member does not have permission to publish this ChangeSetItem.");
-        }
         if ($this->VersionBefore || $this->VersionAfter) {
             throw new BadMethodCallException("This ChangeSetItem has already been published");
         }
@@ -394,7 +390,8 @@ class ChangeSetItem extends DataObject implements Thumbnail
     public function canPublish($member = null)
     {
         // No action for unversiond objects so no action to deny
-        if (!$this->isVersioned()) {
+        // Implicitly added items allow publish
+        if (!$this->isVersioned() || $this->Added === self::IMPLICITLY) {
             return true;
         }
 
@@ -511,13 +508,13 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Preview live if versioned
         if ($this->isVersioned()) {
-            $live = $this->getObjectInStage(Versioned::LIVE);
-            if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
-                $links[Versioned::LIVE] = [
-                    'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
-                    'type' => $live->getMimeType(),
-                ];
-            }
+        $live = $this->getObjectInStage(Versioned::LIVE);
+        if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
+            $links[Versioned::LIVE] = [
+                'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
+                'type' => $live->getMimeType(),
+            ];
+        }
         }
 
         return $links;
