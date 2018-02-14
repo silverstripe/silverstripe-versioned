@@ -114,6 +114,8 @@ class ChangeSet extends DataObject
     /**
      * Publish this changeset, then closes it.
      *
+     * User code should call {@see canPublish()} prior to invoking this method.
+     *
      * @throws Exception
      * @return bool True if successful
      */
@@ -129,9 +131,6 @@ class ChangeSet extends DataObject
             throw new ValidationException(
                 "ChangeSet does not include all necessary changes and cannot be published."
             );
-        }
-        if (!$this->canPublish()) {
-            throw new LogicException("The current member does not have permission to publish this ChangeSet.");
         }
 
         DB::get_conn()->withTransaction(function () {
@@ -394,7 +393,8 @@ class ChangeSet extends DataObject
         if (!$member) {
             $member = Security::getCurrentUser();
         }
-        foreach ($this->Changes() as $change) {
+        // Check all explicitly added items
+        foreach ($this->Changes()->filter(['Added' => ChangeSetItem::EXPLICITLY]) as $change) {
             /** @var ChangeSetItem $change */
             if (!$change->canPublish($member)) {
                 return false;

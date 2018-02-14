@@ -239,9 +239,6 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // Logical checks prior to publish
-        if (!$this->canPublish()) {
-            throw new Exception("The current member does not have permission to publish this ChangeSetItem.");
-        }
         if ($this->VersionBefore || $this->VersionAfter) {
             throw new BadMethodCallException("This ChangeSetItem has already been published");
         }
@@ -356,6 +353,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function canPublish($member = null)
     {
+        // Implicitly added items allow publish
+        if ($this->Added === self::IMPLICITLY) {
+            return true;
+        }
+
         // Check canMethod to invoke on object
         switch ($this->getChangeType()) {
             case static::CHANGE_DELETED: {
