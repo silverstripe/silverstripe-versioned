@@ -2,10 +2,10 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use Silverstripe\Assets\Dev\TestAssetStore;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Image;
-use SilverStripe\Assets\Tests\Storage\AssetStoreTest\TestAssetStore;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\DataDifferencer;
 use SilverStripe\Versioned\Versioned;
