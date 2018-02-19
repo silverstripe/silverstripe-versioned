@@ -307,6 +307,7 @@ class VersionedTest extends SapphireTest
 
     public function testRollbackTo()
     {
+        /** @var VersionedTest\AnotherSubclass $page1 */
         $page1 = $this->objFromFixture(VersionedTest\AnotherSubclass::class, 'subclass1');
         $page1->Content = 'orig';
         $page1->write();
@@ -318,6 +319,7 @@ class VersionedTest extends SapphireTest
         $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $changedVersion = $page1->Version;
 
+        $page1->Content = 'should be discarded';
         $page1->doRollbackTo($origVersion);
         $page1 = Versioned::get_one_by_stage(
             VersionedTest\TestObject::class,
