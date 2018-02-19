@@ -261,17 +261,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function __construct($mode = self::STAGEDVERSIONED)
     {
-        // Handle deprecated behaviour
-        if ($mode === 'Stage' && func_num_args() === 1) {
-            Deprecation::notice("5.0", "Versioned now takes a mode as a single parameter");
-            $mode = static::VERSIONED;
-        } elseif (is_array($mode) || func_num_args() > 1) {
-            Deprecation::notice("5.0", "Versioned now takes a mode as a single parameter");
-            $mode = func_num_args() > 1 || count($mode) > 1
-                ? static::STAGEDVERSIONED
-                : static::VERSIONED;
-        }
-
         if (!in_array($mode, [static::STAGEDVERSIONED, static::VERSIONED])) {
             throw new InvalidArgumentException("Invalid mode: {$mode}");
         }
@@ -989,11 +978,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function canPublish($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1013,6 +997,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         return $owner->canEdit($member);
     }
 
+    protected function extendCanPublish()
+    {
+        // prevent canPublish() from extending itself
+        return null;
+    }
+
     /**
      * Check if the current user can delete this record from live
      *
@@ -1021,11 +1011,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function canUnpublish($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1045,6 +1030,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         return $owner->canPublish($member);
     }
 
+    protected function extendCanUnpublish()
+    {
+        // prevent canUnpublish() extending itself
+        return null;
+    }
+
     /**
      * Check if the current user is allowed to archive this record.
      * If extended, ensure that both canDelete and canUnpublish are extended also
@@ -1054,11 +1045,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function canArchive($member = null)
     {
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
@@ -1088,6 +1074,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         return true;
     }
 
+    protected function extendCanArchive()
+    {
+        // Prevent canArchive() extending itself
+        return null;
+    }
+
     /**
      * Check if the user can revert this record to live
      *
@@ -1097,11 +1089,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function canRevertToLive($member = null)
     {
         $owner = $this->owner;
-
-        // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
-            return null;
-        }
 
         // Can't revert if not on live
         if (!$owner->isPublished()) {
@@ -1124,6 +1111,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Default to canEdit
         return $owner->canEdit($member);
+    }
+
+    protected function extendCanRevertToLive()
+    {
+        // Prevent canRevertToLive() extending itself
+        return null;
     }
 
     /**
@@ -1298,15 +1291,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * @deprecated 4.0..5.0
-     */
-    public function doPublish()
-    {
-        Deprecation::notice('5.0', 'Use publishRecursive instead');
-        return $this->owner->publishRecursive();
-    }
-
-    /**
      * Publishes this object to Live, but doesn't publish owned objects.
      *
      * User code should call {@see canPublish()} prior to invoking this method.
@@ -1449,15 +1433,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * @deprecated 4.0..5.0
-     */
-    public function publish($fromStage, $toStage, $createNewVersion = false)
-    {
-        Deprecation::notice('5.0', 'Use copyVersionToStage instead');
-        $this->owner->copyVersionToStage($fromStage, $toStage, $createNewVersion);
-    }
-
-    /**
      * Move a database record from one stage to the other.
      *
      * @param int|string $fromStage Place to copy from.  Can be either a stage name or a version number.
@@ -1537,16 +1512,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function getMigratingVersion()
     {
         return $this->owner->getField(self::MIGRATING_VERSION);
-    }
-
-    /**
-     * @deprecated 4.0...5.0
-     * @param string $version The version.
-     */
-    public function migrateVersion($version)
-    {
-        Deprecation::notice('5.0', 'use setMigratingVersion instead');
-        $this->setMigratingVersion($version);
     }
 
     /**
