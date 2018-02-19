@@ -30,6 +30,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     {
         $items = parent::Breadcrumbs($unlinked);
         $status = $this->getRecordStatus();
+        $badge = null;
         if ($status) {
             // Generate badge
             $badge = DBField::create_field('HTMLFragment', sprintf(
@@ -37,12 +38,15 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 $status['class'],
                 $status['title']
             ));
-            $this->extend('updateBadge', $badge);
+        }
+        $this->extend('updateBadge', $badge);
 
+        if ($badge) {
             /** @var ArrayData $lastItem */
             $lastItem = $items->last();
             $lastItem->setField('Extra', $badge);
         }
+
         return $items;
     }
 
