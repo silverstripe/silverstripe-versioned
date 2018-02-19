@@ -26,6 +26,7 @@ class MidObject extends DataObject implements TestOnly
 
     private static $has_many = [
         'Others' => UnversionedObject::class,
+        'Unstaged' => UnstagedObject::class,
     ];
 
     private static $owns = [
@@ -35,6 +36,7 @@ class MidObject extends DataObject implements TestOnly
     private static $cascade_deletes = [
         'End',
         'Others',
+        'Unstaged',
     ];
 
     private static $extensions = [
