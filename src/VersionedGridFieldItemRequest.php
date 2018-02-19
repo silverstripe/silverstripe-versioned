@@ -37,6 +37,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 $status['class'],
                 $status['title']
             ));
+            $this->extend('updateBadge', $badge);
+
             /** @var ArrayData $lastItem */
             $lastItem = $items->last();
             $lastItem->setField('Extra', $badge);
