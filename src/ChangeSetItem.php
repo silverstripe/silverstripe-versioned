@@ -242,7 +242,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         if ($liveRecord) {
             foreach ($liveRecord->findCascadeDeletes(true) as $next) {
                 /** @var Versioned|DataObject $next */
-                if ($next->hasExtension(Versioned::class) && $next->isOnLiveOnly()) {
+                if ($next->hasExtension(Versioned::class) && $next->hasStages() && $next->isOnLiveOnly()) {
                     $this->mergeRelatedObject($references, ArrayList::create(), $next);
                 }
             }
@@ -541,6 +541,11 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function isVersioned()
     {
-        return $this->ObjectClass && Extensible::has_extension($this->ObjectClass, Versioned::class);
+        if (!$this->ObjectClass || !class_exists($this->ObjectClass)) {
+            return false;
+        }
+        /** @var Versioned|DataObject $singleton */
+        $singleton = DataObject::singleton($this->ObjectClass);
+        return $singleton->hasExtension(Versioned::class) && $singleton->hasStages();
     }
 }

@@ -27,3 +27,7 @@ SilverStripe\Versioned\Tests\ChangeSetTest\UnversionedObject:
   unversioned1:
     Title: 'object'
     Parent: =>SilverStripe\Versioned\Tests\ChangeSetTest\MidObject.mid1
+SilverStripe\Versioned\Tests\ChangeSetTest\UnstagedObject:
+  unstaged1:
+    Title: 'object'
+    Parent: =>SilverStripe\Versioned\Tests\ChangeSetTest\MidObject.mid2

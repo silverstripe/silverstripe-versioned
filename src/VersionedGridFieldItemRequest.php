@@ -52,22 +52,30 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // Check if record is versionable
         /** @var Versioned|RecursivePublishable|DataObject $record */
         $record = $this->getRecord();
-        $ownerIsVersioned = $record && $record->hasExtension(Versioned::class);
-        $ownerIsPublishable = $record && $record->hasExtension(RecursivePublishable::class);
-        if (!$record || !($ownerIsVersioned || $ownerIsPublishable)) {
-            return parent::getFormActions();
-        }
+        $ownerIsStaged = $record
+            && $record->hasExtension(Versioned::class)
+            && $record->hasStages();
+        $ownerRecursivePublishes = !$ownerIsStaged
+            && $record
+            && $record->hasExtension(RecursivePublishable::class)
+            && $record->config()->get('owns');
+
         // Add extra actions prior to extensions so that these can be modified too
-        $this->beforeExtending(
-            'updateFormActions',
-            function (FieldList $actions) use ($record, $ownerIsVersioned) {
-                if ($ownerIsVersioned) {
+        if ($ownerIsStaged) {
+            $this->beforeExtending(
+                'updateFormActions',
+                function (FieldList $actions) use ($record, $ownerIsStaged) {
                     $this->addVersionedButtons($record, $actions);
-                } else {
+                }
+            );
+        } elseif ($ownerRecursivePublishes) {
+            $this->beforeExtending(
+                'updateFormActions',
+                function (FieldList $actions) use ($record, $ownerIsStaged) {
                     $this->addUnversionedButtons($record, $actions);
                 }
-            }
-        );
+            );
+        }
 
         return parent::getFormActions();
     }
@@ -336,11 +344,11 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $actions->push(LiteralField::create(
             'warning',
             '<span class="btn actions-warning font-icon-info-circled">'
-                ._t(
-                    __CLASS__ . '.PUBLISHITEMSWARNING',
-                    'Draft/modified items will be published'
-                )
-            .'</span>'
+            . _t(
+                __CLASS__ . '.PUBLISHITEMSWARNING',
+                'Draft/modified items will be published'
+            )
+            . '</span>'
         ));
     }
 }
