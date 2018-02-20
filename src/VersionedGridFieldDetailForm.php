@@ -15,7 +15,7 @@ class VersionedGridFieldDetailForm extends Extension
     /**
      * @param string $class
      * @param GridField $gridField
-     * @param DataObject $record
+     * @param DataObject|Versioned $record
      * @param RequestHandler $requestHandler
      */
     public function updateItemRequestClass(&$class, $gridField, $record, $requestHandler)
