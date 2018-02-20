@@ -24,7 +24,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // Check if record is versionable
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
-        if (!$record || !$record->has_extension(Versioned::class)) {
+        if (!$record || !$record->hasExtension(Versioned::class) || !$record->hasStages()) {
             return parent::getFormActions();
         }
 
