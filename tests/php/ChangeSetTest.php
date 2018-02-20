@@ -29,6 +29,7 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\EndObject::class,
         ChangeSetTest\EndObjectChild::class,
         ChangeSetTest\UnversionedObject::class,
+        ChangeSetTest\UnstagedObject::class,
     ];
 
     protected function tearDown()
@@ -51,7 +52,7 @@ class ChangeSetTest extends SapphireTest
             foreach ($fixtures as $handle => $id) {
                 /** @var Versioned|DataObject $object */
                 $object = $this->objFromFixture($class, $handle);
-                if ($object->hasExtension(Versioned::class)) {
+                if ($object->hasExtension(Versioned::class) && $object->hasStages()) {
                     $object->publishSingle();
                 }
             }
@@ -696,19 +697,26 @@ class ChangeSetTest extends SapphireTest
         /** @var ChangeSetTest\MidObject $mid1 */
         $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1');
         $unversioned1ID = $this->idFromFixture(ChangeSetTest\UnversionedObject::class, 'unversioned1');
+        /** @var ChangeSetTest\MidObject $mid2 */
+        $mid2 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid2');
+        $unstaged1ID = $this->idFromFixture(ChangeSetTest\UnstagedObject::class, 'unstaged1');
 
         // Publishing recursively should unlinkd this object
         $changeset = new ChangeSet();
         $changeset->write();
         $changeset->addObject($mid1);
+        $changeset->addObject($mid2);
 
         // Assert unversioned object exists
         $this->assertNotEmpty(ChangeSetTest\UnversionedObject::get()->byID($unversioned1ID));
+        $this->assertNotEmpty(ChangeSetTest\UnstagedObject::get()->byID($unstaged1ID));
 
         $mid1->delete();
+        $mid2->delete();
 
         // Unversioned object is immediately deleted
         $this->assertEmpty(ChangeSetTest\UnversionedObject::get()->byID($unversioned1ID));
+        $this->assertEmpty(ChangeSetTest\UnstagedObject::get()->byID($unstaged1ID));
 
         // Assert changeset only contains root object and no unversioned objects
         $this->assertChangeSetLooksLike(
@@ -716,6 +724,8 @@ class ChangeSetTest extends SapphireTest
             [
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
     }
