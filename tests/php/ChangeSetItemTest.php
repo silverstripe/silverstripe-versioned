@@ -9,7 +9,8 @@ class ChangeSetItemTest extends SapphireTest
 {
 
     protected static $extra_dataobjects = [
-        ChangeSetItemTest\VersionedObject::class
+        ChangeSetItemTest\VersionedObject::class,
+        ChangeSetItemTest\UnstagedObject::class,
     ];
 
     public function testChangeType()
@@ -98,5 +99,28 @@ class ChangeSetItemTest extends SapphireTest
             ChangeSetItemTest\VersionedObject::get()->byID($object->ID)->toMap(),
             ChangeSetItem::get_for_object_by_id($object->ID, $object->ClassName)->first()->Object()->toMap()
         );
+    }
+
+    public function testUnstagedObject()
+    {
+        $object = new ChangeSetItemTest\UnstagedObject(['Bar' => 2]);
+        $object->write();
+        $item = new ChangeSetItem(
+            [
+                'ObjectID' => $object->ID,
+                'ObjectClass' => $object->baseClass(),
+            ]
+        );
+
+        $this->assertEquals(
+            ChangeSetItem::CHANGE_NONE,
+            $item->ChangeType,
+            'Unstaged objects have no change type'
+        );
+
+        $this->assertTrue($item->canPublish());
+
+        // Should not error
+        $item->publish();
     }
 }
