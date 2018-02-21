@@ -2061,7 +2061,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $owner = $this->owner;
         $owner->extend('onBeforeRollback', $version);
         $owner->copyVersionToStage($version, static::DRAFT, true);
-        $owner->writeWithoutVersion();
         $owner->extend('onAfterRollback', $version);
     }
 
