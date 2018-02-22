@@ -285,7 +285,6 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // Unpublish action
         $isPublished = $record->isPublished();
         if ($isPublished && $record->canUnpublish()) {
-            $owners = ($record->hasExtension(RecursivePublishable::class)) ? $record->findOwners()->count() : 0;
             $actions->push(
                 FormAction::create(
                     'doUnpublish',
@@ -297,7 +296,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                         'Remove this record from the published site'
                     ))
                     ->addExtraClass('btn-secondary')
-                    ->setAttribute('data-owners', $owners)
+                    ->setAttribute('data-owners', $record->findOwners(false)->count())
             );
         }
 
