@@ -10,10 +10,11 @@ use SilverStripe\Versioned\Versioned;
 /**
  * @mixin RecursivePublishable
  * @mixin Versioned
+ * @property int $RelatedID
  */
-class VersionedObject extends DataObject implements TestOnly
+class VersionedOwner extends DataObject implements TestOnly
 {
-    private static $table_name = 'VersionedGridFieldItemRequestTest_VersionedObject';
+    private static $table_name = 'VersionedGridFieldItemRequestTest_VersionedOwner';
 
     private static $extensions = [
         Versioned::class,
@@ -23,8 +24,11 @@ class VersionedObject extends DataObject implements TestOnly
         'Title' => 'Varchar',
     ];
 
-    private static $has_many = [
-        'UnversionedOwners' => UnversionedOwner::class,
-        'VersionedOwners' => VersionedOwner::class,
+    private static $owns = [
+        'Related',
+    ];
+
+    private static $has_one = [
+        'Related' => VersionedObject::class,
     ];
 }

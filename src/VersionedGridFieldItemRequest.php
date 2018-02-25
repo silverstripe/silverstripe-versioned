@@ -259,7 +259,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     /**
      * Getting buttons that are for versioned objects
      *
-     * @param DataObject|Versioned $record
+     * @param DataObject|Versioned|RecursivePublishable $record
      * @param FieldList $actions
      */
     protected function addVersionedButtons(DataObject $record, FieldList $actions)
@@ -283,24 +283,30 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
 
         // Unpublish action
-        $isPublished = $record->isPublished();
-        if ($isPublished && $record->canUnpublish()) {
-            $actions->push(
-                FormAction::create(
-                    'doUnpublish',
-                    _t(__CLASS__ . '.BUTTONUNPUBLISH', 'Unpublish')
-                )
-                    ->setUseButtonTag(true)
-                    ->setDescription(_t(
-                        __CLASS__ . '.BUTTONUNPUBLISHDESC',
-                        'Remove this record from the published site'
-                    ))
-                    ->addExtraClass('btn-secondary')
-            );
+        if ($record->isInDB() && $record->canUnpublish()) {
+            /** @var DataObject|Versioned|RecursivePublishable $liveRecord */
+            $liveRecord = Versioned::get_by_stage($record->baseClass(), Versioned::LIVE)
+                ->byID($record->ID);
+            if ($liveRecord) {
+                $liveOwners = $liveRecord->findOwners(false)->count();
+                $actions->push(
+                    FormAction::create(
+                        'doUnpublish',
+                        _t(__CLASS__ . '.BUTTONUNPUBLISH', 'Unpublish')
+                    )
+                        ->setUseButtonTag(true)
+                        ->setDescription(_t(
+                            __CLASS__ . '.BUTTONUNPUBLISHDESC',
+                            'Remove this record from the published site'
+                        ))
+                        ->addExtraClass('btn-secondary')
+                        ->setAttribute('data-owners', $liveOwners)
+                );
+            }
         }
 
         // Archive action
-        if ($record->canArchive()) {
+        if ($record->isInDB() && $record->canArchive()) {
             // Replace "delete" action
             $actions->removeByName('action_doDelete');
 

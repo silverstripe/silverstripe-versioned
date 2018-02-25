@@ -14,6 +14,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedOwner;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedObject;
+use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedOwner;
 use SilverStripe\Versioned\Tests\VersionedGridFieldTest\TestController;
 use SilverStripe\Versioned\VersionedGridFieldItemRequest;
 
@@ -21,6 +22,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
 {
     protected static $extra_dataobjects = [
         VersionedObject::class,
+        VersionedOwner::class,
         UnversionedOwner::class,
         UnversionedObject::class,
     ];
@@ -49,6 +51,40 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $warningField = $actions->fieldByName('warning');
         $this->assertInstanceOf(LiteralField::class, $warningField);
         $this->assertRegExp('/will be published/', $warningField->getContent());
+    }
+
+    /**
+     * Ensure owned objects warn on unpublish
+     */
+    public function testActionsVersionedOwned()
+    {
+        // Object to edit
+        $object = new VersionedObject();
+        $object->Title = 'My Object';
+        $object->write();
+        $object->publishSingle();
+
+        // 4 owners, 3 published owners
+        for ($i = 1; $i <= 4; $i++) {
+            $owner = new VersionedOwner();
+            $owner->RelatedID = $object->ID;
+            $owner->Title = "My Owner {$i}";
+            $owner->write();
+            // Only 3 of these are published
+            if ($i !== 4) {
+                $owner->publishSingle();
+            }
+        }
+
+        $itemRequest = $this->createItemRequestForObject($object);
+        $this->logInWithPermission('ADMIN');
+        $form = $itemRequest->ItemEditForm();
+        $actions = $form->Actions();
+
+        // Get unpublish action
+        $unpublishAction = $actions->fieldByName('action_doUnpublish');
+        $this->assertInstanceOf(FormAction::class, $unpublishAction);
+        $this->assertEquals(3, $unpublishAction->getAttribute('data-owners'));
     }
 
     /**
