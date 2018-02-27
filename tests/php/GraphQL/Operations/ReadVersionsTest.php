@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataList;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
@@ -94,10 +94,10 @@ class ReadVersionsTest extends SapphireTest
             new ResolveInfo([])
         );
 
-        $this->assertInstanceOf(ArrayList::class, $result);
+        $this->assertInstanceOf(DataList::class, $result);
         $this->assertCount(3, $result);
-        $this->assertInstanceOf(Versioned_Version::class, $result->first());
-        $this->assertEquals(3, $result->first()->Version);
-        $this->assertEquals(1, $result->last()->Version);
+        $this->assertInstanceOf(Fake::class, $result->first());
+        $this->assertEquals(1, $result->first()->Version);
+        $this->assertEquals(3, $result->last()->Version);
     }
 }
