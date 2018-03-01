@@ -54,6 +54,9 @@ class DataObjectScaffolderExtension extends Extension
                     ],
                     'Published' => [
                         'type' => Type::boolean(),
+                        'resolve' => function ($obj) {
+                            return $obj->Published();
+                        }
                     ]
                 ];
                 // Remove this recursive madness.
