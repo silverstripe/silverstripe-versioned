@@ -318,7 +318,7 @@ class RecursivePublishable extends DataExtension
     public function onBeforeDuplicate($original, &$doWrite, &$relations)
     {
         // If relations to duplicate are declared (or forced off) don't rewrite
-        if ($relations || $relations === false) {
+        if ($relations !== null) {
             return;
         }
 
