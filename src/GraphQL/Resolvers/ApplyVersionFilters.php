@@ -109,6 +109,10 @@ class ApplyVersionFilters
                     $conditions[] = "\"{$liveTable}\".\"ID\" IS NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL";
                 }
 
+                if (in_array('published', $statuses)) {
+                    $conditions[] = "\"{$liveTable}\".\"ID\" IS NOT NULL";
+                }
+
                 // Validate that all statuses have been handled
                 if (empty($conditions) || count($statuses) !== count($conditions)) {
                     throw new InvalidArgumentException("Invalid statuses provided");
