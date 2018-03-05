@@ -61,4 +61,23 @@ mappings:
   SilverStripe\ORM\Versioning\Versioned: SilverStripe\Versioned\Versioned
 skipConfigs:
   - db_for_versions_table
-
+warnings:
+  methods:
+    'SilverStripe\Versioned\Versioned->doPublish()':
+      replacement: 'publishRecursive'
+      message: 'Moved to SilverStripe\Versioned\Versioned->publishRecursive()'
+    'SilverStripe\ORM\DataObject->doPublish()':
+      replacement: 'publishRecursive'
+      message: 'Moved to SilverStripe\Versioned\Versioned->publishRecursive()'
+    'SilverStripe\Versioned\Versioned::reading_stage()':
+      message: 'Moved to SilverStripe\Versioned\Versioned::set_stage()'
+      replacement: 'set_stage'
+    'SilverStripe\Versioned\Versioned::current_stage()':
+      message: 'Moved to SilverStripe\Versioned\Versioned::get_stage()'
+      replacement: 'get_stage'
+    'SilverStripe\Versioned\Versioned->getVersionedStages':
+      message: 'Removed SilverStripe\Versioned\Versioned->getVersionedStages()'
+    'SilverStripe\Versioned\Versioned::get_live_stage()':
+      message: 'Use SilverStripe\Versioned\Versioned::LIVE constant instead'
+    'SilverStripe\Versioned\Versioned::get_default_stage()':
+      message: 'Use SilverStripe\Versioned\Versioned::DRAFT constant instead'
