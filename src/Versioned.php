@@ -392,39 +392,32 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
-        if (!$dataQuery || !$dataQuery->getQueryParam('Versioned.mode')) {
+        // Ensure query mode exists
+        $versionedMode = $dataQuery->getQueryParam('Versioned.mode');
+        if (!$versionedMode) {
             return;
         }
-
-        $versionedMode = $dataQuery->getQueryParam('Versioned.mode');
         switch ($versionedMode) {
             case 'stage':
                 $this->augmentSQLStage($query, $dataQuery);
                 break;
             case 'stage_unique':
-                $this->augmentSQLStage($query, $dataQuery);
                 $this->augmentSQLStageUnique($query, $dataQuery);
                 break;
             case 'archive':
-                $this->augmentSQLVersioned($query);
                 $this->augmentSQLVersionedArchive($query, $dataQuery);
                 break;
             case 'latest_versions':
-                $this->augmentSQLVersioned($query);
                 $this->augmentSQLVersionedLatest($query);
                 break;
             case 'version':
-                $this->augmentSQLVersioned($query);
                 $this->augmentSQLVersionedVersion($query, $dataQuery);
                 break;
             case 'all_versions':
-                // If all versions are requested, ensure that records are sorted by this field
-                $this->augmentSQLVersioned($query);
                 $this->augmentSQLVersionedAll($query);
                 break;
             default:
-                throw new InvalidArgumentException("Bad value for query parameter Versioned.mode: "
-                    . $dataQuery->getQueryParam('Versioned.mode'));
+                throw new InvalidArgumentException("Bad value for query parameter Versioned.mode: {$versionedMode}");
         }
     }
 
@@ -467,12 +460,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (!$this->hasStages()) {
             return;
         }
-        $stage = $dataQuery->getQueryParam('Versioned.stage');
-        if (!in_array($stage, [static::DRAFT, static::LIVE])) {
-            throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
-        }
+        // Set stage first
+        $this->augmentSQLStage($query, $dataQuery);
 
         // Now exclude any ID from any other stage.
+        $stage = $dataQuery->getQueryParam('Versioned.stage');
         $excludingStage = $stage === static::DRAFT ? static::LIVE : static::DRAFT;
 
         // Note that we double rename to avoid the regular stage rename
@@ -545,6 +537,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         if (!$date) {
             throw new InvalidArgumentException("Invalid archive date");
         }
+
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        // Validate stage
         $stage = $dataQuery->getQueryParam('Versioned.stage');
         if (!in_array($stage, [static::DRAFT, static::LIVE])) {
             throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
@@ -559,16 +556,20 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $query->addInnerJoin(
             <<<SQL
             (
-            SELECT \"{$baseTable}_Versions\".\"RecordID\",
-                MAX(\"{$baseTable}_Versions\".\"Version\") AS LatestVersion
-            FROM \"{$baseTable}_Versions\"
-            WHERE \"{$baseTable}_Versions\".\"LastEdited\" <= ?
-                AND \"{$baseTable}_Versions\".\"{$stageColumn}\" = 1
-            GROUP BY \"{$baseTable}_Versions\".\"RecordID\"
+            SELECT "{$baseTable}_Versions"."RecordID",
+                MAX("{$baseTable}_Versions"."Version") AS LatestVersion
+            FROM "{$baseTable}_Versions"
+            WHERE "{$baseTable}_Versions"."LastEdited" <= ?
+                AND "{$baseTable}_Versions"."{$stageColumn}" = 1
+            GROUP BY "{$baseTable}_Versions"."RecordID"
             )                                
 SQL
             ,
-            "\"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\"",
+            <<<SQL
+            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
+            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
+SQL
+            ,
             "{$baseTable}_Versions_Latest",
             20,
             [$date]
@@ -583,18 +584,26 @@ SQL
      */
     protected function augmentSQLVersionedLatest(SQLSelect $query)
     {
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        // Join and select only latest version
         $baseTable = $this->baseTable();
         $query->addInnerJoin(
             <<<SQL
             (
-            SELECT \"{$baseTable}_Versions\".\"RecordID\",
-                MAX(\"{$baseTable}_Versions\".\"Version\") AS LatestVersion
-            FROM \"{$baseTable}_Versions\"
-            GROUP BY \"{$baseTable}_Versions\".\"RecordID\"
+            SELECT "{$baseTable}_Versions"."RecordID",
+                MAX("{$baseTable}_Versions"."Version") AS LatestVersion
+            FROM "{$baseTable}_Versions"
+            GROUP BY "{$baseTable}_Versions"."RecordID"
             )                                
 SQL
             ,
-            "\"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\"",
+            <<<SQL
+            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
+            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
+SQL
+            ,
             "{$baseTable}_Versions_Latest"
         );
     }
@@ -612,6 +621,9 @@ SQL
             throw new InvalidArgumentException("Invalid version");
         }
 
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
         // Add filter on version field
         $baseTable = $this->baseTable();
         $query->addWhere([
@@ -626,6 +638,9 @@ SQL
      */
     protected function augmentSQLVersionedAll(SQLSelect $query)
     {
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
         $baseTable = $this->baseTable();
         $query->addOrderBy("\"{$baseTable}_Versions\".\"Version\"");
     }
