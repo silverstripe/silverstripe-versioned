@@ -59,6 +59,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
     public function testDeleteOwnedWithoutRepublishingOwner()
     {
+        /* @var GalleryBlockPage|Versioned|RecursivePublishable $page1 */
         $page1 = new GalleryBlockPage([
             'Title' => 'Page1v1'
         ]);
@@ -89,6 +90,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
     public function testDeleteNestedOwnedWithoutRepublishingOwner()
     {
+        /* @var GalleryBlockPage|Versioned|RecursivePublishable $page1 */
         $page1 = new GalleryBlockPage([
             'Title' => 'Page1v1'
         ]);
@@ -102,11 +104,13 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $block1->write();
         $this->assertFalse($block1->isPublished());
 
+        /* @var Versioned|RecursivePublishable $item1 */
         $item1 = new GalleryBlockItem([
             'Title' => 'GalleryBlockItem1v1',
             'GalleryBlockID' => $block1->ID,
         ]);
         $item1->write();
+        /* @var Versioned|RecursivePublishable $item2 */
         $item2 = new GalleryBlockItem([
             'Title' => 'GalleryBlockItem2v1',
             'GalleryBlockID' => $block1->ID,
@@ -147,6 +151,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
         $this->assertTrue($location1->isPublished());
 
+        /* @var Versioned|RecursivePublishable $companyPage1 */
         $companyPage1 = new CompanyPage([
             'Title' => 'CompanyPage1v1'
         ]);
@@ -158,7 +163,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $companyPage1->OfficeLocations()->add($location1);
         $companyPage1->Title = 'CompanyPage1v2';
         $companyPage1->publishRecursive();
-        $this->assertEquals(2, $companyPage1->Version);
+        $this->assertEquals(2, $companyPage1->Version, 'Incorrect version');
 
         $this->assertCount(1, $companyPage1->OfficeLocations());
         $this->assertEquals('OfficeLocation1v1', $companyPage1->OfficeLocations()->first()->Title);
