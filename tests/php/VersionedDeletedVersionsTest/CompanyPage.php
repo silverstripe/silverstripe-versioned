@@ -35,5 +35,4 @@ class CompanyPage extends DataObject implements TestOnly
     private static $owns = [
         'OfficeLocations',
     ];
-
 }

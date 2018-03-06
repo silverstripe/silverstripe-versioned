@@ -23,5 +23,4 @@ class OfficeLocation extends DataObject implements TestOnly
     private static $db = [
         'Title' => 'Varchar(255)',
     ];
-
 }

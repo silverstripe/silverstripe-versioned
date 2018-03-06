@@ -31,5 +31,4 @@ class GalleryBlockPage extends DataObject implements TestOnly
     private static $owns = [
         'GalleryBlocks',
     ];
-
 }

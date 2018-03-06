@@ -171,5 +171,4 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $previousVersion = Versioned::get_version(CompanyPage::class, $companyPage1->ID, 1);
         $this->assertCount(0, $previousVersion->OfficeLocations());
     }
-
 }

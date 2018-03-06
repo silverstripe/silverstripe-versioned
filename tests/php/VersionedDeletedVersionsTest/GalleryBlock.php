@@ -35,5 +35,4 @@ class GalleryBlock extends DataObject implements TestOnly
     private static $owns = [
         'Items',
     ];
-
 }

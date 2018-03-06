@@ -27,5 +27,4 @@ class GalleryBlockItem extends DataObject implements TestOnly
     private static $has_one = [
         'GalleryBlock' => GalleryBlock::class,
     ];
-
 }
