@@ -286,9 +286,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * Get modified date for the given version
      *
      * @param int $version
-     * @return string
+     * @return array A list containing 0 => LastEdited, 1 => Stage
      */
-    protected function getLastEditedForVersion($version)
+    protected function getLastEditedAndStageForVersion($version)
     {
         // Cache key
         $baseTable = $this->baseTable();
@@ -302,16 +302,22 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Build query
         $table = "\"{$baseTable}_Versions\"";
-        $query = SQLSelect::create('"LastEdited"', $table)
+        $query = SQLSelect::create(['"LastEdited"', '"WasPublished"'], $table)
             ->addWhere([
                 "{$table}.\"RecordID\"" => $id,
                 "{$table}.\"Version\"" => $version
             ]);
-        $date = $query->execute()->value();
-        if ($date) {
-            $this->versionModifiedCache[$key] = $date;
+        $result = $query->execute()->record();
+        if ($result) {
+            $list = [
+                $result['LastEdited'],
+                $result['WasPublished'] ? static::LIVE : static::DRAFT,
+            ];
+            $this->versionModifiedCache[$key] = $list;
+
+            return $list;
         }
-        return $date;
+        return $result;
     }
 
     /**
@@ -339,13 +345,15 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 // to find the date this version was published, and ensure
                 // inherited queries select from that date.
                 $version = $params['Versioned.version'];
-                $date = $this->getLastEditedForVersion($version);
+                $dateAndStage = $this->getLastEditedAndStageForVersion($version);
 
                 // Filter related objects at the same date as this version
                 unset($params['Versioned.version']);
-                if ($date) {
+                if ($dateAndStage) {
+                    list($date, $stage) = $dateAndStage;
                     $params['Versioned.mode'] = 'archive';
                     $params['Versioned.date'] = $date;
+                    $params['Versioned.stage'] = $stage;
                 } else {
                     // Fallback to default
                     $params['Versioned.mode'] = 'stage';
