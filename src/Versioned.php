@@ -557,7 +557,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             <<<SQL
             (
             SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS LatestVersion
+                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
             FROM "{$baseTable}_Versions"
             WHERE "{$baseTable}_Versions"."LastEdited" <= ?
                 AND "{$baseTable}_Versions"."{$stageColumn}" = 1
@@ -593,7 +593,7 @@ SQL
             <<<SQL
             (
             SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS LatestVersion
+                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
             FROM "{$baseTable}_Versions"
             GROUP BY "{$baseTable}_Versions"."RecordID"
             )                                
