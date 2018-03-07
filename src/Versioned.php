@@ -1644,10 +1644,13 @@ SQL
      */
     public function copyVersionToStage($fromStage, $toStage, $createNewVersion = true)
     {
+        // Disallow $createNewVersion = false
+        if (!$createNewVersion) {
+            Deprecation::notice('5.0', 'copyVersionToStage no longer allows $createNewVersion to be false');
+            $createNewVersion = true;
+        }
         $owner = $this->owner;
-        // Keep IDEs happy with the ignored param
-        $forceCreateNewVersion = $createNewVersion ? true : true;
-        $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $forceCreateNewVersion);
+        $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $createNewVersion);
 
         $baseClass = $owner->baseClass();
         $baseTable = $owner->baseTable();

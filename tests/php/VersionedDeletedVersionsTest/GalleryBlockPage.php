@@ -4,13 +4,15 @@ namespace SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
- *
+ * @property string $Title
  * @mixin RecursivePublishable
  * @mixin Versioned
+ * @method HasManyList GalleryBlocks()
  */
 class GalleryBlockPage extends DataObject implements TestOnly
 {
