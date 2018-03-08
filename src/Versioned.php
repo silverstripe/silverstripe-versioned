@@ -1026,6 +1026,7 @@ SQL
             true
         );
         unset($manipulation[$baseTable]);
+        $this->owner->extend('augmentWriteDeletedVersion', $manipulation, $stages);
         DB::manipulate($manipulation);
     }
 
