@@ -188,53 +188,64 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
     public function testDeleteNestedOwnedWithoutRepublishingOwner()
     {
+        DBDatetime::set_mock_now(DBDatetime::now());
         /* @var GalleryBlockPage|Versioned|RecursivePublishable $page1 */
         $page1 = new GalleryBlockPage([
             'Title' => 'Page1v1'
         ]);
-        $page1->write();
-        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+        $page1->write(); // v1
 
+        // Add block with 2 items
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $block1 = new GalleryBlock([
             'Title' => 'GalleryBlock1v1',
             'GalleryBlockPageID' => $page1->ID,
         ]);
-        $block1->write();
+        $block1->write(); // v3
         $this->assertFalse($block1->isPublished());
 
-        /* @var Versioned|RecursivePublishable $item1 */
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        /* @var GalleryBlockItem $item1 */
         $item1 = new GalleryBlockItem([
             'Title' => 'GalleryBlockItem1v1',
             'GalleryBlockID' => $block1->ID,
         ]);
         $item1->write();
-        /* @var Versioned|RecursivePublishable $item2 */
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        /* @var GalleryBlockItem $item2 */
         $item2 = new GalleryBlockItem([
             'Title' => 'GalleryBlockItem2v1',
             'GalleryBlockID' => $block1->ID,
         ]);
         $item2->write();
 
-        $page1->Title = 'Page1v2';
-        $page1->publishRecursive();
+        // Publish the page with attached items
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->Title = 'Page1v3';
+        $page1->publishRecursive(); // v2
+        $liveVersion = Versioned::get_versionnumber_by_stage(GalleryBlock::class, Versioned::LIVE, $page1->ID, false);
+        $this->assertEquals(2, $liveVersion);
 
         $this->assertTrue($block1->isPublished());
         $this->assertTrue($item1->isPublished());
         $this->assertTrue($item2->isPublished());
 
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $item2->doArchive();
         $this->assertFalse($item2->isPublished());
         $this->assertFalse($item2->isOnDraft());
 
-        $page1 = Versioned::get_by_stage(GalleryBlockPage::class, Versioned::LIVE)->byID($page1->ID);
-        $this->assertNotNull($page1);
-
-        $this->assertCount(1, $page1->GalleryBlocks());
-        $this->assertEquals('GalleryBlock1v1', $page1->GalleryBlocks()->first()->Title);
-        $this->assertCount(2, $page1->GalleryBlocks()->first()->Items());
+        // Get page1 v2 again from before we did the archive
+        /** @var GalleryBlockPage $page1v2 */
+        $page1v2 = Versioned::get_version(GalleryBlockPage::class, $page1->ID, 2);
+        $this->assertNotNull($page1v2);
+        $this->assertCount(1, $page1v2->GalleryBlocks());
+        $this->assertEquals('GalleryBlock1v1', $page1v2->GalleryBlocks()->first()->Title);
+        $this->assertCount(2, $page1v2->GalleryBlocks()->first()->Items());
         $this->assertEquals(
             ['GalleryBlockItem1v1', 'GalleryBlockItem2v1'],
-            $page->GalleryBlocks()->Items()->column('Title')
+            $page1v2->GalleryBlocks()->first()->Items()->column('Title')
         );
     }
 
