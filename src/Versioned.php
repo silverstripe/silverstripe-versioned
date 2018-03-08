@@ -950,7 +950,6 @@ SQL
         $nextVersion = $nextVersion ?: 1;
 
         if ($class === $baseDataClass) {
-            $appliesToStages = is_array($stages) ? $stages : [$stages];
             // Write AuthorID for baseclass
             if ((Security::getCurrentUser())) {
                 $userID = Security::getCurrentUser()->ID;
@@ -962,8 +961,8 @@ SQL
                 [
                     'AuthorID' => $userID,
                     'PublisherID' => $userID,
-                    'WasPublished' => (int)in_array(static::LIVE, $appliesToStages),
-                    'WasDraft' => (int)in_array(static::DRAFT, $appliesToStages),
+                    'WasPublished' => (int)in_array(static::LIVE, (array)$stages),
+                    'WasDraft' => (int)in_array(static::DRAFT, (array)$stages),
                     'WasDeleted' => (int)$isDelete,
                 ]
             );
@@ -1079,14 +1078,11 @@ SQL
                 // Putting a Version of -1 is a signal to leave the version table alone, despite their being no version
                 unset($manipulation[$table]['fields']['Version']);
             } else {
-                $this->augmentWriteVersioned(
-                    $manipulation,
-                    $class,
-                    $table,
-                    $id,
-                    [static::get_stage()],
-                    false
-                );
+                // All writes are to draft, only live affect both
+                $stages = static::get_stage() === static::LIVE
+                    ? [self::DRAFT, self::LIVE]
+                    : [self::DRAFT];
+                $this->augmentWriteVersioned($manipulation, $class, $table, $id, $stages, false);
             }
 
             // Remove "Version" column from subclasses of baseDataClass
