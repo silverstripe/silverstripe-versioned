@@ -20,6 +20,7 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -1013,8 +1014,17 @@ SQL
         }
         // Prepare manipulation
         $baseTable = $this->owner->baseTable();
+        $now = DBDatetime::now()->Rfc2822();
+        // Ensure all fixed_fields are specified
         $manipulation = [
-            $baseTable => []
+            $baseTable => [
+                'fields' => [
+                    'ID' => $this->owner->ID,
+                    'LastEdited' => $now,
+                    'Created' => $this->owner->Created ?: $now,
+                    'ClassName' => $this->owner->ClassName,
+                ],
+            ],
         ];
         // Prepare "deleted" augment write
         $this->augmentWriteVersioned(
