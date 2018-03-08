@@ -32,31 +32,41 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
     public function testDeleteOwnedWithRepublishingOwner()
     {
-        /* @var GalleryBlockPage|Versioned|RecursivePublishable $page1 */
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        /* @var GalleryBlockPage $page1 */
         $page1 = new GalleryBlockPage([
             'Title' => 'Page1v1',
         ]);
-        $page1->write();
-        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+        $page1->write(); // v1
 
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishSingle(); // v2
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $block1 = new GalleryBlock([
             'Title' => 'GalleryBlock1v1',
             'GalleryBlockPageID' => $page1->ID,
         ]);
-        $block1->write();
+        $block1->write(); // v1
         $this->assertFalse($block1->isPublished());
 
-        $page1->Title = 'Page1v2';
-        $page1->publishRecursive();
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->Title = 'Page1v3';
+        $page1->write(); // v3
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishRecursive(); // v4
         $this->assertTrue($block1->isPublished());
         $this->assertTrue($page1->isPublished());
 
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $block1->doArchive();
         $this->assertFalse($block1->isPublished());
         $this->assertFalse($block1->isOnDraft());
 
-        $page1->Title = 'Page1v3';
-        $page1->publishRecursive();
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->Title = 'Page1v5';
+        $page1->publishRecursive(); // v5
 
         $this->assertCount(0, $page1->GalleryBlocks());
     }
@@ -195,6 +205,9 @@ class VersionedDeletedVersionsTest extends SapphireTest
         ]);
         $page1->write(); // v1
 
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishRecursive(); // v2
+
         // Add block with 2 items
         DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $block1 = new GalleryBlock([
@@ -223,9 +236,12 @@ class VersionedDeletedVersionsTest extends SapphireTest
         // Publish the page with attached items
         DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $page1->Title = 'Page1v3';
-        $page1->publishRecursive(); // v2
-        $liveVersion = Versioned::get_versionnumber_by_stage(GalleryBlock::class, Versioned::LIVE, $page1->ID, false);
-        $this->assertEquals(2, $liveVersion);
+        $page1->write(); // v3
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishRecursive(); // v4
+        $liveVersion = Versioned::get_versionnumber_by_stage(GalleryBlockPage::class, Versioned::LIVE, $page1->ID, false);
+        $this->assertEquals(4, $liveVersion);
 
         $this->assertTrue($block1->isPublished());
         $this->assertTrue($item1->isPublished());
@@ -237,47 +253,67 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $this->assertFalse($item2->isOnDraft());
 
         // Get page1 v2 again from before we did the archive
-        /** @var GalleryBlockPage $page1v2 */
-        $page1v2 = Versioned::get_version(GalleryBlockPage::class, $page1->ID, 2);
-        $this->assertNotNull($page1v2);
-        $this->assertCount(1, $page1v2->GalleryBlocks());
-        $this->assertEquals('GalleryBlock1v1', $page1v2->GalleryBlocks()->first()->Title);
-        $this->assertCount(2, $page1v2->GalleryBlocks()->first()->Items());
+        /** @var GalleryBlockPage $page1v4 */
+        $page1v4 = Versioned::get_version(GalleryBlockPage::class, $page1->ID, 4);
+        $this->assertNotNull($page1v4);
+        $this->assertCount(1, $page1v4->GalleryBlocks());
+        $this->assertEquals('GalleryBlock1v1', $page1v4->GalleryBlocks()->first()->Title);
+        $this->assertCount(2, $page1v4->GalleryBlocks()->first()->Items());
         $this->assertEquals(
             ['GalleryBlockItem1v1', 'GalleryBlockItem2v1'],
-            $page1v2->GalleryBlocks()->first()->Items()->column('Title')
+            $page1v4->GalleryBlocks()->first()->Items()->column('Title')
         );
     }
 
     public function testAddAssociationAfterRecordHasAlreadyBeenPublished()
     {
-        /* @var Versioned|RecursivePublishable $location1 */
+        DBDatetime::set_mock_now(DBDatetime::now());
+        /* @var OfficeLocation $location1 */
         $location1 = new OfficeLocation([
             'Title' => 'OfficeLocation1v1'
         ]);
-        $location1->write();
-        $location1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+        $location1->write(); // v1
 
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $location1->publishRecursive(); // v2
         $this->assertTrue($location1->isPublished());
 
-        /* @var Versioned|RecursivePublishable $companyPage1 */
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        /* @var CompanyPage $companyPage1 */
         $companyPage1 = new CompanyPage([
             'Title' => 'CompanyPage1v1'
         ]);
-        $companyPage1->write();
-        $companyPage1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertEquals(1, $companyPage1->Version);
+        $companyPage1->write(); // v1
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $companyPage1->publishRecursive(); // v2
+
+        // Reload from stage to get updated version
+        $companyPage1 = Versioned::get_by_stage(CompanyPage::class, Versioned::DRAFT)
+            ->byID($companyPage1->ID);
+        $this->assertEquals(2, $companyPage1->Version);
         $this->assertTrue($companyPage1->isPublished());
 
+        // Add locations
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $companyPage1->OfficeLocations()->add($location1);
-        $companyPage1->Title = 'CompanyPage1v2';
-        $companyPage1->publishRecursive();
-        $this->assertEquals(2, $companyPage1->Version, 'Incorrect version');
+        $companyPage1->Title = 'CompanyPage1v3';
+        $companyPage1->write(); // v3
 
+        // Publish recursively
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $companyPage1->publishRecursive(); // v4
+        $companyPage1 = Versioned::get_by_stage(CompanyPage::class, Versioned::DRAFT)
+            ->byID($companyPage1->ID);
+        $this->assertEquals(4, $companyPage1->Version);
+
+        // Check office locations at current version
         $this->assertCount(1, $companyPage1->OfficeLocations());
         $this->assertEquals('OfficeLocation1v1', $companyPage1->OfficeLocations()->first()->Title);
 
-        $previousVersion = Versioned::get_version(CompanyPage::class, $companyPage1->ID, 1);
-        $this->assertCount(0, $previousVersion->OfficeLocations());
+        // Check office locations prior to being assigned
+        /** @var CompanyPage $companyPageV2 */
+        $companyPageV2 = Versioned::get_version(CompanyPage::class, $companyPage1->ID, 2);
+        $this->assertCount(0, $companyPageV2->OfficeLocations());
     }
 }
