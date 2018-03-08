@@ -6,6 +6,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDate;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyOfficeLocation;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyPage;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlock;
@@ -58,6 +59,72 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $page1->publishRecursive();
 
         $this->assertCount(0, $page1->GalleryBlocks());
+    }
+
+    public function testArchive()
+    {
+        DBDatetime::set_mock_now(DBDatetime::now());
+        /** @var GalleryBlockPage $page1 */
+        $page1 = new GalleryBlockPage([
+            'Title' => 'Page1v1'
+        ]);
+        $page1->write(); // v1
+
+        // Publish v2 a few seconds later, which should create a new version on each stage
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishSingle(); // v2
+
+        // Archive now
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->doArchive(); // v3
+
+        // Check _Versioned table contains row with WasPublished = 1 WasDraft = 1 and WasDeleted = 1
+        $table = $page1->baseTable() . '_Versions';
+        $query = SQLSelect::create()
+            ->addSelect(['"WasDeleted"', '"WasDraft"', '"WasPublished"', '"Version"'])
+            ->setFrom("\"{$table}\"")
+            ->addWhere([ "\"{$table}\".\"RecordID\" = ?" => $page1->ID ])
+            ->addOrderBy("\"{$table}\".\"Version\" DESC");
+
+        // Record has all the flags
+        $version = $query->execute()->record();
+        $this->assertTrue((bool)$version['WasDeleted']);
+        $this->assertTrue((bool)$version['WasDraft']);
+        $this->assertTrue((bool)$version['WasPublished']);
+        $this->assertEquals(3,  $version['Version']);
+    }
+
+    public function testUnpublish()
+    {
+        DBDatetime::set_mock_now(DBDatetime::now());
+        /** @var GalleryBlockPage $page1 */
+        $page1 = new GalleryBlockPage([
+            'Title' => 'Page1v1'
+        ]);
+        $page1->write(); // v1
+
+        // Publish v2 a few seconds later, which should create a new version on each stage
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->publishSingle(); // v2
+
+        // Archive now
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $page1->doUnpublish(); // v3
+
+        // Check _Versioned table contains row with WasPublished = 1 WasDraft = 1 and WasDeleted = 1
+        $table = $page1->baseTable() . '_Versions';
+        $query = SQLSelect::create()
+            ->addSelect(['"WasDeleted"', '"WasDraft"', '"WasPublished"', '"Version"'])
+            ->setFrom("\"{$table}\"")
+            ->addWhere([ "\"{$table}\".\"RecordID\" = ?" => $page1->ID ])
+            ->addOrderBy("\"{$table}\".\"Version\" DESC");
+
+        // Record has all the flags
+        $version = $query->execute()->record();
+        $this->assertTrue((bool)$version['WasDeleted']);
+        $this->assertFalse((bool)$version['WasDraft']);
+        $this->assertTrue((bool)$version['WasPublished']);
+        $this->assertEquals(3,  $version['Version']);
     }
 
     public function testDeleteOwnedWithoutRepublishingOwner()

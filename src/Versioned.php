@@ -107,6 +107,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
 
     /**
+     * Prevents delete() from creating a _Versioned record (in case this must be deferred)
+     * Best used with suppressDeleteVersion()
+     */
+    const DELETE_WRITES_VERSION_DISABLED = 'DeleteWritesVersionDisabled';
+
+    /**
      * Ensure versioned page doesn't attempt to virtualise these non-db fields
      *
      * @config
@@ -115,6 +121,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     private static $non_virtual_fields = [
         self::MIGRATING_VERSION,
         self::NEXT_WRITE_WITHOUT_VERSIONED,
+        self::DELETE_WRITES_VERSION_DISABLED,
     ];
 
     /**
@@ -892,7 +899,7 @@ SQL
      * @param string $class Class
      * @param string $table Table Table for this class
      * @param int $recordID ID of record to version
-     * @param array $stages An array of affected stages
+     * @param array|string $stages Stage or array of affected stages
      * @param bool $isDelete Set to true of version is created from a deletion
      */
     protected function augmentWriteVersioned(&$manipulation, $class, $table, $recordID, $stages, $isDelete = false)
@@ -909,17 +916,18 @@ SQL
         ];
 
         // Add any extra, unchanged fields to the version record.
-        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        if (!$isDelete) {
+            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+            if ($data) {
+                $fields = $schema->databaseFields($class, false);
+                if (is_array($fields)) {
+                    $data = array_intersect_key($data, $fields);
 
-        if ($data) {
-            $fields = $schema->databaseFields($class, false);
-            if (is_array($fields)) {
-                $data = array_intersect_key($data, $fields);
-
-                foreach ($data as $k => $v) {
-                    // If the value is not set at all in the manipulation currently, use the existing value from the database
-                    if (!array_key_exists($k, $newManipulation['fields'])) {
-                        $newManipulation['fields'][$k] = $v;
+                    foreach ($data as $k => $v) {
+                        // If the value is not set at all in the manipulation currently, use the existing value from the database
+                        if (!array_key_exists($k, $newManipulation['fields'])) {
+                            $newManipulation['fields'][$k] = $v;
+                        }
                     }
                 }
             }
@@ -960,7 +968,9 @@ SQL
             );
 
             // Update main table version if not previously known
-            $manipulation[$table]['fields']['Version'] = $nextVersion;
+            if (isset($manipulation[$table]['fields'])) {
+                $manipulation[$table]['fields']['Version'] = $nextVersion;
+            }
         }
 
         // Update _Versions table manipulation
@@ -992,33 +1002,31 @@ SQL
     /**
      * Adds a WasDeleted=1 version entry for this record, and records any stages
      * the deletion applies to
-     * @param array $stages
+     *
+     * @param string[]|string $stages Stage or array of affected stages
      */
     protected function createDeletedVersion($stages = [])
     {
-        $ancestry = $this->owner->getClassAncestry();
-        $baseClass = DataObject::getSchema()->baseDataClass(get_class($this->owner));
-        foreach (array_reverse($ancestry) as $class) {
-            $table = DataObject::getSchema()->tableName($class);
-            $manipulation = [
-                $table => []
-            ];
-
-            $this->augmentWriteVersioned(
-                $manipulation,
-                get_class($this->owner),
-                $table,
-                $this->owner->ID,
-                $stages,
-                true
-            );
-            unset($manipulation[$table]);
-            DB::manipulate($manipulation);
-
-            if ($class === $baseClass) {
-                break;
-            }
+        // Skip if suppressed by parent delete
+        if (!$this->getDeleteWritesVersion()) {
+            return;
         }
+        // Prepare manipulation
+        $baseTable = $this->owner->baseTable();
+        $manipulation = [
+            $baseTable => []
+        ];
+        // Prepare "deleted" augment write
+        $this->augmentWriteVersioned(
+            $manipulation,
+            $this->owner->baseClass(),
+            $baseTable,
+            $this->owner->ID,
+            $stages,
+            true
+        );
+        unset($manipulation[$baseTable]);
+        DB::manipulate($manipulation);
     }
 
     public function augmentWrite(&$manipulation)
@@ -1138,6 +1146,44 @@ SQL
     public function setNextWriteWithoutVersion($flag)
     {
         return $this->owner->setField(self::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
+    }
+
+    /**
+     * Check if delete() should write _Version rows or not
+     *
+     * @return bool
+     */
+    public function getDeleteWritesVersion()
+    {
+        return !$this->owner->getField(self::DELETE_WRITES_VERSION_DISABLED);
+    }
+
+    /**
+     * Set if delete() should write _Version rows
+     *
+     * @param bool $flag
+     * @return DataObject owner
+     */
+    public function setDeleteWritesVersion($flag)
+    {
+        return $this->owner->setField(self::DELETE_WRITES_VERSION_DISABLED, !$flag);
+    }
+
+    /**
+     * Helper method to safely suppress delete callback
+     *
+     * @param callable $callback
+     * @return mixed Result of $callback()
+     */
+    protected function suppressDeletedVersion($callback)
+    {
+        $original = $this->getDeleteWritesVersion();
+        try {
+            $this->setDeleteWritesVersion(false);
+            return $callback();
+        } finally {
+            $this->setDeleteWritesVersion($original);
+        }
     }
 
     /**
@@ -1519,8 +1565,12 @@ SQL
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeArchive', $this);
         $owner->deleteFromChangeSets();
-        $owner->doUnpublish();
-        $owner->deleteFromStage(static::DRAFT);
+        // Unpublish without creating deleted version
+        $this->suppressDeletedVersion(function () use ($owner) {
+            $owner->doUnpublish();
+            $owner->deleteFromStage(static::DRAFT);
+        });
+        // Create deleted version in both stages
         $this->createDeletedVersion([
             static::LIVE,
             static::DRAFT,
@@ -1552,16 +1602,24 @@ SQL
         $owner->invokeWithExtensions('onBeforeUnpublish');
 
         $origReadingMode = static::get_reading_mode();
-        static::set_stage(static::LIVE);
+        try {
+            static::set_stage(static::LIVE);
 
-        // This way our ID won't be unset
-        $clone = clone $owner;
-        $clone->delete();
-        $this->createDeletedVersion([static::LIVE]);
-        static::set_reading_mode($origReadingMode);
+            // This way our ID won't be unset
+            $clone = clone $owner;
+            $clone->delete();
+        } finally {
+            static::set_reading_mode($origReadingMode);
+        }
 
         $owner->invokeWithExtensions('onAfterUnpublish');
         return true;
+    }
+
+    public function onAfterDelete()
+    {
+        // Create deleted record for current stage
+        $this->createDeletedVersion(static::get_stage());
     }
 
     /**
@@ -2199,12 +2257,14 @@ SQL
     public function deleteFromStage($stage)
     {
         $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($stage);
-        $owner = $this->owner;
-        $clone = clone $owner;
-        $clone->delete();
-        Versioned::set_reading_mode($oldMode);
-        $this->createDeletedVersion($stage);
+        try {
+            Versioned::set_stage($stage);
+            $owner = $this->owner;
+            $clone = clone $owner;
+            $clone->delete();
+        } finally {
+            Versioned::set_reading_mode($oldMode);
+        }
         // Fix the version number cache (in case you go delete from stage and then check ExistsOnLive)
         $baseClass = $owner->baseClass();
         self::$cache_versionnumber[$baseClass][$stage][$owner->ID] = null;
