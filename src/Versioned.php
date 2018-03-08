@@ -2445,6 +2445,38 @@ SQL
     }
 
     /**
+     * Returns whether the current record's version is the current live/published version
+     *
+     * @return bool
+     */
+    public function isLiveVersion()
+    {
+        $id = $this->owner->ID ?: $this->owner->OldID;
+        if (!$id || !$this->isPublished()) {
+            return false;
+        }
+
+        $liveVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+        return $liveVersionNumber === $this->owner->Version;
+    }
+
+    /**
+     * Returns whether the current record's version is the current draft/modified version
+     *
+     * @return bool
+     */
+    public function isLatestDraftVersion()
+    {
+        $id = $this->owner->ID ?: $this->owner->OldID;
+        if (!$id || !$this->isOnDraft()) {
+            return false;
+        }
+
+        $draftVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
+        return $draftVersionNumber === $this->owner->Version;
+    }
+
+    /**
      * Check if this record exists on live
      *
      * @return bool

@@ -1417,6 +1417,7 @@ class VersionedTest extends SapphireTest
         $publishedPage->copyVersionToStage('Stage', 'Live');
         $this->assertTrue($publishedPage->isOnDraft());
         $this->assertTrue($publishedPage->isPublished());
+        $this->assertTrue($publishedPage->isLiveVersion());
         $this->assertFalse($publishedPage->isOnDraftOnly());
         $this->assertFalse($publishedPage->isOnLiveOnly());
         $this->assertFalse($publishedPage->isModifiedOnDraft());
@@ -1464,6 +1465,8 @@ class VersionedTest extends SapphireTest
         $modifiedOnDraftPage->Content = 'modified';
         $modifiedOnDraftPage->write();
         $this->assertFalse($modifiedOnDraftPage->isArchived());
+        $this->assertFalse($modifiedOnDraftPage->isLiveVersion());
+        $this->assertTrue($modifiedOnDraftPage->isLatestDraftVersion());
         $this->assertTrue($modifiedOnDraftPage->isOnDraft());
         $this->assertTrue($modifiedOnDraftPage->isPublished());
         $this->assertFalse($modifiedOnDraftPage->isOnDraftOnly());

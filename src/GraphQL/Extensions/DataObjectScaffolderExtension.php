@@ -57,7 +57,19 @@ class DataObjectScaffolderExtension extends Extension
                         'resolve' => function ($obj) {
                             return $obj->Published();
                         }
-                    ]
+                    ],
+                    'LiveVersion' => [
+                        'type' => Type::boolean(),
+                        'resolve' => function ($obj) {
+                            return $obj->LiveVersion();
+                        }
+                    ],
+                    'LatestDraftVersion' => [
+                        'type' => Type::boolean(),
+                        'resolve' => function ($obj) {
+                            return $obj->LatestDraftVersion();
+                        }
+                    ],
                 ];
                 // Remove this recursive madness.
                 unset($coreFields['Versions']);
