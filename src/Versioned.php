@@ -255,9 +255,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $parts = explode('.', Versioned::get_reading_mode());
 
         if ($parts[0] == 'Archive') {
+            $archiveStage = isset($parts[2]) ? $parts[2] : static::DRAFT;
             $dataQuery->setQueryParam('Versioned.mode', 'archive');
             $dataQuery->setQueryParam('Versioned.date', $parts[1]);
-            $dataQuery->setQueryParam('Versioned.stage', $parts[2]);
+            $dataQuery->setQueryParam('Versioned.stage', $archiveStage);
         } elseif ($parts[0] == 'Stage' && $this->hasStages()) {
             $dataQuery->setQueryParam('Versioned.mode', 'stage');
             $dataQuery->setQueryParam('Versioned.stage', $parts[1]);

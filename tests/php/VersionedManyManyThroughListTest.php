@@ -32,10 +32,9 @@ class VersionedManyManyThroughListTest extends SapphireTest
         parent::tearDown();
     }
 
-
     public function testPublishing()
     {
-        /** @var VersionedManyManyThroughListTest\VersionedObject */
+        /** @var VersionedManyManyThroughListTest\VersionedObject $draftParent */
         $draftParent = $this->objFromFixture(VersionedManyManyThroughListTest\VersionedObject::class, 'parent1');
         $draftParent->publishRecursive();
 
@@ -49,7 +48,7 @@ class VersionedManyManyThroughListTest extends SapphireTest
 
         // Check owned objects on stage
         $draftOwnedObjects = $draftParent->findOwned(true);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'new versioned join 1'],
                 ['Title' => 'versioned join 2'],
@@ -68,7 +67,7 @@ class VersionedManyManyThroughListTest extends SapphireTest
             Versioned::LIVE
         )->byID($draftParent->ID);
         $liveOwnedObjects = $liveParent->findOwned(true);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'versioned join 1'],
                 ['Title' => 'versioned join 2'],
@@ -85,7 +84,7 @@ class VersionedManyManyThroughListTest extends SapphireTest
             Versioned::LIVE
         )->byID($draftParent->ID);
         $liveOwnedObjects = $liveParent->findOwned(true);
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'new versioned join 1'],
                 ['Title' => 'versioned join 2'],
