@@ -587,7 +587,10 @@ SQL
 
     /**
      * Return latest version instances, regardless of whether they are on a particular stage.
-     * This provides "show all, including deleted" functonality
+     * This provides "show all, including deleted" functonality.
+     *
+     * Note: latest_version ignores deleted versions, and will select the latest non-deleted
+     * version.
      *
      * @param SQLSelect $query
      */
@@ -604,6 +607,7 @@ SQL
             SELECT "{$baseTable}_Versions"."RecordID",
                 MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
             FROM "{$baseTable}_Versions"
+            WHERE "{$baseTable}_Versions"."WasDeleted" = 0
             GROUP BY "{$baseTable}_Versions"."RecordID"
             )                                
 SQL
@@ -1409,6 +1413,11 @@ SQL
         $latestVersion = Versioned::get_versionnumber_by_stage(get_class($owner), static::LIVE, $owner->ID);
         if ($latestVersion == $owner->Version) {
             // Even if this is loaded from a non-live stage, this is the live version
+            return true;
+        }
+
+        // If stages are synchronised treat this as the draft stage
+        if ($mode === 'stage' && !$this->stagesDiffer()) {
             return true;
         }
 

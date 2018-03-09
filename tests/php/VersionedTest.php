@@ -164,16 +164,16 @@ class VersionedTest extends SapphireTest
         $obj1 = new VersionedTest\Subclass();
         $obj1->ExtraField = 'Foo';
         $obj1->write(); // version 1
-        $obj1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+        $obj1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE); // version 2
         $obj1->ExtraField = 'Foo2';
-        $obj1->write(); // version 2
+        $obj1->write(); // version 3
 
         // Make duplicate
         $obj2 = $obj1->duplicate();
 
         // Check records differ
         $this->assertNotEquals($obj1->ID, $obj2->ID);
-        $this->assertEquals(2, $obj1->Version);
+        $this->assertEquals(3, $obj1->Version);
         $this->assertEquals(1, $obj2->Version);
     }
 
@@ -317,36 +317,24 @@ class VersionedTest extends SapphireTest
         $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $origVersion = $page1->Version;
 
+        // New version
         $page1->Content = 'changed';
         $page1->write();
         $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $changedVersion = $page1->Version;
 
+        // Third version
         $page1->Content = 'should be discarded';
         $page1->doRollbackTo($origVersion);
-        $page1 = Versioned::get_one_by_stage(
-            VersionedTest\TestObject::class,
-            'Stage',
-            [
-            '"VersionedTest_DataObject"."ID" = ?' => $page1->ID
-            ]
-        );
+        $page1 = Versioned::get_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT)
+            ->byID($page1->ID);
+        /** @var VersionedTest\AnotherSubclass $page1Live */
+        $page1Live = Versioned::get_by_stage(VersionedTest\TestObject::class, Versioned::LIVE)
+            ->byID($page1->ID);
 
-        $this->assertTrue($page1->Version == $changedVersion + 1, 'Create a new higher version number');
+        $this->assertGreaterThan($changedVersion, $page1->Version, 'Create a new higher version number');
         $this->assertEquals('orig', $page1->Content, 'Copies the content from the old version');
-
-        // check db entries
-        $version = DB::prepared_query(
-            "SELECT MAX(\"Version\") FROM \"VersionedTest_DataObject_Versions\" WHERE \"RecordID\" = ?",
-            [$page1->ID]
-        )->value();
-        $this->assertEquals($page1->Version, $version, 'Correct entry in VersionedTest_DataObject_Versions');
-
-        $version = DB::prepared_query(
-            "SELECT MAX(\"Version\") FROM \"VersionedTest_AnotherSubclass_Versions\" WHERE \"RecordID\" = ?",
-            [$page1->ID]
-        )->value();
-        $this->assertEquals($page1->Version, $version, 'Correct entry in VersionedTest_AnotherSubclass_Versions');
+        $this->assertEquals('changed', $page1Live->Content);
     }
 
     public function testDeleteFromStage()
@@ -650,7 +638,8 @@ class VersionedTest extends SapphireTest
         // the modified date of that version
         $archiveParms = [
             'Versioned.mode' => 'archive',
-            'Versioned.date' => $version1Date
+            'Versioned.date' => $version1Date,
+            'Versioned.stage' => Versioned::DRAFT,
         ];
         $this->assertEquals($archiveParms, $page2v1->getInheritableQueryParams());
         $this->assertArraySubset($archiveParms, $page2v1->Children()->getQueryParams());
@@ -671,7 +660,8 @@ class VersionedTest extends SapphireTest
         // the modified date of that version
         $archiveParms = [
             'Versioned.mode' => 'archive',
-            'Versioned.date' => $version2Date
+            'Versioned.date' => $version2Date,
+            'Versioned.stage' => Versioned::DRAFT,
         ];
         $this->assertEquals($archiveParms, $page2v2->getInheritableQueryParams());
         $this->assertArraySubset($archiveParms, $page2v2->Children()->getQueryParams());
@@ -1149,73 +1139,73 @@ class VersionedTest extends SapphireTest
         $record = VersionedTest\Subclass::create();
         $record->Title = "Test A";
         $record->ExtraField = "Test A";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
+        $this->assertRecordHasLatestVersion($record, 2);
         $record->Title = "Test A2";
         $record->ExtraField = "Test A2";
-        $record->writeToStage("Stage");
-        $this->assertRecordHasLatestVersion($record, 2);
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
 
         // Test subclass without changes to base class
         $record = VersionedTest\Subclass::create();
         $record->ExtraField = "Test B";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
-        $record->ExtraField = "Test B2";
-        $record->writeToStage("Stage");
         $this->assertRecordHasLatestVersion($record, 2);
+        $record->ExtraField = "Test B2";
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
 
         // Test subclass without changes to sub class
         $record = VersionedTest\Subclass::create();
         $record->Title = "Test C";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
-        $record->Title = "Test C2";
-        $record->writeToStage("Stage");
         $this->assertRecordHasLatestVersion($record, 2);
+        $record->Title = "Test C2";
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
 
         // Test subclass with versioned extension only added to the base clases
         /** @var VersionedTest\AnotherSubclass $record */
         $record = VersionedTest\AnotherSubclass::create();
         $record->Title = "Test A";
         $record->AnotherField = "Test A";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
+        $this->assertRecordHasLatestVersion($record, 2);
         $record->Title = "Test A2";
         $record->AnotherField = "Test A2";
-        $record->writeToStage("Stage");
-        $this->assertRecordHasLatestVersion($record, 2);
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
 
 
         // Test subclass without changes to base class
         $record = VersionedTest\AnotherSubclass::create();
         $record->AnotherField = "Test B";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
-        $record->AnotherField = "Test B2";
-        $record->writeToStage("Stage");
         $this->assertRecordHasLatestVersion($record, 2);
+        $record->AnotherField = "Test B2";
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
 
         // Test subclass without changes to sub class
         $record = VersionedTest\AnotherSubclass::create();
         $record->Title = "Test C";
-        $record->writeToStage("Stage");
+        $record->writeToStage(Versioned::DRAFT);
         $this->assertRecordHasLatestVersion($record, 1);
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $this->assertRecordHasLatestVersion($record, 1);
-        $record->Title = "Test C2";
-        $record->writeToStage("Stage");
         $this->assertRecordHasLatestVersion($record, 2);
+        $record->Title = "Test C2";
+        $record->writeToStage(Versioned::DRAFT);
+        $this->assertRecordHasLatestVersion($record, 3);
     }
 
     public function testVersionedHandlesRenamedDataObjectFields()
@@ -1244,13 +1234,16 @@ class VersionedTest extends SapphireTest
         $this->logOut();
         Versioned::set_stage(Versioned::DRAFT);
         /** @var VersionedTest\PublicStage $public1 */
-        $public1 = Versioned::get_one_by_stage(VersionedTest\PublicStage::class, 'Stage', ['"ID"' => $public1ID]);
-        $public2 = Versioned::get_one_by_stage(VersionedTest\PublicViaExtension::class, 'Stage', ['"ID"' => $public2ID]);
+        $public1 = Versioned::get_by_stage(VersionedTest\PublicStage::class, Versioned::DRAFT)
+            ->byID($public1ID);
+        $public2 = Versioned::get_by_stage(VersionedTest\PublicViaExtension::class, Versioned::DRAFT)
+            ->byID($public2ID);
         /** @var VersionedTest\TestObject $private */
-        $private = Versioned::get_one_by_stage(VersionedTest\TestObject::class, 'Stage', ['"ID"' => $privateID]);
+        $private = Versioned::get_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT)
+            ->byID($privateID);
         // Also test an object that has just a single-stage (eg. is only versioned)
-        $single = Versioned::get_one_by_stage(VersionedTest\SingleStage::class, 'Stage', ['"ID"' => $singleID]);
-
+        $single = Versioned::get_by_stage(VersionedTest\SingleStage::class, Versioned::DRAFT)
+            ->byID($singleID);
 
         $this->assertTrue($public1->canView());
         $this->assertTrue($public2->canView());
@@ -1266,7 +1259,8 @@ class VersionedTest extends SapphireTest
 
         // Writing the private page to live should be fine though
         $private->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-        $privateLive = Versioned::get_one_by_stage(VersionedTest\TestObject::class, 'Live', ['"ID"' => $privateID]);
+        $privateLive = Versioned::get_by_stage(VersionedTest\TestObject::class, Versioned::LIVE)
+            ->byID($privateID);
         $this->assertTrue($private->canView());
         $this->assertTrue($privateLive->canView());
 
