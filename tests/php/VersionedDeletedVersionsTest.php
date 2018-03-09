@@ -101,7 +101,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $this->assertTrue((bool)$version['WasDeleted']);
         $this->assertTrue((bool)$version['WasDraft']);
         $this->assertTrue((bool)$version['WasPublished']);
-        $this->assertEquals(3,  $version['Version']);
+        $this->assertEquals(3, $version['Version']);
     }
 
     public function testUnpublish()
@@ -134,7 +134,7 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $this->assertTrue((bool)$version['WasDeleted']);
         $this->assertFalse((bool)$version['WasDraft']);
         $this->assertTrue((bool)$version['WasPublished']);
-        $this->assertEquals(3,  $version['Version']);
+        $this->assertEquals(3, $version['Version']);
     }
 
     public function testDeleteOwnedWithoutRepublishingOwner()
