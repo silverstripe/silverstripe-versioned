@@ -24,6 +24,10 @@ class GalleryBlockItem extends DataObject implements TestOnly
         'Title' => 'Varchar(255)',
     ];
 
+    private static $default_sort = [
+        '"VersionsDeletedVersionsTest_GalleryBlockItem"."Title" ASC',
+    ];
+
     private static $has_one = [
         'GalleryBlock' => GalleryBlock::class,
     ];
