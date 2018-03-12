@@ -1345,6 +1345,33 @@ class VersionedTest extends SapphireTest
         $this->assertEquals($record->Title, $version->Title);
     }
 
+    public function testPublishSingle()
+    {
+        $createdPage = new VersionedTest\TestObject();
+        $createdPage->Title = 'Title';
+        $createdPage->write();
+
+        $this->assertEquals(1, $createdPage->Version);
+        $this->assertEquals(
+            1,
+            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, $createdPage->ID)
+        );
+        $this->assertNull(
+            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::LIVE, $createdPage->ID)
+        );
+
+        // Publish creates new version and modifies local object safely
+        $createdPage->publishSingle();
+        $this->assertEquals(2, $createdPage->Version);
+        $this->assertEquals(
+            2,
+            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, $createdPage->ID)
+        );
+        $this->assertEquals(
+            2,
+            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::LIVE, $createdPage->ID)
+        );
+    }
 
 
     public function testStageStates()

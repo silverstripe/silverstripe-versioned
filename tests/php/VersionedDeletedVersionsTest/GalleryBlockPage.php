@@ -12,7 +12,7 @@ use SilverStripe\Versioned\Versioned;
  * @property string $Title
  * @mixin RecursivePublishable
  * @mixin Versioned
- * @method HasManyList GalleryBlocks()
+ * @method HasManyList|GalleryBlock[] GalleryBlocks()
  */
 class GalleryBlockPage extends DataObject implements TestOnly
 {

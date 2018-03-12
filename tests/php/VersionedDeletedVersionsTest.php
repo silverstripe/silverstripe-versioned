@@ -3,10 +3,9 @@
 namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\FieldType\DBDate;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyOfficeLocation;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyPage;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlock;
@@ -14,11 +13,9 @@ use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlockItem;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlockPage;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\OfficeLocation;
 use SilverStripe\Versioned\Versioned;
-use SilverStripe\Versioned\RecursivePublishable;
 
 class VersionedDeletedVersionsTest extends SapphireTest
 {
-
     protected static $extra_dataobjects = [
         GalleryBlockPage::class,
         GalleryBlock::class,
@@ -257,11 +254,13 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $page1v4 = Versioned::get_version(GalleryBlockPage::class, $page1->ID, 4);
         $this->assertNotNull($page1v4);
         $this->assertCount(1, $page1v4->GalleryBlocks());
-        $this->assertEquals('GalleryBlock1v1', $page1v4->GalleryBlocks()->first()->Title);
-        $this->assertCount(2, $page1v4->GalleryBlocks()->first()->Items());
+        /** @var GalleryBlock $galleryBlock1 */
+        $galleryBlock1 = $page1v4->GalleryBlocks()->first();
+        $this->assertEquals('GalleryBlock1v1', $galleryBlock1->Title);
+        $this->assertCount(2, $galleryBlock1->Items());
         $this->assertEquals(
             ['GalleryBlockItem1v1', 'GalleryBlockItem2v1'],
-            $page1v4->GalleryBlocks()->first()->Items()->column('Title')
+            $galleryBlock1->Items()->column('Title')
         );
     }
 

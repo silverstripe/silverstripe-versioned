@@ -1564,8 +1564,7 @@ SQL
             $original = null;
         }
         $owner->invokeWithExtensions('onBeforePublish', $original);
-        $owner->write();
-        $owner->copyVersionToStage(static::DRAFT, static::LIVE);
+        $owner->writeToStage(static::LIVE);
         $owner->invokeWithExtensions('onAfterPublish', $original);
         return true;
     }
@@ -1670,7 +1669,7 @@ SQL
     {
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeRevertToLive');
-        $owner->copyVersionToStage(static::LIVE, static::DRAFT, false);
+        $owner->copyVersionToStage(static::LIVE, static::DRAFT);
         $owner->invokeWithExtensions('onAfterRevertToLive');
         return true;
     }
@@ -2298,14 +2297,19 @@ SQL
     public function writeToStage($stage, $forceInsert = false)
     {
         $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($stage);
-
         $owner = $this->owner;
-        $owner->forceChange();
-        $result = $owner->write(false, $forceInsert);
-        Versioned::set_reading_mode($oldMode);
+        try {
+            Versioned::set_stage($stage);
 
-        return $result;
+            // Write
+            $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
+            $owner->forceChange();
+            return $owner->write(false, $forceInsert);
+        } finally {
+            // Revert global state
+            Versioned::set_reading_mode($oldMode);
+            $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
+        }
     }
 
     /**
@@ -2320,7 +2324,7 @@ SQL
     {
         $owner = $this->owner;
         $owner->extend('onBeforeRollback', $version);
-        $owner->copyVersionToStage($version, static::DRAFT, true);
+        $owner->copyVersionToStage($version, static::DRAFT);
         $owner->extend('onAfterRollback', $version);
     }
 
