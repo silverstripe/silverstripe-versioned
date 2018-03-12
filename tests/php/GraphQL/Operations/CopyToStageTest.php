@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
-use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
+use SilverStripe\GraphQL\Scaffolding\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\CopyToStage;
@@ -26,7 +26,7 @@ class CopyToStageTest extends SapphireTest
 
     public function testCopyToStage()
     {
-        $typeName = ScaffoldingUtil::typeNameForDataObject(Fake::class);
+        $typeName = Schema::inst()->typeNameForDataObject(Fake::class);
         $manager = new Manager();
         $manager->addType((new CopyToStageInputType())->toType());
         $manager->addType(new ObjectType(['name' => $typeName]));

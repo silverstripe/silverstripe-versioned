@@ -5,7 +5,7 @@ namespace SilverStripe\Versioned\GraphQL\Extensions;
 use SilverStripe\Core\Extension;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
+use SilverStripe\GraphQL\Scaffolding\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
 
@@ -19,7 +19,7 @@ class SchemaScaffolderExtension extends Extension
      */
     public function onBeforeAddToManager(Manager $manager)
     {
-        $memberType = ScaffoldingUtil::typeNameForDataObject(Member::class);
+        $memberType = Schema::inst()->typeNameForDataObject(Member::class);
         if ($manager->hasType($memberType)) {
             return;
         }

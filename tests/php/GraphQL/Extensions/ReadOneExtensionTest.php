@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
-use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
+use SilverStripe\GraphQL\Scaffolding\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
@@ -24,7 +24,7 @@ class ReadOneExtensionTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedInputType())->toType());
-        $manager->addType(new ObjectType(['name' => ScaffoldingUtil::typeNameForDataObject(Fake::class)]));
+        $manager->addType(new ObjectType(['name' => Schema::inst()->typeNameForDataObject(Fake::class)]));
         $read = new ReadOne(Fake::class);
         $readScaffold = $read->scaffold($manager);
         $this->assertInternalType('callable', $readScaffold['resolve']);
