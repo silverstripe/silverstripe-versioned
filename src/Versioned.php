@@ -1552,17 +1552,14 @@ SQL
     public function publishSingle()
     {
         $owner = $this->owner;
+        // get the last published version
+        $original = null;
         if ($this->isPublished()) {
-            // get the last published version
-            $baseClass = $owner->baseClass();
-            $baseTable = $owner->baseTable();
-
-            $original = self::get_one_by_stage($baseClass, self::LIVE, [
-                "\"$baseTable\".\"ID\" = ?" => $owner->ID,
-            ]);
-        } else {
-            $original = null;
+            $original = self::get_by_stage($owner->baseClass(), self::LIVE)
+                ->byID($owner->ID);
         }
+
+        // Publish it
         $owner->invokeWithExtensions('onBeforePublish', $original);
         $owner->writeToStage(static::LIVE);
         $owner->invokeWithExtensions('onAfterPublish', $original);
@@ -1727,44 +1724,18 @@ SQL
         $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $createNewVersion);
 
         $baseClass = $owner->baseClass();
-        $baseTable = $owner->baseTable();
-
         /** @var Versioned|DataObject $from */
         if (is_numeric($fromStage)) {
             $from = Versioned::get_version($baseClass, $owner->ID, $fromStage);
         } else {
-            $owner->flushCache();
-            $from = Versioned::get_one_by_stage($baseClass, $fromStage, [
-                "\"{$baseTable}\".\"ID\" = ?" => $owner->ID
-            ]);
+            $from = Versioned::get_by_stage($baseClass, $fromStage)->byID($owner->ID);
         }
         if (!$from) {
             throw new InvalidArgumentException("Can't find {$baseClass}#{$owner->ID} in stage {$fromStage}");
         }
 
-        $from->forceChange();
-        $from->Version = null;
-        // Change to new stage, write, and revert state
-        $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($toStage);
-
-        // Migrate stage prior to write
-        $from->setSourceQueryParam('Versioned.mode', 'stage');
-        $from->setSourceQueryParam('Versioned.stage', $toStage);
-
-        $conn = DB::get_conn();
-        if (method_exists($conn, 'allowPrimaryKeyEditing')) {
-            $conn->allowPrimaryKeyEditing($baseTable, true);
-            $from->write();
-            $conn->allowPrimaryKeyEditing($baseTable, false);
-        } else {
-            $from->write();
-        }
-
+        $from->writeToStage($toStage);
         $from->destroy();
-
-        Versioned::set_reading_mode($oldMode);
-
         $owner->invokeWithExtensions('onAfterVersionedPublish', $fromStage, $toStage, $createNewVersion);
     }
 
@@ -2296,19 +2267,25 @@ SQL
      */
     public function writeToStage($stage, $forceInsert = false)
     {
-        $oldMode = Versioned::get_reading_mode();
         $owner = $this->owner;
+        $oldMode = Versioned::get_reading_mode();
+        $oldParams = $owner->getSourceQueryParams();
         try {
+            // Migrate stage prior to write
             Versioned::set_stage($stage);
+            $owner->setSourceQueryParam('Versioned.mode', 'stage');
+            $owner->setSourceQueryParam('Versioned.stage', $stage);
 
             // Write
             $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
+            $owner->Version = null;
             $owner->forceChange();
             return $owner->write(false, $forceInsert);
         } finally {
             // Revert global state
-            Versioned::set_reading_mode($oldMode);
             $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
+            $owner->setSourceQueryParams($oldParams);
+            Versioned::set_reading_mode($oldMode);
         }
     }
 
