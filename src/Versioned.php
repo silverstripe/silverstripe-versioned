@@ -961,13 +961,15 @@ SQL
             } else {
                 $userID = 0;
             }
+            $wasPublished = (int)in_array(static::LIVE, (array)$stages);
+            $wasDraft = (int)in_array(static::DRAFT, (array)$stages);
             $newManipulation['fields'] = array_merge(
                 $newManipulation['fields'],
                 [
                     'AuthorID' => $userID,
-                    'PublisherID' => $userID,
-                    'WasPublished' => (int)in_array(static::LIVE, (array)$stages),
-                    'WasDraft' => (int)in_array(static::DRAFT, (array)$stages),
+                    'PublisherID' => $wasPublished ? $userID : 0,
+                    'WasPublished' => $wasPublished,
+                    'WasDraft' => $wasDraft,
                     'WasDeleted' => (int)$isDelete,
                 ]
             );
@@ -1392,8 +1394,8 @@ SQL
     {
         // Bypass when live stage
         $owner = $this->owner;
-        $mode = $owner->getSourceQueryParam("Versioned.mode");
-        $stage = $owner->getSourceQueryParam("Versioned.stage");
+        $mode = $owner->getSourceQueryParam("Versioned.mode") ?: 'stage';
+        $stage = $owner->getSourceQueryParam("Versioned.stage") ?: Versioned::get_stage();
         if ($mode === 'stage' && $stage === static::LIVE) {
             return true;
         }
@@ -1416,7 +1418,7 @@ SQL
             return true;
         }
 
-        // If stages are synchronised treat this as the draft stage
+        // If stages are synchronised treat this as the live stage
         if ($mode === 'stage' && !$this->stagesDiffer()) {
             return true;
         }
@@ -2271,6 +2273,10 @@ SQL
         $oldMode = Versioned::get_reading_mode();
         $oldParams = $owner->getSourceQueryParams();
         try {
+            // Lazy load and reset version in current stage prior to resetting write stage
+            $owner->forceChange();
+            $owner->Version = null;
+
             // Migrate stage prior to write
             Versioned::set_stage($stage);
             $owner->setSourceQueryParam('Versioned.mode', 'stage');
@@ -2278,8 +2284,6 @@ SQL
 
             // Write
             $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
-            $owner->Version = null;
-            $owner->forceChange();
             return $owner->write(false, $forceInsert);
         } finally {
             // Revert global state
