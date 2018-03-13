@@ -1,0 +1,36 @@
+fr:
+  SilverStripe\Versioned\ChangeSet:
+    EMPTY: Vide
+    NAME: Nom
+    PLURALNAME: Campagnes
+    PUBLISHED_TODAY: 'Aujourd''hui {time}'
+    PUBLISHER_NAME: 'Publié par'
+    PUBLISH_DATE: 'Date de publication'
+    SINGULARNAME: Campagne
+    STATE_OPEN: Active
+    STATE_PUBLISHED: Publié
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Versions
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Archive
+    Archived: '{name} {title} archivé'
+    BUTTONAPPLYCHANGES: 'Appliquer les changements'
+    BUTTONARCHIVEDESC: 'Dépublier et envoyer en archive'
+    BUTTONPUBLISH: Publier
+    BUTTONUNPUBLISH: Dépublier
+    BUTTONUNPUBLISHDESC: 'Retirer cette entrée du site publié'
+    DRAFT: Brouillon
+    MODIFIED: Modifié
+    PUBLISHITEMSWARNING: 'Les éléments brouillons/modifiés seront publiés'
+    Published: '{name} {link} publié'
+    Unpublished: '{name} {title} dépublié'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'L''élément n''a pas encore été publié'
+    ADDEDTODRAFTSHORT: Brouillon
+    ARCHIVEDPAGEHELP: 'L''élément est retiré des brouillons et en ligne'
+    ARCHIVEDPAGESHORT: Archivée
+    MODIFIEDONDRAFTHELP: 'L''élément a des changements non publiés'
+    MODIFIEDONDRAFTSHORT: Modifié
+    ONLIVEONLYSHORTHELP: 'L''élément est publié, mais a été effacé des brouillons'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Vous devez vous identifier avec votre mot de passe CMS pour voir le contenu brouillon ou archivé. <a href="{link}">Cliquez ici pour revenir au site publié.</a>'
