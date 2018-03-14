@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned;
 
 use InvalidArgumentException;
+use LogicException;
 use SilverStripe\Core\Extensible;
 use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
@@ -288,7 +289,9 @@ class ChangeSetItem extends DataObject implements Thumbnail
             false
         );
 
-        switch ($this->getChangeType()) {
+        // Enact change
+        $changeType = $this->getChangeType();
+        switch ($changeType) {
             case static::CHANGE_NONE: {
                 break;
             }
@@ -303,8 +306,19 @@ class ChangeSetItem extends DataObject implements Thumbnail
                 // Non-recursive publish
                 $object = $this->getObjectInStage(Versioned::DRAFT);
                 $object->publishSingle();
+
+                // Point after version to the published version actually created, not the
+                // version copied from draft.
+                $this->VersionAfter = Versioned::get_versionnumber_by_stage(
+                    $this->ObjectClass,
+                    Versioned::LIVE,
+                    $this->ObjectID,
+                    false
+                );
                 break;
             }
+            default:
+                throw new LogicException("Invalid change type: {$changeType}");
         }
 
         $this->write();

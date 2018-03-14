@@ -20,8 +20,8 @@ use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
@@ -108,6 +108,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
 
     /**
+     * Prevents delete() from creating a _Versioned record (in case this must be deferred)
+     * Best used with suppressDeleteVersion()
+     */
+    const DELETE_WRITES_VERSION_DISABLED = 'DeleteWritesVersionDisabled';
+
+    /**
      * Ensure versioned page doesn't attempt to virtualise these non-db fields
      *
      * @config
@@ -116,6 +122,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     private static $non_virtual_fields = [
         self::MIGRATING_VERSION,
         self::NEXT_WRITE_WITHOUT_VERSIONED,
+        self::DELETE_WRITES_VERSION_DISABLED,
     ];
 
     /**
@@ -130,6 +137,8 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         "RecordID" => "Int",
         "Version" => "Int",
         "WasPublished" => "Boolean",
+        "WasDeleted" => "Boolean",
+        "WasDraft" => "Boolean",
         "AuthorID" => "Int",
         "PublisherID" => "Int"
     ];
@@ -246,8 +255,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $parts = explode('.', Versioned::get_reading_mode());
 
         if ($parts[0] == 'Archive') {
+            $archiveStage = isset($parts[2]) ? $parts[2] : static::DRAFT;
             $dataQuery->setQueryParam('Versioned.mode', 'archive');
             $dataQuery->setQueryParam('Versioned.date', $parts[1]);
+            $dataQuery->setQueryParam('Versioned.stage', $archiveStage);
         } elseif ($parts[0] == 'Stage' && $this->hasStages()) {
             $dataQuery->setQueryParam('Versioned.mode', 'stage');
             $dataQuery->setQueryParam('Versioned.stage', $parts[1]);
@@ -282,10 +293,27 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Get modified date for the given version
      *
+     * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion instead
      * @param int $version
      * @return string
      */
     protected function getLastEditedForVersion($version)
+    {
+        Deprecation::notice('5.0', 'Use getLastEditedAndStageForVersion instead');
+        $result = $this->getLastEditedAndStageForVersion($version);
+        if ($result) {
+            return reset($result);
+        }
+        return null;
+    }
+
+    /**
+     * Get modified date and stage for the given version
+     *
+     * @param int $version
+     * @return array A list containing 0 => LastEdited, 1 => Stage
+     */
+    protected function getLastEditedAndStageForVersion($version)
     {
         // Cache key
         $baseTable = $this->baseTable();
@@ -299,16 +327,21 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Build query
         $table = "\"{$baseTable}_Versions\"";
-        $query = SQLSelect::create('"LastEdited"', $table)
+        $query = SQLSelect::create(['"LastEdited"', '"WasPublished"'], $table)
             ->addWhere([
                 "{$table}.\"RecordID\"" => $id,
                 "{$table}.\"Version\"" => $version
             ]);
-        $date = $query->execute()->value();
-        if ($date) {
-            $this->versionModifiedCache[$key] = $date;
+        $result = $query->execute()->record();
+        if (!$result) {
+            return null;
         }
-        return $date;
+        $list = [
+            $result['LastEdited'],
+            $result['WasPublished'] ? static::LIVE : static::DRAFT,
+        ];
+        $this->versionModifiedCache[$key] = $list;
+        return $list;
     }
 
     /**
@@ -325,24 +358,28 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Adjust query based on original selection criterea
         switch ($params['Versioned.mode']) {
-            case 'all_versions': {
+            case 'all_versions':
+            {
                 // Versioned.mode === all_versions doesn't inherit very well, so default to stage
                 $params['Versioned.mode'] = 'stage';
                 $params['Versioned.stage'] = static::DRAFT;
                 break;
             }
-            case 'version': {
+            case 'version':
+            {
                 // If we selected this object from a specific version, we need
                 // to find the date this version was published, and ensure
                 // inherited queries select from that date.
                 $version = $params['Versioned.version'];
-                $date = $this->getLastEditedForVersion($version);
+                $dateAndStage = $this->getLastEditedAndStageForVersion($version);
 
                 // Filter related objects at the same date as this version
                 unset($params['Versioned.version']);
-                if ($date) {
+                if ($dateAndStage) {
+                    list($date, $stage) = $dateAndStage;
                     $params['Versioned.mode'] = 'archive';
                     $params['Versioned.date'] = $date;
+                    $params['Versioned.stage'] = $stage;
                 } else {
                     // Fallback to default
                     $params['Versioned.mode'] = 'stage';
@@ -364,161 +401,261 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
-        if (!$dataQuery || !$dataQuery->getQueryParam('Versioned.mode')) {
+        // Ensure query mode exists
+        $versionedMode = $dataQuery->getQueryParam('Versioned.mode');
+        if (!$versionedMode) {
             return;
         }
-
-        $baseTable = $this->baseTable();
-        $versionedMode = $dataQuery->getQueryParam('Versioned.mode');
         switch ($versionedMode) {
-        // Reading a specific stage (Stage or Live)
             case 'stage':
-                // Check if we need to rewrite this table
-                $stage = $dataQuery->getQueryParam('Versioned.stage');
-                if (!$this->hasStages() || $stage === static::DRAFT) {
-                    break;
-                }
-                // Rewrite all tables to select from the live version
-                foreach ($query->getFrom() as $table => $dummy) {
-                    if (!$this->isTableVersioned($table)) {
-                        continue;
-                    }
-                    $stageTable = $this->stageTable($table, $stage);
-                    $query->renameTable($table, $stageTable);
-                }
+                $this->augmentSQLStage($query, $dataQuery);
                 break;
-
-        // Reading a specific stage, but only return items that aren't in any other stage
             case 'stage_unique':
-                if (!$this->hasStages()) {
-                    break;
-                }
-
-                $stage = $dataQuery->getQueryParam('Versioned.stage');
-                // Recurse to do the default stage behavior (must be first, we rely on stage renaming happening before
-                // below)
-                $dataQuery->setQueryParam('Versioned.mode', 'stage');
-                $this->augmentSQL($query, $dataQuery);
-                $dataQuery->setQueryParam('Versioned.mode', 'stage_unique');
-
-                // Now exclude any ID from any other stage. Note that we double rename to avoid the regular stage rename
-                // renaming all subquery references to be Versioned.stage
-                foreach ([static::DRAFT, static::LIVE] as $excluding) {
-                    if ($excluding == $stage) {
-                        continue;
-                    }
-
-                    $tempName = 'ExclusionarySource_'.$excluding;
-                    $excludingTable = $this->baseTable($excluding);
-
-                    $query->addWhere('"'.$baseTable.'"."ID" NOT IN (SELECT "ID" FROM "'.$tempName.'")');
-                    $query->renameTable($tempName, $excludingTable);
-                }
+                $this->augmentSQLStageUnique($query, $dataQuery);
                 break;
-
-        // Return all version instances
             case 'archive':
-            case 'all_versions':
+                $this->augmentSQLVersionedArchive($query, $dataQuery);
+                break;
             case 'latest_versions':
+                $this->augmentSQLVersionedLatest($query);
+                break;
             case 'version':
-                foreach ($query->getFrom() as $alias => $join) {
-                    if (!$this->isTableVersioned($alias)) {
-                        continue;
-                    }
-
-                    if ($alias != $baseTable) {
-                        // Make sure join includes version as well
-                        $query->setJoinFilter(
-                            $alias,
-                            "\"{$alias}_Versions\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\""
-                            . " AND \"{$alias}_Versions\".\"Version\" = \"{$baseTable}_Versions\".\"Version\""
-                        );
-                    }
-
-                    // Rewrite all usages of `Table` to `Table_Versions`
-                    // However, add an alias back to the base table in case this must later be joined
-                    $query->renameTable($alias, $alias . '_Versions');
-                    $query->renameTable($alias . '_Draft', $alias);
-                }
-
-                // Add all <basetable>_Versions columns
-                foreach (Config::inst()->get(static::class, 'db_for_versions_table') as $name => $type) {
-                    $query->selectField(sprintf('"%s_Versions"."%s"', $baseTable, $name), $name);
-                }
-
-                // Alias the record ID as the row ID, and ensure ID filters are aliased correctly
-                $query->selectField("\"{$baseTable}_Versions\".\"RecordID\"", "ID");
-                $query->replaceText("\"{$baseTable}_Versions\".\"ID\"", "\"{$baseTable}_Versions\".\"RecordID\"");
-
-                // However, if doing count, undo rewrite of "ID" column
-                $query->replaceText(
-                    "count(DISTINCT \"{$baseTable}_Versions\".\"RecordID\")",
-                    "count(DISTINCT \"{$baseTable}_Versions\".\"ID\")"
-                );
-
-                    // Add additional versioning filters
-                switch ($versionedMode) {
-                    case 'archive': {
-                        $date = $dataQuery->getQueryParam('Versioned.date');
-                        if (!$date) {
-                            throw new InvalidArgumentException("Invalid archive date");
-                        }
-                        // Link to the version archived on that date
-                        $query->addWhere([
-                            "\"{$baseTable}_Versions\".\"Version\" IN
-						(SELECT LatestVersion FROM
-							(SELECT
-								\"{$baseTable}_Versions\".\"RecordID\",
-								MAX(\"{$baseTable}_Versions\".\"Version\") AS LatestVersion
-								FROM \"{$baseTable}_Versions\"
-								WHERE \"{$baseTable}_Versions\".\"LastEdited\" <= ?
-								GROUP BY \"{$baseTable}_Versions\".\"RecordID\"
-							) AS \"{$baseTable}_Versions_Latest\"
-							WHERE \"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\"
-						)" => $date
-                        ]);
-                        break;
-                    }
-                    case 'latest_versions': {
-                        // Return latest version instances, regardless of whether they are on a particular stage
-                        // This provides "show all, including deleted" functonality
-                        $query->addWhere(
-                            "\"{$baseTable}_Versions\".\"Version\" IN
-						(SELECT LatestVersion FROM
-							(SELECT
-								\"{$baseTable}_Versions\".\"RecordID\",
-								MAX(\"{$baseTable}_Versions\".\"Version\") AS LatestVersion
-								FROM \"{$baseTable}_Versions\"
-								GROUP BY \"{$baseTable}_Versions\".\"RecordID\"
-							) AS \"{$baseTable}_Versions_Latest\"
-							WHERE \"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\"
-						)"
-                        );
-                        break;
-                    }
-                    case 'version': {
-                        // If selecting a specific version, filter it here
-                        $version = $dataQuery->getQueryParam('Versioned.version');
-                        if (!$version) {
-                            throw new InvalidArgumentException("Invalid version");
-                        }
-                        $query->addWhere([
-                            "\"{$baseTable}_Versions\".\"Version\"" => $version
-                        ]);
-                        break;
-                    }
-                    case 'all_versions':
-                    default: {
-                        // If all versions are requested, ensure that records are sorted by this field
-                        $query->addOrderBy(sprintf('"%s_Versions"."%s"', $baseTable, 'Version'));
-                        break;
-                    }
-                }
+                $this->augmentSQLVersionedVersion($query, $dataQuery);
+                break;
+            case 'all_versions':
+                $this->augmentSQLVersionedAll($query);
                 break;
             default:
-                throw new InvalidArgumentException("Bad value for query parameter Versioned.mode: "
-                . $dataQuery->getQueryParam('Versioned.mode'));
+                throw new InvalidArgumentException("Bad value for query parameter Versioned.mode: {$versionedMode}");
         }
+    }
+
+    /**
+     * Reading a specific stage (Stage or Live)
+     *
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
+    protected function augmentSQLStage(SQLSelect $query, DataQuery $dataQuery)
+    {
+        if (!$this->hasStages()) {
+            return;
+        }
+        $stage = $dataQuery->getQueryParam('Versioned.stage');
+        if (!in_array($stage, [static::DRAFT, static::LIVE])) {
+            throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
+        }
+        if ($stage === static::DRAFT) {
+            return;
+        }
+        // Rewrite all tables to select from the live version
+        foreach ($query->getFrom() as $table => $dummy) {
+            if (!$this->isTableVersioned($table)) {
+                continue;
+            }
+            $stageTable = $this->stageTable($table, $stage);
+            $query->renameTable($table, $stageTable);
+        }
+    }
+
+    /**
+     * Reading a specific stage, but only return items that aren't in any other stage
+     *
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
+    protected function augmentSQLStageUnique(SQLSelect $query, DataQuery $dataQuery)
+    {
+        if (!$this->hasStages()) {
+            return;
+        }
+        // Set stage first
+        $this->augmentSQLStage($query, $dataQuery);
+
+        // Now exclude any ID from any other stage.
+        $stage = $dataQuery->getQueryParam('Versioned.stage');
+        $excludingStage = $stage === static::DRAFT ? static::LIVE : static::DRAFT;
+
+        // Note that we double rename to avoid the regular stage rename
+        // renaming all subquery references to be Versioned.stage
+        $tempName = 'ExclusionarySource_' . $excludingStage;
+        $excludingTable = $this->baseTable($excludingStage);
+        $baseTable = $this->baseTable($stage);
+        $query->addWhere("\"{$baseTable}\".\"ID\" NOT IN (SELECT \"ID\" FROM \"{$tempName}\")");
+        $query->renameTable($tempName, $excludingTable);
+    }
+
+    /**
+     * Augment SQL to select from `_Versioned` table instead.
+     *
+     * @param SQLSelect $query
+     */
+    protected function augmentSQLVersioned(SQLSelect $query)
+    {
+        $baseTable = $this->baseTable();
+        foreach ($query->getFrom() as $alias => $join) {
+            if (!$this->isTableVersioned($alias)) {
+                continue;
+            }
+
+            if ($alias != $baseTable) {
+                // Make sure join includes version as well
+                $query->setJoinFilter(
+                    $alias,
+                    "\"{$alias}_Versions\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\""
+                    . " AND \"{$alias}_Versions\".\"Version\" = \"{$baseTable}_Versions\".\"Version\""
+                );
+            }
+
+            // Rewrite all usages of `Table` to `Table_Versions`
+            $query->renameTable($alias, $alias . '_Versions');
+            // However, add an alias back to the base table in case this must later be joined.
+            // See ApplyVersionFilters for example which joins _Versioned back onto draft table.
+            $query->renameTable($alias . '_Draft', $alias);
+        }
+
+        // Add all <basetable>_Versions columns
+        foreach (Config::inst()->get(static::class, 'db_for_versions_table') as $name => $type) {
+            $query->selectField(sprintf('"%s_Versions"."%s"', $baseTable, $name), $name);
+        }
+
+        // Alias the record ID as the row ID, and ensure ID filters are aliased correctly
+        $query->selectField("\"{$baseTable}_Versions\".\"RecordID\"", "ID");
+        $query->replaceText("\"{$baseTable}_Versions\".\"ID\"", "\"{$baseTable}_Versions\".\"RecordID\"");
+
+        // However, if doing count, undo rewrite of "ID" column
+        $query->replaceText(
+            "count(DISTINCT \"{$baseTable}_Versions\".\"RecordID\")",
+            "count(DISTINCT \"{$baseTable}_Versions\".\"ID\")"
+        );
+
+        // Filter deleted versions, which are all unqueryable
+        $query->addWhere(["\"{$baseTable}_Versions\".\"WasDeleted\"" => 0]);
+    }
+
+    /**
+     * Filter the versioned history by a specific date and archive stage
+     *
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
+    protected function augmentSQLVersionedArchive(SQLSelect $query, DataQuery $dataQuery)
+    {
+        $baseTable = $this->baseTable();
+        $date = $dataQuery->getQueryParam('Versioned.date');
+        if (!$date) {
+            throw new InvalidArgumentException("Invalid archive date");
+        }
+
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        // Validate stage
+        $stage = $dataQuery->getQueryParam('Versioned.stage');
+        if (!in_array($stage, [static::DRAFT, static::LIVE])) {
+            throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
+        }
+
+        // Filter on appropriate stage column in addition to date
+        $stageColumn = $stage === static::LIVE
+            ? 'WasPublished'
+            : 'WasDraft';
+
+        // Join on latest version filtered by date
+        $query->addInnerJoin(
+            <<<SQL
+            (
+            SELECT "{$baseTable}_Versions"."RecordID",
+                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
+            FROM "{$baseTable}_Versions"
+            WHERE "{$baseTable}_Versions"."LastEdited" <= ?
+                AND "{$baseTable}_Versions"."{$stageColumn}" = 1
+            GROUP BY "{$baseTable}_Versions"."RecordID"
+            )                                
+SQL
+            ,
+            <<<SQL
+            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
+            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
+SQL
+            ,
+            "{$baseTable}_Versions_Latest",
+            20,
+            [$date]
+        );
+    }
+
+    /**
+     * Return latest version instances, regardless of whether they are on a particular stage.
+     * This provides "show all, including deleted" functonality.
+     *
+     * Note: latest_version ignores deleted versions, and will select the latest non-deleted
+     * version.
+     *
+     * @param SQLSelect $query
+     */
+    protected function augmentSQLVersionedLatest(SQLSelect $query)
+    {
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        // Join and select only latest version
+        $baseTable = $this->baseTable();
+        $query->addInnerJoin(
+            <<<SQL
+            (
+            SELECT "{$baseTable}_Versions"."RecordID",
+                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
+            FROM "{$baseTable}_Versions"
+            WHERE "{$baseTable}_Versions"."WasDeleted" = 0
+            GROUP BY "{$baseTable}_Versions"."RecordID"
+            )                                
+SQL
+            ,
+            <<<SQL
+            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
+            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
+SQL
+            ,
+            "{$baseTable}_Versions_Latest"
+        );
+    }
+
+    /**
+     * If selecting a specific version, filter it here
+     *
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
+    protected function augmentSQLVersionedVersion(SQLSelect $query, DataQuery $dataQuery)
+    {
+        $version = $dataQuery->getQueryParam('Versioned.version');
+        if (!$version) {
+            throw new InvalidArgumentException("Invalid version");
+        }
+
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        // Add filter on version field
+        $baseTable = $this->baseTable();
+        $query->addWhere([
+            "\"{$baseTable}_Versions\".\"Version\"" => $version,
+        ]);
+    }
+
+    /**
+     * If all versions are requested, ensure that records are sorted by this field
+     *
+     * @param SQLSelect $query
+     */
+    protected function augmentSQLVersionedAll(SQLSelect $query)
+    {
+        // Query against _Versioned table first
+        $this->augmentSQLVersioned($query);
+
+        $baseTable = $this->baseTable();
+        $query->addOrderBy("\"{$baseTable}_Versions\".\"Version\"");
     }
 
     /**
@@ -768,8 +905,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @param string $class Class
      * @param string $table Table Table for this class
      * @param int $recordID ID of record to version
+     * @param array|string $stages Stage or array of affected stages
+     * @param bool $isDelete Set to true of version is created from a deletion
      */
-    protected function augmentWriteVersioned(&$manipulation, $class, $table, $recordID)
+    protected function augmentWriteVersioned(&$manipulation, $class, $table, $recordID, $stages, $isDelete = false)
     {
         $schema = DataObject::getSchema();
         $baseDataClass = $schema->baseDataClass($class);
@@ -783,17 +922,18 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         ];
 
         // Add any extra, unchanged fields to the version record.
-        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        if (!$isDelete) {
+            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+            if ($data) {
+                $fields = $schema->databaseFields($class, false);
+                if (is_array($fields)) {
+                    $data = array_intersect_key($data, $fields);
 
-        if ($data) {
-            $fields = $schema->databaseFields($class, false);
-            if (is_array($fields)) {
-                $data = array_intersect_key($data, $fields);
-
-                foreach ($data as $k => $v) {
-                    // If the value is not set at all in the manipulation currently, use the existing value from the database
-                    if (!array_key_exists($k, $newManipulation['fields'])) {
-                        $newManipulation['fields'][$k] = $v;
+                    foreach ($data as $k => $v) {
+                        // If the value is not set at all in the manipulation currently, use the existing value from the database
+                        if (!array_key_exists($k, $newManipulation['fields'])) {
+                            $newManipulation['fields'][$k] = $v;
+                        }
                     }
                 }
             }
@@ -821,10 +961,23 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             } else {
                 $userID = 0;
             }
-            $newManipulation['fields']['AuthorID'] = $userID;
+            $wasPublished = (int)in_array(static::LIVE, (array)$stages);
+            $wasDraft = (int)in_array(static::DRAFT, (array)$stages);
+            $newManipulation['fields'] = array_merge(
+                $newManipulation['fields'],
+                [
+                    'AuthorID' => $userID,
+                    'PublisherID' => $wasPublished ? $userID : 0,
+                    'WasPublished' => $wasPublished,
+                    'WasDraft' => $wasDraft,
+                    'WasDeleted' => (int)$isDelete,
+                ]
+            );
 
             // Update main table version if not previously known
-            $manipulation[$table]['fields']['Version'] = $nextVersion;
+            if (isset($manipulation[$table]['fields'])) {
+                $manipulation[$table]['fields']['Version'] = $nextVersion;
+            }
         }
 
         // Update _Versions table manipulation
@@ -853,6 +1006,45 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $manipulation[$newTable] = $manipulation[$table];
     }
 
+    /**
+     * Adds a WasDeleted=1 version entry for this record, and records any stages
+     * the deletion applies to
+     *
+     * @param string[]|string $stages Stage or array of affected stages
+     */
+    protected function createDeletedVersion($stages = [])
+    {
+        // Skip if suppressed by parent delete
+        if (!$this->getDeleteWritesVersion()) {
+            return;
+        }
+        // Prepare manipulation
+        $baseTable = $this->owner->baseTable();
+        $now = DBDatetime::now()->Rfc2822();
+        // Ensure all fixed_fields are specified
+        $manipulation = [
+            $baseTable => [
+                'fields' => [
+                    'ID' => $this->owner->ID,
+                    'LastEdited' => $now,
+                    'Created' => $this->owner->Created ?: $now,
+                    'ClassName' => $this->owner->ClassName,
+                ],
+            ],
+        ];
+        // Prepare "deleted" augment write
+        $this->augmentWriteVersioned(
+            $manipulation,
+            $this->owner->baseClass(),
+            $baseTable,
+            $this->owner->ID,
+            $stages,
+            true
+        );
+        unset($manipulation[$baseTable]);
+        $this->owner->extend('augmentWriteDeletedVersion', $manipulation, $stages);
+        DB::manipulate($manipulation);
+    }
 
     public function augmentWrite(&$manipulation)
     {
@@ -871,6 +1063,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         }
 
         // Update all tables
+        $thisVersion = null;
         $tables = array_keys($manipulation);
         foreach ($tables as $table) {
             // Make sure that the augmented write is being applied to a table that can be versioned
@@ -891,10 +1084,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             if ($version < 0 || $this->getNextWriteWithoutVersion()) {
                 // Putting a Version of -1 is a signal to leave the version table alone, despite their being no version
                 unset($manipulation[$table]['fields']['Version']);
-            } elseif (empty($version)) {
-                // If we haven't got a version #, then we're creating a new version.
-                // Otherwise, we're just copying a version to another table
-                $this->augmentWriteVersioned($manipulation, $class, $table, $id);
+            } else {
+                // All writes are to draft, only live affect both
+                $stages = static::get_stage() === static::LIVE
+                    ? [self::DRAFT, self::LIVE]
+                    : [self::DRAFT];
+                $this->augmentWriteVersioned($manipulation, $class, $table, $id, $stages, false);
             }
 
             // Remove "Version" column from subclasses of baseDataClass
@@ -920,7 +1115,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Add the new version # back into the data object, for accessing
         // after this write
-        if (isset($thisVersion)) {
+        if ($thisVersion !== null) {
             $owner->Version = str_replace("'", "", $thisVersion);
         }
     }
@@ -965,6 +1160,44 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function setNextWriteWithoutVersion($flag)
     {
         return $this->owner->setField(self::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
+    }
+
+    /**
+     * Check if delete() should write _Version rows or not
+     *
+     * @return bool
+     */
+    public function getDeleteWritesVersion()
+    {
+        return !$this->owner->getField(self::DELETE_WRITES_VERSION_DISABLED);
+    }
+
+    /**
+     * Set if delete() should write _Version rows
+     *
+     * @param bool $flag
+     * @return DataObject owner
+     */
+    public function setDeleteWritesVersion($flag)
+    {
+        return $this->owner->setField(self::DELETE_WRITES_VERSION_DISABLED, !$flag);
+    }
+
+    /**
+     * Helper method to safely suppress delete callback
+     *
+     * @param callable $callback
+     * @return mixed Result of $callback()
+     */
+    protected function suppressDeletedVersion($callback)
+    {
+        $original = $this->getDeleteWritesVersion();
+        try {
+            $this->setDeleteWritesVersion(false);
+            return $callback();
+        } finally {
+            $this->setDeleteWritesVersion($original);
+        }
     }
 
     /**
@@ -1161,8 +1394,8 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         // Bypass when live stage
         $owner = $this->owner;
-        $mode = $owner->getSourceQueryParam("Versioned.mode");
-        $stage = $owner->getSourceQueryParam("Versioned.stage");
+        $mode = $owner->getSourceQueryParam("Versioned.mode") ?: 'stage';
+        $stage = $owner->getSourceQueryParam("Versioned.stage") ?: Versioned::get_stage();
         if ($mode === 'stage' && $stage === static::LIVE) {
             return true;
         }
@@ -1182,6 +1415,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $latestVersion = Versioned::get_versionnumber_by_stage(get_class($owner), static::LIVE, $owner->ID);
         if ($latestVersion == $owner->Version) {
             // Even if this is loaded from a non-live stage, this is the live version
+            return true;
+        }
+
+        // If stages are synchronised treat this as the live stage
+        if ($mode === 'stage' && !$this->stagesDiffer()) {
             return true;
         }
 
@@ -1316,20 +1554,16 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function publishSingle()
     {
         $owner = $this->owner;
+        // get the last published version
+        $original = null;
         if ($this->isPublished()) {
-            // get the last published version
-            $baseClass = $owner->baseClass();
-            $baseTable = $owner->baseTable();
-
-            $original = self::get_one_by_stage($baseClass, self::LIVE, [
-                "\"$baseTable\".\"ID\" = ?" => $owner->ID,
-            ]);
-        } else {
-            $original = null;
+            $original = self::get_by_stage($owner->baseClass(), self::LIVE)
+                ->byID($owner->ID);
         }
+
+        // Publish it
         $owner->invokeWithExtensions('onBeforePublish', $original);
-        $owner->write();
-        $owner->copyVersionToStage(static::DRAFT, static::LIVE);
+        $owner->writeToStage(static::LIVE);
         $owner->invokeWithExtensions('onAfterPublish', $original);
         return true;
     }
@@ -1346,8 +1580,16 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeArchive', $this);
         $owner->deleteFromChangeSets();
-        $owner->doUnpublish();
-        $owner->deleteFromStage(static::DRAFT);
+        // Unpublish without creating deleted version
+        $this->suppressDeletedVersion(function () use ($owner) {
+            $owner->doUnpublish();
+            $owner->deleteFromStage(static::DRAFT);
+        });
+        // Create deleted version in both stages
+        $this->createDeletedVersion([
+            static::LIVE,
+            static::DRAFT,
+        ]);
         $owner->invokeWithExtensions('onAfterArchive', $this);
         return true;
     }
@@ -1375,16 +1617,24 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $owner->invokeWithExtensions('onBeforeUnpublish');
 
         $origReadingMode = static::get_reading_mode();
-        static::set_stage(static::LIVE);
+        try {
+            static::set_stage(static::LIVE);
 
-        // This way our ID won't be unset
-        $clone = clone $owner;
-        $clone->delete();
-
-        static::set_reading_mode($origReadingMode);
+            // This way our ID won't be unset
+            $clone = clone $owner;
+            $clone->delete();
+        } finally {
+            static::set_reading_mode($origReadingMode);
+        }
 
         $owner->invokeWithExtensions('onAfterUnpublish');
         return true;
+    }
+
+    public function onAfterDelete()
+    {
+        // Create deleted record for current stage
+        $this->createDeletedVersion(static::get_stage());
     }
 
     /**
@@ -1418,7 +1668,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeRevertToLive');
-        $owner->copyVersionToStage(static::LIVE, static::DRAFT, false);
+        $owner->copyVersionToStage(static::LIVE, static::DRAFT);
         $owner->invokeWithExtensions('onAfterRevertToLive');
         return true;
     }
@@ -1451,10 +1701,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * @deprecated 4.0..5.0
      */
-    public function publish($fromStage, $toStage, $createNewVersion = false)
+    public function publish($fromStage, $toStage, $createNewVersion = true)
     {
         Deprecation::notice('5.0', 'Use copyVersionToStage instead');
-        $this->owner->copyVersionToStage($fromStage, $toStage, $createNewVersion);
+        $this->owner->copyVersionToStage($fromStage, $toStage, true);
     }
 
     /**
@@ -1462,70 +1712,32 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * @param int|string $fromStage Place to copy from.  Can be either a stage name or a version number.
      * @param string $toStage Place to copy to.  Must be a stage name.
-     * @param bool $createNewVersion Set this to true to create a new version number.
-     * By default, the existing version number will be copied over. Note if copying
-     * to the live stage, the draft stage will also be updated with the new version.
+     * @param bool $createNewVersion [DEPRECATED] This parameter is ignored, as copying to stage should always
+     * create a new version.
      */
-    public function copyVersionToStage($fromStage, $toStage, $createNewVersion = false)
+    public function copyVersionToStage($fromStage, $toStage, $createNewVersion = true)
     {
+        // Disallow $createNewVersion = false
+        if (!$createNewVersion) {
+            Deprecation::notice('5.0', 'copyVersionToStage no longer allows $createNewVersion to be false');
+            $createNewVersion = true;
+        }
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $createNewVersion);
 
         $baseClass = $owner->baseClass();
-        $baseTable = $owner->baseTable();
-
         /** @var Versioned|DataObject $from */
         if (is_numeric($fromStage)) {
             $from = Versioned::get_version($baseClass, $owner->ID, $fromStage);
         } else {
-            $owner->flushCache();
-            $from = Versioned::get_one_by_stage($baseClass, $fromStage, [
-                "\"{$baseTable}\".\"ID\" = ?" => $owner->ID
-            ]);
+            $from = Versioned::get_by_stage($baseClass, $fromStage)->byID($owner->ID);
         }
         if (!$from) {
             throw new InvalidArgumentException("Can't find {$baseClass}#{$owner->ID} in stage {$fromStage}");
         }
 
-        $from->forceChange();
-        if ($createNewVersion) {
-            // Clear version to be automatically created on write
-            $from->Version = null;
-        } else {
-            $from->setMigratingVersion($from->Version);
-
-            // Mark this version as having been published at some stage
-            $publisherID = isset(Security::getCurrentUser()->ID) ? Security::getCurrentUser()->ID : 0;
-            $extTable = $this->extendWithSuffix($baseTable);
-            DB::prepared_query(
-                "UPDATE \"{$extTable}_Versions\"
-				SET \"WasPublished\" = ?, \"PublisherID\" = ?
-				WHERE \"RecordID\" = ? AND \"Version\" = ?",
-                [1, $publisherID, $from->ID, $from->Version]
-            );
-        }
-
-        // Change to new stage, write, and revert state
-        $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($toStage);
-
-        // Migrate stage prior to write
-        $from->setSourceQueryParam('Versioned.mode', 'stage');
-        $from->setSourceQueryParam('Versioned.stage', $toStage);
-
-        $conn = DB::get_conn();
-        if (method_exists($conn, 'allowPrimaryKeyEditing')) {
-            $conn->allowPrimaryKeyEditing($baseTable, true);
-            $from->write();
-            $conn->allowPrimaryKeyEditing($baseTable, false);
-        } else {
-            $from->write();
-        }
-
+        $from->writeToStage($toStage);
         $from->destroy();
-
-        Versioned::set_reading_mode($oldMode);
-
         $owner->invokeWithExtensions('onAfterVersionedPublish', $fromStage, $toStage, $createNewVersion);
     }
 
@@ -1763,6 +1975,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $getArchived = $request->getVar('archiveDate');
         if ($getArchived && strtotime($getArchived)) {
             $mode = 'Archive.' . $getArchived;
+            $stageArchived = $request->getVar('stage');
+            if ($stageArchived) {
+                $mode .= '.' . $stageArchived;
+            }
         }
 
         // Fallback
@@ -1842,6 +2058,20 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return $parts[1];
         }
         return null;
+    }
+
+    /**
+     * Get the current archive stage.
+     *
+     * @return string
+     */
+    public static function current_archived_stage()
+    {
+        $parts = explode('.', Versioned::get_reading_mode());
+        if (sizeof($parts) === 3 && $parts[0] == 'Archive') {
+            return $parts[2];
+        }
+        return static::DRAFT;
     }
 
     /**
@@ -1962,7 +2192,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                     );
                 }
             }
-            $filter = 'WHERE "ID" IN ('.DB::placeholders($idList).')';
+            $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
             $parameters = $idList;
         }
 
@@ -2016,12 +2246,14 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function deleteFromStage($stage)
     {
         $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($stage);
-        $owner = $this->owner;
-        $clone = clone $owner;
-        $clone->delete();
-        Versioned::set_reading_mode($oldMode);
-
+        try {
+            Versioned::set_stage($stage);
+            $owner = $this->owner;
+            $clone = clone $owner;
+            $clone->delete();
+        } finally {
+            Versioned::set_reading_mode($oldMode);
+        }
         // Fix the version number cache (in case you go delete from stage and then check ExistsOnLive)
         $baseClass = $owner->baseClass();
         self::$cache_versionnumber[$baseClass][$stage][$owner->ID] = null;
@@ -2037,15 +2269,28 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function writeToStage($stage, $forceInsert = false)
     {
-        $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($stage);
-
         $owner = $this->owner;
-        $owner->forceChange();
-        $result = $owner->write(false, $forceInsert);
-        Versioned::set_reading_mode($oldMode);
+        $oldMode = Versioned::get_reading_mode();
+        $oldParams = $owner->getSourceQueryParams();
+        try {
+            // Lazy load and reset version in current stage prior to resetting write stage
+            $owner->forceChange();
+            $owner->Version = null;
 
-        return $result;
+            // Migrate stage prior to write
+            Versioned::set_stage($stage);
+            $owner->setSourceQueryParam('Versioned.mode', 'stage');
+            $owner->setSourceQueryParam('Versioned.stage', $stage);
+
+            // Write
+            $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
+            return $owner->write(false, $forceInsert);
+        } finally {
+            // Revert global state
+            $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
+            $owner->setSourceQueryParams($oldParams);
+            Versioned::set_reading_mode($oldMode);
+        }
     }
 
     /**
@@ -2060,7 +2305,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     {
         $owner = $this->owner;
         $owner->extend('onBeforeRollback', $version);
-        $owner->copyVersionToStage($version, static::DRAFT, true);
+        $owner->copyVersionToStage($version, static::DRAFT);
         $owner->extend('onAfterRollback', $version);
     }
 
@@ -2310,7 +2555,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function cacheKeyComponent()
     {
-        return 'versionedmode-'.static::get_reading_mode();
+        return 'versionedmode-' . static::get_reading_mode();
     }
 
     /**
