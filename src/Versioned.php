@@ -391,6 +391,27 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
+     * Auto-append current stage if we're in draft,
+     * to avoid relying on session state for this,
+     * and the related potential of showing draft content
+     * without varying the URL itself.
+     *
+     * Assumes that if the user has access to view the current
+     * record in draft stage, they can also view other draft records.
+     * Does not concern itself with verifying permissions for performance reasons.
+     *
+     * @param String $link
+     * @param String $action
+     * @param String $relativeLink
+     */
+    public function updateLink(&$link)
+    {
+        if(self::get_stage() === self::DRAFT) {
+            $link = Controller::join_links($link, '?stage=' . Versioned::DRAFT);
+        }
+    }
+
+    /**
      * Augment the the SQLSelect that is created by the DataQuery
      *
      * See {@see augmentLazyLoadFields} for lazy-loading applied prior to this.

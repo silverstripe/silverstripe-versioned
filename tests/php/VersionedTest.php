@@ -1376,4 +1376,30 @@ class VersionedTest extends SapphireTest
         $this->assertFalse($modifiedOnDraftPage->isOnLiveOnly());
         $this->assertTrue($modifiedOnDraftPage->isModifiedOnDraft());
     }
+
+    public function testUpdateLinkAddsStageParamsInDraftMode()
+    {
+        Versioned::set_stage(Versioned::DRAFT);
+        $ext = new Versioned();
+        $link = 'my-relative-link/?some=var';
+        $ext->updateLink($link);
+        $this->assertEquals('my-relative-link/?some=var&stage=' . Versioned::DRAFT, $link);
+    }
+
+    public function testUpdateLinkAddsStageParamsOnlyOnceInDraftMode()
+    {
+        Versioned::set_stage(Versioned::DRAFT);
+        $ext = new Versioned();
+        $link = 'my-relative-link/?some=var&stage=Stage';
+        $ext->updateLink($link);
+        $this->assertEquals('my-relative-link/?some=var&stage=' . Versioned::DRAFT, $link);
+    }
+
+    public function testUpdateLinkDoesNotAddStageParamsInLiveMode()
+    {
+        $ext = new Versioned();
+        $link = 'my-relative-link/?some=var';
+        $ext->updateLink($link);
+        $this->assertEquals('my-relative-link/?some=var', $link);
+    }
 }

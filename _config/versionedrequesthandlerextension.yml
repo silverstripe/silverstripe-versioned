@@ -1,0 +1,10 @@
+---
+Name: versionedrequesthandlerextension
+After:
+  - 'requestprocessors'
+  - 'coresecurity'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Controller\RequestHandler:
+    extensions:
+      - VersionedRequestHandlerExtension
