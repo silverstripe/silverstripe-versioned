@@ -235,6 +235,17 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     private static $non_live_permissions = ['CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'];
 
     /**
+     * Use PHP's session storage for the "reading mode",
+     * instead of explicitly relying on the "stage" query parameter.
+     * This is considered bad practice, since it can cause draft content
+     * to leak under live URLs to unauthorised users, depending on HTTP cache settings.
+     *
+     * @config
+     * @var bool
+     */
+    private static $use_session = false;
+
+    /**
      * Reset static configuration variables to their default values.
      */
     public static function reset()
@@ -1977,8 +1988,14 @@ SQL
      */
     public static function choose_site_stage(HTTPRequest $request)
     {
+        $useSession = Config::inst()->get(static::class, 'use_session');
+
         // Check any pre-existing session mode
-        $mode = static::DEFAULT_MODE;
+        $preexistingMode = static::DEFAULT_MODE;
+        if ($useSession) {
+            $preexistingMode = $request->getSession()->get('readingMode') ?: static::DEFAULT_MODE;
+        }
+        $mode = $preexistingMode;
 
         // Check reading mode
         $getStage = $request->getVar('stage');
@@ -2001,8 +2018,22 @@ SQL
             }
         }
 
+        // Fallback
+        if ($useSession && !$mode) {
+            $mode = static::DEFAULT_MODE;
+        }
+
         // Save reading mode
         Versioned::set_reading_mode($mode);
+
+        // Try not to store the mode in the session if not needed
+        if ($useSession) {
+            if ($mode === static::DEFAULT_MODE) {
+                $request->getSession()->clear('readingMode');
+            } else {
+                $request->getSession()->set('readingMode', $mode);
+            }
+        }
 
         if (!headers_sent() && !Director::is_cli()) {
             if (Versioned::get_stage() === static::LIVE) {
