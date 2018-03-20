@@ -6,7 +6,7 @@ use GraphQL\Type\Definition\ObjectType;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Schema;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\Tests\VersionedTest\ChangeSetFake;
@@ -24,7 +24,7 @@ class SchemaScaffolderExtensionTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
-        $memberType = Schema::inst()->typeNameForDataObject(Member::class);
+        $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
         $this->assertFalse($manager->hasType($memberType));
 
         $scaffolder = new SchemaScaffolder();
