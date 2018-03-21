@@ -2457,7 +2457,7 @@ SQL
         }
 
         $liveVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
-        return (int) $liveVersionNumber === (int) $this->owner->Version;
+        return $liveVersionNumber == $this->owner->Version;
     }
 
     /**
@@ -2473,7 +2473,7 @@ SQL
         }
 
         $draftVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
-        return (int) $draftVersionNumber === (int) $this->owner->Version;
+        return $draftVersionNumber == $this->owner->Version;
     }
 
     /**
