@@ -1027,7 +1027,7 @@ class VersionedTest extends SapphireTest
      */
     public function testReadingPersistentWhenUseSessionTrue()
     {
-        Config::modify()->update(Versioned::class, 'use_session', true);
+        Config::modify()->set(Versioned::class, 'use_session', true);
 
         $session = new Session([]);
         $adminID = $this->logInWithPermission('ADMIN');
@@ -1045,24 +1045,26 @@ class VersionedTest extends SapphireTest
             $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Stage mode'
         );
-        // Doesn't store default stage in session if not necessary
+        // Default stage stored anyway (in case default changes)
         Director::test('/?stage=Live', null, $session);
-        $this->assertNull(
+        $this->assertEquals(
+            'Stage.Live',
             $session->get('readingMode'),
             'Check querystring changes reading mode to Live'
         );
         Director::test('/', null, $session);
-        $this->assertNull(
+        $this->assertEquals(
+            'Stage.Live',
             $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Live mode'
         );
-        // Test that session doesn't redundantly store the default stage if it doesn't need to
+        // Test that session doesn't redundantly modify session stage without querystring args
         $session2 = new Session([]);
         $session2->set('loggedInAs', $adminID);
         Director::test('/', null, $session2);
         $this->assertArrayNotHasKey('readingMode', $session2->changedData());
         Director::test('/?stage=Live', null, $session2);
-        $this->assertArrayNotHasKey('readingMode', $session2->changedData());
+        $this->assertArrayHasKey('readingMode', $session2->changedData());
         // Test choose_site_stage
         unset($_GET['stage']);
         unset($_GET['archiveDate']);
@@ -1459,31 +1461,5 @@ class VersionedTest extends SapphireTest
         $this->assertFalse($modifiedOnDraftPage->isOnDraftOnly());
         $this->assertFalse($modifiedOnDraftPage->isOnLiveOnly());
         $this->assertTrue($modifiedOnDraftPage->isModifiedOnDraft());
-    }
-
-    public function testUpdateLinkAddsStageParamsInDraftMode()
-    {
-        Versioned::set_stage(Versioned::DRAFT);
-        $ext = new Versioned();
-        $link = 'my-relative-link/?some=var';
-        $ext->updateLink($link);
-        $this->assertEquals('my-relative-link/?some=var&stage=' . Versioned::DRAFT, $link);
-    }
-
-    public function testUpdateLinkAddsStageParamsOnlyOnceInDraftMode()
-    {
-        Versioned::set_stage(Versioned::DRAFT);
-        $ext = new Versioned();
-        $link = 'my-relative-link/?some=var&stage=Stage';
-        $ext->updateLink($link);
-        $this->assertEquals('my-relative-link/?some=var&stage=' . Versioned::DRAFT, $link);
-    }
-
-    public function testUpdateLinkDoesNotAddStageParamsInLiveMode()
-    {
-        $ext = new Versioned();
-        $link = 'my-relative-link/?some=var';
-        $ext->updateLink($link);
-        $this->assertEquals('my-relative-link/?some=var', $link);
     }
 }
