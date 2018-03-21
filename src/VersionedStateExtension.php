@@ -26,11 +26,6 @@ class VersionedStateExtension extends Extension
      */
     public function updateLink(&$link)
     {
-        // Skip if link already contains reading mode
-        if ($this->hasVersionedQuery($link)) {
-            return;
-        }
-
         // Skip if current mode matches default mode
         // See LeftAndMain::init() for example of this being overridden.
         if (Versioned::get_reading_mode() === Versioned::get_default_reading_mode()) {
@@ -48,30 +43,6 @@ class VersionedStateExtension extends Extension
             $link,
             '?' . http_build_query($queryargs)
         );
-    }
-
-    /**
-     * Check if link contains versioned queryargs
-     *
-     * @param string $link
-     * @return bool
-     */
-    protected function hasVersionedQuery($link)
-    {
-        // Find querystrings
-        $parts = explode('?', $link, 2);
-        if (count($parts) < 2) {
-            return false;
-        }
-        parse_str($parts[1], $localargs);
-        // any known keys?
-        switch (true) {
-            case isset($localargs['stage']):
-            case isset($localargs['archiveDate']):
-                return true;
-            default:
-                return false;
-        }
     }
 
     /**
