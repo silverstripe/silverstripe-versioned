@@ -8,7 +8,7 @@ use SilverStripe\Versioned\ReadingMode;
 class ReadingModeTest extends SapphireTest
 {
     /**
-     * @dataProvider providerReadingModes()
+     * @dataProvider provideReadingModes()
      *
      * @param string $readingMode
      * @param array $dataQuery
@@ -24,7 +24,7 @@ class ReadingModeTest extends SapphireTest
         );
     }
     /**
-     * @dataProvider providerReadingModes()
+     * @dataProvider provideReadingModes()
      *
      * @param string $readingMode
      * @param array $dataQuery
@@ -41,7 +41,7 @@ class ReadingModeTest extends SapphireTest
     }
 
     /**
-     * @dataProvider providerReadingModes()
+     * @dataProvider provideReadingModes()
      *
      * @param string $readingMode
      * @param array $dataQuery
@@ -57,7 +57,7 @@ class ReadingModeTest extends SapphireTest
     }
 
     /**
-     * @dataProvider providerReadingModes()
+     * @dataProvider provideReadingModes()
      *
      * @param string $readingMode
      * @param array $dataQuery
@@ -82,10 +82,10 @@ class ReadingModeTest extends SapphireTest
      *  - reading mode string
      *  - dataquery params array
      *  - query string array
-     *  - query strig (string)
+     *  - query string (string)
      * @return array
      */
-    public function providerReadingModes()
+    public function provideReadingModes()
     {
         return [
             // Draft
