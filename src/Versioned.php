@@ -1426,18 +1426,21 @@ SQL
         // Bypass when live stage
         $owner = $this->owner;
 
+        // Bypass if site is unsecured
+        if (!self::get_draft_site_secured()) {
+            return true;
+        }
+
         // Get reading mode from source query (or current mode)
         $readingParams = $owner->getSourceQueryParams()
             // Guess record mode from current reading mode instead
             ?: ReadingMode::toDataQueryParams(static::get_reading_mode());
 
         // If this is the live record we can view it
-        if ($readingParams["Versioned.mode"] === 'stage' && $readingParams["Versioned.stage"] === static::LIVE) {
-            return true;
-        }
-
-        // Bypass if site is unsecured
-        if (!self::get_draft_site_secured()) {
+        if (isset($readingParams["Versioned.mode"])
+            && $readingParams["Versioned.mode"] === 'stage'
+            && $readingParams["Versioned.stage"] === static::LIVE
+        ) {
             return true;
         }
 
@@ -1455,7 +1458,7 @@ SQL
         }
 
         // If stages are synchronised treat this as the live stage
-        if ($readingParams["Versioned.mode"] === 'stage' && !$this->stagesDiffer()) {
+        if (!$this->stagesDiffer()) {
             return true;
         }
 
