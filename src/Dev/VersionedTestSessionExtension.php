@@ -11,16 +11,17 @@ use SilverStripe\Versioned\VersionedStateExtension;
  * Decorates TestSession object to update get / post requests with versioned querystring arguments.
  * Session vars assigned by FunctionalTest::useDraftSite are respected here.
  *
+ * @deprecated 2.2..3.0 Use ?stage= querystring arguments instead of session
  * @property TestSession $owner
  */
 class VersionedTestSessionExtension extends VersionedStateExtension
 {
     /**
-     * Decorate link prior to http get request
+     * Update link
      *
      * @param string $url
      */
-    public function updateGetURL(&$url)
+    public function updateLink(&$url)
     {
         $session = $this->owner->session();
         if (!$session) {
@@ -36,23 +37,40 @@ class VersionedTestSessionExtension extends VersionedStateExtension
         // Set reading mode
         $readingMode = $session->get('readingMode');
         if ($readingMode) {
-            Versioned::withVersionedMode(function () use ($readingMode, &$url) {
-                Versioned::set_reading_mode($readingMode);
-                $this->updateLink($url);
-            });
+            parent::updateLink($url);
         }
+    }
+
+    /**
+     * Get reading mode set by FunctionalTest::useDraftSite()
+     *
+     * @return string
+     */
+    protected function getReadingmode()
+    {
+        // Set reading mode
+        return $this->owner->session()->get('readingMode');
+    }
+
+
+    /**
+     * Decorate link prior to http get request
+     *
+     * @param string $link
+     */
+    public function updateGetURL(&$link)
+    {
+        $this->updateLink($link);
     }
 
     /**
      * Decorate link prior to http post request
      *
-     * @param string $url
+     * @param string $link
      */
-    public function updatePostURL(&$url)
+    public function updatePostURL(&$link)
     {
         // Default to same as http get
-        $this->updateGetURL($url);
+        $this->updateLink($link);
     }
-
-
 }

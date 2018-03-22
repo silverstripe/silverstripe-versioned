@@ -107,7 +107,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     protected $versionModifiedCache = [];
 
     /**
-     * Current reading mode
+     * Current reading mode. Supports stage / archive modes.
      *
      * @var string
      */
@@ -287,16 +287,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function augmentDataQueryCreation(SQLSelect &$query, DataQuery &$dataQuery)
     {
-        $parts = explode('.', Versioned::get_reading_mode());
-
-        if ($parts[0] == 'Archive') {
-            $archiveStage = isset($parts[2]) ? $parts[2] : static::DRAFT;
-            $dataQuery->setQueryParam('Versioned.mode', 'archive');
-            $dataQuery->setQueryParam('Versioned.date', $parts[1]);
-            $dataQuery->setQueryParam('Versioned.stage', $archiveStage);
-        } elseif ($parts[0] == 'Stage' && $this->hasStages()) {
-            $dataQuery->setQueryParam('Versioned.mode', 'stage');
-            $dataQuery->setQueryParam('Versioned.stage', $parts[1]);
+        // Convert reading mode to dataquery params and assign
+        $args = ReadingMode::toDataQueryParams(Versioned::get_reading_mode());
+        if ($args) {
+            foreach ($args as $key => $value) {
+                $dataQuery->setQueryParam($key, $value);
+            }
         }
     }
 
@@ -1429,9 +1425,14 @@ SQL
     {
         // Bypass when live stage
         $owner = $this->owner;
-        $mode = $owner->getSourceQueryParam("Versioned.mode") ?: 'stage';
-        $stage = $owner->getSourceQueryParam("Versioned.stage") ?: Versioned::get_stage();
-        if ($mode === 'stage' && $stage === static::LIVE) {
+
+        // Get reading mode from source query (or current mode)
+        $readingParams = $owner->getSourceQueryParams()
+            // Guess record mode from current reading mode instead
+            ?: ReadingMode::toDataQueryParams(static::get_reading_mode());
+
+        // If this is the live record we can view it
+        if ($readingParams["Versioned.mode"] === 'stage' && $readingParams["Versioned.stage"] === static::LIVE) {
             return true;
         }
 
@@ -1454,7 +1455,7 @@ SQL
         }
 
         // If stages are synchronised treat this as the live stage
-        if ($mode === 'stage' && !$this->stagesDiffer()) {
+        if ($readingParams["Versioned.mode"] === 'stage' && !$this->stagesDiffer()) {
             return true;
         }
 
@@ -1968,6 +1969,16 @@ SQL
             return true;
         }
 
+        // Request is allowed if unsecuredDraftSite is enabled
+        if (!static::get_draft_site_secured()) {
+            return true;
+        }
+
+        // Predict if choose_site_stage() will allow unsecured draft assignment by session
+        if (Config::inst()->get(static::class, 'use_session') && $request->getSession()->get('unsecuredDraftSite')) {
+            return true;
+        }
+
         // Check permissions with member ID in session.
         $member = Security::getCurrentUser();
         $permissions = Config::inst()->get(get_called_class(), 'non_live_permissions');
@@ -2004,26 +2015,10 @@ SQL
             }
         }
 
-        // Check reading mode
-        $getStage = $request->getVar('stage');
-        if ($getStage) {
-            if (strcasecmp($getStage, static::DRAFT) === 0) {
-                $stage = static::DRAFT;
-            } else {
-                $stage = static::LIVE;
-            }
-            $mode = 'Stage.' . $stage;
-            $updateSession = true;
-        }
-
-        // Check archived date
-        $getArchived = $request->getVar('archiveDate');
-        if ($getArchived && strtotime($getArchived)) {
-            $mode = 'Archive.' . $getArchived;
-            $stageArchived = $request->getVar('stage');
-            if ($stageArchived) {
-                $mode .= '.' . $stageArchived;
-            }
+        // Verify if querystring contains valid reading mode
+        $queryMode = ReadingMode::fromQueryString($request->getVars());
+        if ($queryMode) {
+            $mode = $queryMode;
             $updateSession = true;
         }
 
@@ -2177,12 +2172,12 @@ SQL
      * Set the reading archive date.
      *
      * @param string $date New reading archived date.
+     * @param string $stage Set stage
      */
-    public static function reading_archived_date($date)
+    public static function reading_archived_date($date, $stage = self::DRAFT)
     {
-        Versioned::set_reading_mode('Archive.' . $date);
+        Versioned::set_reading_mode('Archive.' . $date . '.' . $stage);
     }
-
 
     /**
      * Get a singleton instance of a class in the given stage.
@@ -2350,7 +2345,7 @@ SQL
     public function writeToStage($stage, $forceInsert = false)
     {
         $owner = $this->owner;
-        static::withVersionedMode(function () use ($stage, $forceInsert, $owner) {
+        return static::withVersionedMode(function () use ($stage, $forceInsert, $owner) {
             $oldParams = $owner->getSourceQueryParams();
             try {
                 // Lazy load and reset version in current stage prior to resetting write stage

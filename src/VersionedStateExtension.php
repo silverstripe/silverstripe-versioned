@@ -3,10 +3,14 @@
 namespace SilverStripe\Versioned;
 
 use SilverStripe\Control\Controller;
+use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Extension;
+use SilverStripe\ORM\DataObject;
 
 /**
  * Persists versioned state between requests via querystring arguments
+ *
+ * @property RequestHandler|DataObject $owner
  */
 class VersionedStateExtension extends Extension
 {
@@ -33,12 +37,13 @@ class VersionedStateExtension extends Extension
 
         // Skip if current mode matches default mode
         // See LeftAndMain::init() for example of this being overridden.
-        if (Versioned::get_reading_mode() === Versioned::get_default_reading_mode()) {
+        $readingMode = $this->getReadingmode();
+        if ($readingMode === Versioned::get_default_reading_mode()) {
             return;
         }
 
         // Determine if query args are supported for the current mode
-        $queryargs = $this->buildVersionedQuery();
+        $queryargs = ReadingMode::toQueryString($readingMode);
         if (!$queryargs) {
             return;
         }
@@ -63,40 +68,30 @@ class VersionedStateExtension extends Extension
         if (count($parts) < 2) {
             return false;
         }
-        parse_str($parts[1], $localargs);
-        // any known keys?
-        switch (true) {
-            case isset($localargs['stage']):
-            case isset($localargs['archiveDate']):
-                return true;
-            default:
-                return false;
-        }
+
+        // Parse args
+        $readingMode = ReadingMode::fromQueryString($parts[1]);
+        return !empty($readingMode);
     }
 
     /**
-     * Build queryargs array for current mode
+     * Get reading mode for the record / controller being decorated
      *
-     * @return array|null Necessary args, or null if not supported mode
+     * @return string
      */
-    protected function buildVersionedQuery()
+    protected function getReadingmode()
     {
-        // Stage args
-        $stage = Versioned::get_stage();
-        if ($stage) {
-            return ['stage' => $stage];
+        $default = Versioned::get_reading_mode();
+
+        // Non dataobjects use global mode
+        if (! $this->owner instanceof DataObject) {
+            return $default;
         }
 
-        // Archived args
-        $archivedDate = Versioned::current_archived_date();
-        if ($archivedDate) {
-            return [
-                'archiveDate' => $archivedDate,
-                'stage' => Versioned::current_archived_stage(),
-            ];
-        }
-
-        // No args for other modes
-        return null;
+        // Respect source query params (so records selected from live will have live urls)
+        $queryParams = $this->owner->getSourceQueryParams();
+        return ReadingMode::fromDataQueryParams($queryParams)
+            // Fall back to default otherwise
+            ?: $default;
     }
 }
