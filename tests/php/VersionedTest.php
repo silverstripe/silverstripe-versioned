@@ -1267,14 +1267,22 @@ class VersionedTest extends SapphireTest
         $this->assertTrue($public1->canView());
         $this->assertTrue($public2->canView());
         $this->assertFalse($private->canView());
-        $this->assertFalse($single->canView());
+        $this->assertTrue($single->canView());
+
+        // Setting unsecured draft site should enable those pages to be visible on draft
+        Versioned::set_draft_site_secured(false);
+        $this->assertTrue($public1->canView());
+        $this->assertTrue($public2->canView());
+        $this->assertTrue($private->canView());
+        $this->assertTrue($single->canView());
+        Versioned::set_draft_site_secured(true);
 
         // Adjusting the current stage should not allow objects loaded in stage to be viewable
         Versioned::set_stage(Versioned::LIVE);
         $this->assertTrue($public1->canView());
         $this->assertTrue($public2->canView());
         $this->assertFalse($private->canView());
-        $this->assertFalse($single->canView());
+        $this->assertTrue($single->canView());
 
         // Writing the private page to live should be fine though
         $private->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
