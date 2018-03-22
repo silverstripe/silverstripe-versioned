@@ -48,7 +48,8 @@ class ReadingModeTest extends SapphireTest
      * @param array $queryStringArray
      * @param string $queryString
      */
-    public function testToQueryString($readingMode, $dataQuery, $queryStringArray, $queryString) {
+    public function testToQueryString($readingMode, $dataQuery, $queryStringArray, $queryString)
+    {
         $this->assertEquals(
             $queryStringArray,
             ReadingMode::toQueryString($readingMode),
@@ -64,7 +65,8 @@ class ReadingModeTest extends SapphireTest
      * @param array $queryStringArray
      * @param string $queryString
      */
-    public function testFromQueryString($readingMode, $dataQuery, $queryStringArray, $queryString) {
+    public function testFromQueryString($readingMode, $dataQuery, $queryStringArray, $queryString)
+    {
         $this->assertEquals(
             $readingMode,
             ReadingMode::fromQueryString($queryStringArray),
