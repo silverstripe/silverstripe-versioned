@@ -9,12 +9,19 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use SilverStripe\Versioned\Versioned;
 
 /**
  * @skipUpgrade
  */
 class TestController extends Controller implements TestOnly
 {
+    protected function init()
+    {
+        parent::init();
+        Versioned::set_stage(Versioned::DRAFT);
+    }
+
     public function __construct()
     {
         parent::__construct();
