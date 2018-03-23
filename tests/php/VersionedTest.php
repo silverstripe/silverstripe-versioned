@@ -1001,15 +1001,37 @@ class VersionedTest extends SapphireTest
         $this->assertEquals($original->ExtraField, $fetched->ExtraField); // Lazy loaded
     }
 
-    /**
-     * Tests that reading mode persists between requests
-     */
-    public function testReadingPersistent()
+    public function testReadingNotPersistentWhenUseSessionFalse()
     {
+        Config::modify()->update(Versioned::class, 'use_session', false);
+
         $session = new Session([]);
         $adminID = $this->logInWithPermission('ADMIN');
         $session->set('loggedInAs', $adminID);
 
+        Director::test('/?stage=Stage', null, $session);
+        $this->assertNull(
+            $session->get('readingMode'),
+            'Check querystring does not change reading mode'
+        );
+
+        Director::test('/', null, $session);
+        $this->assertNull(
+            $session->get('readingMode'),
+            'Check that subsequent requests in the same session do not have a changed reading mode'
+        );
+    }
+
+    /**
+     * Tests that reading mode persists between requests
+     */
+    public function testReadingPersistentWhenUseSessionTrue()
+    {
+        Config::modify()->set(Versioned::class, 'use_session', true);
+
+        $session = new Session([]);
+        $adminID = $this->logInWithPermission('ADMIN');
+        $session->set('loggedInAs', $adminID);
         // Set to stage
         Director::test('/?stage=Stage', null, $session);
         $this->assertEquals(
@@ -1023,27 +1045,26 @@ class VersionedTest extends SapphireTest
             $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Stage mode'
         );
-
-        // Doesn't store default stage in session if not necessary
+        // Default stage stored anyway (in case default changes)
         Director::test('/?stage=Live', null, $session);
-        $this->assertNull(
+        $this->assertEquals(
+            'Stage.Live',
             $session->get('readingMode'),
             'Check querystring changes reading mode to Live'
         );
         Director::test('/', null, $session);
-        $this->assertNull(
+        $this->assertEquals(
+            'Stage.Live',
             $session->get('readingMode'),
             'Check that subsequent requests in the same session remain in Live mode'
         );
-
-        // Test that session doesn't redundantly store the default stage if it doesn't need to
+        // Test that session doesn't redundantly modify session stage without querystring args
         $session2 = new Session([]);
         $session2->set('loggedInAs', $adminID);
         Director::test('/', null, $session2);
         $this->assertArrayNotHasKey('readingMode', $session2->changedData());
         Director::test('/?stage=Live', null, $session2);
-        $this->assertArrayNotHasKey('readingMode', $session2->changedData());
-
+        $this->assertArrayHasKey('readingMode', $session2->changedData());
         // Test choose_site_stage
         unset($_GET['stage']);
         unset($_GET['archiveDate']);
@@ -1058,11 +1079,9 @@ class VersionedTest extends SapphireTest
         $request->getSession()->clear('readingMode');
         Versioned::choose_site_stage($request);
         $this->assertEquals('Stage.Live', Versioned::get_reading_mode());
-
         // Ensure stage is reset to Live when logging out
         $request->getSession()->set('readingMode', 'Stage.Stage');
         Versioned::choose_site_stage($request);
-
         Injector::inst()->get(IdentityStore::class)->logOut($request);
         Versioned::choose_site_stage($request);
         $this->assertSame('Stage.Live', Versioned::get_reading_mode());
@@ -1248,14 +1267,22 @@ class VersionedTest extends SapphireTest
         $this->assertTrue($public1->canView());
         $this->assertTrue($public2->canView());
         $this->assertFalse($private->canView());
-        $this->assertFalse($single->canView());
+        $this->assertTrue($single->canView());
+
+        // Setting unsecured draft site should enable those pages to be visible on draft
+        Versioned::set_draft_site_secured(false);
+        $this->assertTrue($public1->canView());
+        $this->assertTrue($public2->canView());
+        $this->assertTrue($private->canView());
+        $this->assertTrue($single->canView());
+        Versioned::set_draft_site_secured(true);
 
         // Adjusting the current stage should not allow objects loaded in stage to be viewable
         Versioned::set_stage(Versioned::LIVE);
         $this->assertTrue($public1->canView());
         $this->assertTrue($public2->canView());
         $this->assertFalse($private->canView());
-        $this->assertFalse($single->canView());
+        $this->assertTrue($single->canView());
 
         // Writing the private page to live should be fine though
         $private->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);

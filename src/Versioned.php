@@ -84,6 +84,22 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     protected static $cache_versionnumber;
 
     /**
+     * Set if draft site is secured or not. Fails over to
+     * $draft_site_secured if unset
+     *
+     * @var bool|null
+     */
+    protected static $is_draft_site_secured = null;
+
+    /**
+     * Default config for $is_draft_site_secured
+     *
+     * @config
+     * @var bool
+     */
+    private static $draft_site_secured = true;
+
+    /**
      * Cache of version to modified dates for this object
      *
      * @var array
@@ -91,11 +107,19 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     protected $versionModifiedCache = [];
 
     /**
-     * Current reading mode
+     * Current reading mode. Supports stage / archive modes.
      *
      * @var string
      */
     protected static $reading_mode = null;
+
+    /**
+     * Default reading mode, if none set.
+     * Any modes which differ to this value should be assigned via querystring / session (if enabled)
+     *
+     * @var null
+     */
+    protected static $default_reading_mode = self::DEFAULT_MODE;
 
     /**
      * Field used to hold the migrating version
@@ -235,6 +259,17 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     private static $non_live_permissions = ['CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'];
 
     /**
+     * Use PHP's session storage for the "reading mode" and "unsecuredDraftSite",
+     * instead of explicitly relying on the "stage" query parameter.
+     * This is considered bad practice, since it can cause draft content
+     * to leak under live URLs to unauthorised users, depending on HTTP cache settings.
+     *
+     * @config
+     * @var bool
+     */
+    private static $use_session = false;
+
+    /**
      * Reset static configuration variables to their default values.
      */
     public static function reset()
@@ -252,16 +287,12 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public function augmentDataQueryCreation(SQLSelect &$query, DataQuery &$dataQuery)
     {
-        $parts = explode('.', Versioned::get_reading_mode());
-
-        if ($parts[0] == 'Archive') {
-            $archiveStage = isset($parts[2]) ? $parts[2] : static::DRAFT;
-            $dataQuery->setQueryParam('Versioned.mode', 'archive');
-            $dataQuery->setQueryParam('Versioned.date', $parts[1]);
-            $dataQuery->setQueryParam('Versioned.stage', $archiveStage);
-        } elseif ($parts[0] == 'Stage' && $this->hasStages()) {
-            $dataQuery->setQueryParam('Versioned.mode', 'stage');
-            $dataQuery->setQueryParam('Versioned.stage', $parts[1]);
+        // Convert reading mode to dataquery params and assign
+        $args = ReadingMode::toDataQueryParams(Versioned::get_reading_mode());
+        if ($args) {
+            foreach ($args as $key => $value) {
+                $dataQuery->setQueryParam($key, $value);
+            }
         }
     }
 
@@ -1394,14 +1425,22 @@ SQL
     {
         // Bypass when live stage
         $owner = $this->owner;
-        $mode = $owner->getSourceQueryParam("Versioned.mode") ?: 'stage';
-        $stage = $owner->getSourceQueryParam("Versioned.stage") ?: Versioned::get_stage();
-        if ($mode === 'stage' && $stage === static::LIVE) {
+
+        // Bypass if site is unsecured
+        if (!self::get_draft_site_secured()) {
             return true;
         }
 
-        // Bypass if site is unsecured
-        if (Controller::has_curr() && Controller::curr()->getRequest()->getSession()->get('unsecuredDraftSite')) {
+        // Get reading mode from source query (or current mode)
+        $readingParams = $owner->getSourceQueryParams()
+            // Guess record mode from current reading mode instead
+            ?: ReadingMode::toDataQueryParams(static::get_reading_mode());
+
+        // If this is the live record we can view it
+        if (isset($readingParams["Versioned.mode"])
+            && $readingParams["Versioned.mode"] === 'stage'
+            && $readingParams["Versioned.stage"] === static::LIVE
+        ) {
             return true;
         }
 
@@ -1419,7 +1458,7 @@ SQL
         }
 
         // If stages are synchronised treat this as the live stage
-        if ($mode === 'stage' && !$this->stagesDiffer()) {
+        if (!$this->stagesDiffer()) {
             return true;
         }
 
@@ -1448,16 +1487,16 @@ SQL
      * @param Member $member
      * @return bool
      */
-    public function canViewStage($stage = 'Live', $member = null)
+    public function canViewStage($stage = self::LIVE, $member = null)
     {
-        $oldMode = Versioned::get_reading_mode();
-        Versioned::set_stage($stage);
+        return static::withVersionedMode(function () use ($stage, $member) {
+            Versioned::set_stage($stage);
 
-        $owner = $this->owner;
-        $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
+            $owner = $this->owner;
+            $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
 
-        Versioned::set_reading_mode($oldMode);
-        return $versionFromStage ? $versionFromStage->canView($member) : false;
+            return $versionFromStage ? $versionFromStage->canView($member) : false;
+        });
     }
 
     /**
@@ -1616,16 +1655,14 @@ SQL
 
         $owner->invokeWithExtensions('onBeforeUnpublish');
 
-        $origReadingMode = static::get_reading_mode();
-        try {
+        // Modify in isolated mode
+        static::withVersionedMode(function () use ($owner) {
             static::set_stage(static::LIVE);
 
             // This way our ID won't be unset
             $clone = clone $owner;
             $clone->delete();
-        } finally {
-            static::set_reading_mode($origReadingMode);
-        }
+        });
 
         $owner->invokeWithExtensions('onAfterUnpublish');
         return true;
@@ -1935,6 +1972,16 @@ SQL
             return true;
         }
 
+        // Request is allowed if unsecuredDraftSite is enabled
+        if (!static::get_draft_site_secured()) {
+            return true;
+        }
+
+        // Predict if choose_site_stage() will allow unsecured draft assignment by session
+        if (Config::inst()->get(static::class, 'use_session') && $request->getSession()->get('unsecuredDraftSite')) {
+            return true;
+        }
+
         // Check permissions with member ID in session.
         $member = Security::getCurrentUser();
         $permissions = Config::inst()->get(get_called_class(), 'non_live_permissions');
@@ -1956,48 +2003,38 @@ SQL
      */
     public static function choose_site_stage(HTTPRequest $request)
     {
+        $mode = static::get_default_reading_mode();
+
         // Check any pre-existing session mode
-        $preexistingMode = $request->getSession()->get('readingMode') ?: static::DEFAULT_MODE;
-        $mode = $preexistingMode;
+        $useSession = Config::inst()->get(static::class, 'use_session');
+        $updateSession = false;
+        if ($useSession) {
+            // Boot reading mode from session
+            $mode = $request->getSession()->get('readingMode') ?: $mode;
 
-        // Check reading mode
-        $getStage = $request->getVar('stage');
-        if ($getStage) {
-            if (strcasecmp($getStage, static::DRAFT) === 0) {
-                $stage = static::DRAFT;
-            } else {
-                $stage = static::LIVE;
-            }
-            $mode = 'Stage.' . $stage;
-        }
-
-        // Check archived date
-        $getArchived = $request->getVar('archiveDate');
-        if ($getArchived && strtotime($getArchived)) {
-            $mode = 'Archive.' . $getArchived;
-            $stageArchived = $request->getVar('stage');
-            if ($stageArchived) {
-                $mode .= '.' . $stageArchived;
+            // Set draft site security if disabled for this session
+            if ($request->getSession()->get('unsecuredDraftSite')) {
+                static::set_draft_site_secured(false);
             }
         }
 
-        // Fallback
-        if (!$mode) {
-            $mode = static::DEFAULT_MODE;
+        // Verify if querystring contains valid reading mode
+        $queryMode = ReadingMode::fromQueryString($request->getVars());
+        if ($queryMode) {
+            $mode = $queryMode;
+            $updateSession = true;
         }
 
         // Save reading mode
         Versioned::set_reading_mode($mode);
 
-        // Try not to store the mode in the session if not needed
-        if ($mode === static::DEFAULT_MODE) {
-            $request->getSession()->clear('readingMode');
-        } else {
+        // Set mode if session enabled
+        if ($useSession && $updateSession) {
             $request->getSession()->set('readingMode', $mode);
         }
 
         if (!headers_sent() && !Director::is_cli()) {
-            if (Versioned::get_stage() == 'Live') {
+            if (Versioned::get_stage() === static::LIVE) {
                 // clear the cookie if it's set
                 if (Cookie::get('bypassStaticCache')) {
                     Cookie::force_expiry('bypassStaticCache', null, null, false, true /* httponly */);
@@ -2089,15 +2126,61 @@ SQL
     }
 
     /**
+     * Replace default mode.
+     * An non-default mode should be specified via querystring arguments.
+     *
+     * @param string $mode
+     */
+    public static function set_default_reading_mode($mode)
+    {
+        self::$default_reading_mode = $mode;
+    }
+
+    /**
+     * Get default reading mode
+     *
+     * @return string
+     */
+    public static function get_default_reading_mode()
+    {
+        return self::$default_reading_mode ?: self::DEFAULT_MODE;
+    }
+
+    /**
+     * Check if draft site should be secured.
+     * Can be turned off if draft site unauthenticated
+     *
+     * @return bool
+     */
+    public static function get_draft_site_secured()
+    {
+        if (isset(static::$is_draft_site_secured)) {
+            return (bool)static::$is_draft_site_secured;
+        }
+        // Config default
+        return (bool)Config::inst()->get(self::class, 'draft_site_secured');
+    }
+
+    /**
+     * Set if the draft site should be secured or not
+     *
+     * @param bool $secured
+     */
+    public static function set_draft_site_secured($secured)
+    {
+        static::$is_draft_site_secured = $secured;
+    }
+
+    /**
      * Set the reading archive date.
      *
      * @param string $date New reading archived date.
+     * @param string $stage Set stage
      */
-    public static function reading_archived_date($date)
+    public static function reading_archived_date($date, $stage = self::DRAFT)
     {
-        Versioned::set_reading_mode('Archive.' . $date);
+        Versioned::set_reading_mode('Archive.' . $date . '.' . $stage);
     }
-
 
     /**
      * Get a singleton instance of a class in the given stage.
@@ -2112,13 +2195,10 @@ SQL
      */
     public static function get_one_by_stage($class, $stage, $filter = '', $cache = true, $sort = '')
     {
-        try {
-            $origMode = Versioned::get_reading_mode();
+        return static::withVersionedMode(function () use ($class, $stage, $filter, $cache, $sort) {
             Versioned::set_stage($stage);
             return DataObject::get_one($class, $filter, $cache, $sort);
-        } finally {
-            Versioned::set_reading_mode($origMode);
-        }
+        });
     }
 
     /**
@@ -2245,15 +2325,13 @@ SQL
      */
     public function deleteFromStage($stage)
     {
-        $oldMode = Versioned::get_reading_mode();
-        try {
+        $owner = $this->owner;
+        static::withVersionedMode(function () use ($stage, $owner) {
             Versioned::set_stage($stage);
-            $owner = $this->owner;
             $clone = clone $owner;
             $clone->delete();
-        } finally {
-            Versioned::set_reading_mode($oldMode);
-        }
+        });
+
         // Fix the version number cache (in case you go delete from stage and then check ExistsOnLive)
         $baseClass = $owner->baseClass();
         self::$cache_versionnumber[$baseClass][$stage][$owner->ID] = null;
@@ -2270,27 +2348,27 @@ SQL
     public function writeToStage($stage, $forceInsert = false)
     {
         $owner = $this->owner;
-        $oldMode = Versioned::get_reading_mode();
-        $oldParams = $owner->getSourceQueryParams();
-        try {
-            // Lazy load and reset version in current stage prior to resetting write stage
-            $owner->forceChange();
-            $owner->Version = null;
+        return static::withVersionedMode(function () use ($stage, $forceInsert, $owner) {
+            $oldParams = $owner->getSourceQueryParams();
+            try {
+                // Lazy load and reset version in current stage prior to resetting write stage
+                $owner->forceChange();
+                $owner->Version = null;
 
-            // Migrate stage prior to write
-            Versioned::set_stage($stage);
-            $owner->setSourceQueryParam('Versioned.mode', 'stage');
-            $owner->setSourceQueryParam('Versioned.stage', $stage);
+                // Migrate stage prior to write
+                Versioned::set_stage($stage);
+                $owner->setSourceQueryParam('Versioned.mode', 'stage');
+                $owner->setSourceQueryParam('Versioned.stage', $stage);
 
-            // Write
-            $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
-            return $owner->write(false, $forceInsert);
-        } finally {
-            // Revert global state
-            $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
-            $owner->setSourceQueryParams($oldParams);
-            Versioned::set_reading_mode($oldMode);
-        }
+                // Write
+                $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
+                return $owner->write(false, $forceInsert);
+            } finally {
+                // Revert global state
+                $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
+                $owner->setSourceQueryParams($oldParams);
+            }
+        });
     }
 
     /**
@@ -2587,5 +2665,24 @@ SQL
     public function hasStages()
     {
         return $this->mode === static::STAGEDVERSIONED;
+    }
+
+    /**
+     * Invoke a callback which may modify reading mode, but ensures this mode is restored
+     * after completion, without modifying global state.
+     *
+     * The desired reading mode should be set by the callback directly
+     *
+     * @param callable $callback
+     * @return mixed Result of $callback
+     */
+    public static function withVersionedMode($callback)
+    {
+        $origReadingMode = static::get_reading_mode();
+        try {
+            return $callback();
+        } finally {
+            static::set_reading_mode($origReadingMode);
+        }
     }
 }
