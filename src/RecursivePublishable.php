@@ -188,7 +188,7 @@ class RecursivePublishable extends DataExtension
         // Find all classes with 'owns' config
         $lookup = [];
         $classes = ClassInfo::subclassesFor(DataObject::class);
-        array_pop($classes); // skip DataObject
+        array_shift($classes); // skip DataObject
         foreach ($classes as $class) {
             // Ensure this class is RecursivePublishable
             if (!DataObject::has_extension($class, static::class)) {
