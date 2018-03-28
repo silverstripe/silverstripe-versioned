@@ -1414,9 +1414,10 @@ class VersionedTest extends SapphireTest
         // published page
         $publishedPage = new VersionedTest\TestObject();
         $publishedPage->write();
-        $publishedPage->copyVersionToStage('Stage', 'Live');
+        $publishedPage->writeToStage(Versioned::LIVE);
         $this->assertTrue($publishedPage->isOnDraft());
         $this->assertTrue($publishedPage->isPublished());
+        $this->assertTrue($publishedPage->isLiveVersion());
         $this->assertFalse($publishedPage->isOnDraftOnly());
         $this->assertFalse($publishedPage->isOnLiveOnly());
         $this->assertFalse($publishedPage->isModifiedOnDraft());
@@ -1424,7 +1425,7 @@ class VersionedTest extends SapphireTest
         // published page, deleted from stage
         $deletedFromDraftPage = new VersionedTest\TestObject();
         $deletedFromDraftPage->write();
-        $deletedFromDraftPage->copyVersionToStage('Stage', 'Live');
+        $deletedFromDraftPage->writeToStage(Versioned::LIVE);
         $deletedFromDraftPage->deleteFromStage('Stage');
         $this->assertFalse($deletedFromDraftPage->isArchived());
         $this->assertFalse($deletedFromDraftPage->isOnDraft());
@@ -1436,7 +1437,7 @@ class VersionedTest extends SapphireTest
         // published page, deleted from live
         $deletedFromLivePage = new VersionedTest\TestObject();
         $deletedFromLivePage->write();
-        $deletedFromLivePage->copyVersionToStage('Stage', 'Live');
+        $deletedFromLivePage->writeToStage(Versioned::LIVE);
         $deletedFromLivePage->deleteFromStage('Live');
         $this->assertFalse($deletedFromLivePage->isArchived());
         $this->assertTrue($deletedFromLivePage->isOnDraft());
@@ -1448,7 +1449,7 @@ class VersionedTest extends SapphireTest
         // published page, deleted from both stages
         $deletedFromAllStagesPage = new VersionedTest\TestObject();
         $deletedFromAllStagesPage->write();
-        $deletedFromAllStagesPage->copyVersionToStage('Stage', 'Live');
+        $deletedFromAllStagesPage->writeToStage(Versioned::LIVE);
         $deletedFromAllStagesPage->doArchive();
         $this->assertTrue($deletedFromAllStagesPage->isArchived());
         $this->assertFalse($deletedFromAllStagesPage->isOnDraft());
@@ -1460,10 +1461,12 @@ class VersionedTest extends SapphireTest
         // published page, modified
         $modifiedOnDraftPage = new VersionedTest\TestObject();
         $modifiedOnDraftPage->write();
-        $modifiedOnDraftPage->copyVersionToStage('Stage', 'Live');
+        $modifiedOnDraftPage->writeToStage(Versioned::LIVE);
         $modifiedOnDraftPage->Content = 'modified';
         $modifiedOnDraftPage->write();
         $this->assertFalse($modifiedOnDraftPage->isArchived());
+        $this->assertFalse($modifiedOnDraftPage->isLiveVersion());
+        $this->assertTrue($modifiedOnDraftPage->isLatestDraftVersion());
         $this->assertTrue($modifiedOnDraftPage->isOnDraft());
         $this->assertTrue($modifiedOnDraftPage->isPublished());
         $this->assertFalse($modifiedOnDraftPage->isOnDraftOnly());

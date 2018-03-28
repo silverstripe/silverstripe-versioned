@@ -87,6 +87,26 @@ class Versioned_Version extends ViewableData
     }
 
     /**
+     * True if the current version is the current live/published version
+     *
+     * @return boolean
+     */
+    public function LiveVersion()
+    {
+        return $this->object->isLiveVersion();
+    }
+
+    /**
+     * True if the current version is the latest draft/modified version
+     *
+     * @return boolean
+     */
+    public function LatestDraftVersion()
+    {
+        return $this->object->isLatestDraftVersion();
+    }
+
+    /**
      * Traverses to a field referenced by relationships between data objects, returning the value
      * The path to the related field is specified with dot separated syntax (eg: Parent.Child.Child.FieldName)
      *
