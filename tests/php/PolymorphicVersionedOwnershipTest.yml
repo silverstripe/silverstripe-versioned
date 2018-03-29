@@ -1,0 +1,20 @@
+
+SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicIntermediary:
+  join1:
+    Title: "Join 1"
+  join2:
+    Title: "Join 2"
+SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicOwner:
+  owner1:
+    Title: "Owner 1"
+    Joins: =>SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicIntermediary.join1
+  owner2:
+    Title: "Owner 2"
+    Joins: =>SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicIntermediary.join2
+SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicOwned:
+  owned1:
+    Title: "Owned 1"
+    JoinedBy: =>SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicIntermediary.join1
+  owned2:
+    Title: "Owned 2"
+    JoinedBy: =>SilverStripe\Versioned\Tests\PolymorphicVersionedOwnershipTest\PolymorphicIntermediary.join2
