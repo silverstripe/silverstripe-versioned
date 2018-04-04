@@ -4,7 +4,7 @@ After:
   - sapphiretest
 ---
 SilverStripe\Core\Injector\Injector:
-  SilverStripe\Dev\SapphireTestState:
+  SilverStripe\Dev\State\SapphireTestState:
     properties:
       States:
         versioned: '%$SilverStripe\Versioned\Dev\VersionedTestState'

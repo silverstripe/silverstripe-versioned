@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyThroughList;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 /**
@@ -13,6 +14,7 @@ use SilverStripe\Versioned\Versioned;
  * @property string $Title
  * @method ManyManyThroughList Items()
  * @mixin Versioned
+ * @mixin RecursivePublishable
  */
 class VersionedObject extends DataObject implements TestOnly
 {

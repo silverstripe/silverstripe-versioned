@@ -7,7 +7,7 @@ use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Extension;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Util\ScaffoldingUtil;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\Versioned;
@@ -22,7 +22,7 @@ class DataObjectScaffolderExtension extends Extension
     {
         /* @var DataObjectScaffolder $owner */
         $owner = $this->owner;
-        $memberType = ScaffoldingUtil::typeNameForDataObject(Member::class);
+        $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
         $instance = $owner->getDataObjectInstance();
         $class = $owner->getDataObjectClass();
         if (!$instance->hasExtension(Versioned::class)) {
@@ -57,7 +57,19 @@ class DataObjectScaffolderExtension extends Extension
                         'resolve' => function ($obj) {
                             return $obj->Published();
                         }
-                    ]
+                    ],
+                    'LiveVersion' => [
+                        'type' => Type::boolean(),
+                        'resolve' => function ($obj) {
+                            return $obj->LiveVersion();
+                        }
+                    ],
+                    'LatestDraftVersion' => [
+                        'type' => Type::boolean(),
+                        'resolve' => function ($obj) {
+                            return $obj->LatestDraftVersion();
+                        }
+                    ],
                 ];
                 // Remove this recursive madness.
                 unset($coreFields['Versions']);
@@ -80,6 +92,6 @@ class DataObjectScaffolderExtension extends Extension
      */
     protected function createVersionedTypeName($class)
     {
-        return ScaffoldingUtil::typeNameForDataObject($class).'Version';
+        return StaticSchema::inst()->typeNameForDataObject($class).'Version';
     }
 }

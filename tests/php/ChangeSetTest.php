@@ -547,8 +547,8 @@ class ChangeSetTest extends SapphireTest
             ]
         )->first();
         $this->assertEquals((int)$baseBefore, (int)$baseChange->VersionBefore);
-        $this->assertEquals((int)$baseAfter, (int)$baseChange->VersionAfter);
-        $this->assertEquals((int)$baseChange->VersionBefore + 1, (int)$baseChange->VersionAfter);
+        $this->assertEquals((int)$baseAfter + 1, (int)$baseChange->VersionAfter); // New live = draft + 1
+        $this->assertEquals((int)$baseChange->VersionBefore + 2, (int)$baseChange->VersionAfter);
         $this->assertEquals(
             (int)$baseChange->VersionAfter,
             (int)Versioned::get_versionnumber_by_stage(ChangeSetTest\BaseObject::class, Versioned::LIVE, $baseID)
@@ -574,9 +574,9 @@ class ChangeSetTest extends SapphireTest
             ]
         )->first();
         $this->assertEquals(0, (int)$midNewChange->VersionBefore);
-        $this->assertEquals((int)$midNewAfter, (int)$midNewChange->VersionAfter);
+        $this->assertEquals((int)$midNewAfter + 1, (int)$midNewChange->VersionAfter); // New live = draft + 1
         $this->assertEquals(
-            (int)$midNewAfter,
+            (int)$midNewChange->VersionAfter,
             (int)Versioned::get_versionnumber_by_stage(ChangeSetTest\MidObject::class, Versioned::LIVE, $midNewID)
         );
 

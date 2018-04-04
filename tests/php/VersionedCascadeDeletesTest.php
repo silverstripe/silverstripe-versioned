@@ -36,19 +36,19 @@ class VersionedCascadeDeletesTest extends SapphireTest
         $parent1->publishRecursive();
 
         // Ensure all live objects are published
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Child 1'],
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\ChildObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\RelatedObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Grandchild 1'],
                 ['Title' => 'Grandchild 2'],
@@ -60,30 +60,30 @@ class VersionedCascadeDeletesTest extends SapphireTest
         $parent1->doUnpublish();
 
         // Check live
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\ChildObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'], // owned, but not cascade_delete, so sticks around
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\RelatedObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\GrandChildObject::class, Versioned::LIVE)
         );
 
         // Check stage
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Child 1'],
                 ['Title' => 'Child 2'],
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\ChildObject::class, Versioned::DRAFT)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Related 2'],
@@ -91,7 +91,7 @@ class VersionedCascadeDeletesTest extends SapphireTest
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\RelatedObject::class, Versioned::DRAFT)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Grandchild 1'],
                 ['Title' => 'Grandchild 2'],
@@ -115,13 +115,13 @@ class VersionedCascadeDeletesTest extends SapphireTest
         $parent1->delete();
 
         // Check draft doesn't contain the deleted records
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Child 2'],
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\ChildObject::class, Versioned::DRAFT)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 // None of these cascade delete
                 ['Title' => 'Related 1'],
@@ -130,7 +130,7 @@ class VersionedCascadeDeletesTest extends SapphireTest
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\RelatedObject::class, Versioned::DRAFT)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Grandchild 3'],
             ],
@@ -138,14 +138,14 @@ class VersionedCascadeDeletesTest extends SapphireTest
         );
 
         // Ensure all owned records persist on live
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Child 1'],
                 ['Title' => 'Child 2'],
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\ChildObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Related 1'],
                 ['Title' => 'Related 2'],
@@ -153,7 +153,7 @@ class VersionedCascadeDeletesTest extends SapphireTest
             ],
             Versioned::get_by_stage(VersionedCascadeDeletesTest\RelatedObject::class, Versioned::LIVE)
         );
-        $this->assertDOSEquals(
+        $this->assertListEquals(
             [
                 ['Title' => 'Grandchild 1'],
                 ['Title' => 'Grandchild 2'],

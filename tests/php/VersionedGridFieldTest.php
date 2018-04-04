@@ -10,12 +10,6 @@ class VersionedGridFieldTest extends FunctionalTest
 {
     protected static $fixture_file = 'VersionedTest.yml';
 
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->useDraftSite(true);
-    }
-
     protected static $extra_controllers = [
         VersionedGridFieldTest\TestController::class,
     ];

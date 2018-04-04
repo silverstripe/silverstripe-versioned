@@ -1,0 +1,4 @@
+SilverStripe\Versioned\Tests\VersionedStateExtensionTest\LinkableObject:
+  object1:
+    Title: 'My Object'
+    URLSegment: 'myobject'

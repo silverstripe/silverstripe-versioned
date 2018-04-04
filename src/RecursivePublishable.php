@@ -187,8 +187,10 @@ class RecursivePublishable extends DataExtension
     {
         // Find all classes with 'owns' config
         $lookup = [];
-        foreach (ClassInfo::subclassesFor(DataObject::class) as $class) {
-            // Ensure this class is versioned
+        $classes = ClassInfo::subclassesFor(DataObject::class);
+        array_shift($classes); // skip DataObject
+        foreach ($classes as $class) {
+            // Ensure this class is RecursivePublishable
             if (!DataObject::has_extension($class, static::class)) {
                 continue;
             }
@@ -203,16 +205,9 @@ class RecursivePublishable extends DataExtension
             foreach ($owns as $owned) {
                 // Find owned class
                 $ownedClass = $instance->getRelationClass($owned);
-                // Skip custom methods that don't have db relationsm
-                if (!$ownedClass) {
+                // Skip custom methods that don't have db relations, or cannot be inferred
+                if (!$ownedClass || $ownedClass === DataObject::class) {
                     continue;
-                }
-                if ($ownedClass === DataObject::class) {
-                    throw new LogicException(sprintf(
-                        "Relation %s on class %s cannot be owned as it is polymorphic",
-                        $owned,
-                        $class
-                    ));
                 }
 
                 // Add lookup for owned class

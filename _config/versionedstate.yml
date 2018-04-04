@@ -1,0 +1,15 @@
+---
+Name: versionedstate
+---
+SilverStripe\Control\RequestHandler:
+  extensions:
+    - SilverStripe\Versioned\VersionedStateExtension
+SilverStripe\ORM\DataObject:
+  extensions:
+    - SilverStripe\Versioned\VersionedStateExtension
+---
+Name: versionedstate-test
+---
+SilverStripe\Dev\TestSession:
+  extensions:
+    - SilverStripe\Versioned\Dev\VersionedTestSessionExtension
