@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned\Tests;
 
 use DateTime;
 use InvalidArgumentException;
+use ReflectionMethod;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
@@ -99,9 +100,20 @@ class VersionedTest extends SapphireTest
         // insert a record with no primary key (ID)
         DB::query("INSERT INTO \"VersionedTest_DataObject_Versions\" (\"RecordID\") VALUES ($obj->ID)");
 
-        // run the script which should clean that up
-        $obj->extend('augmentDatabase', $dummy);
+        // expose cleanupVersionedOrphans and invoke
+        // Note: Pass in table names in incorrect case intentionally
+        // to test that it internally corrects itself
+        $method = new ReflectionMethod(Versioned::class, 'cleanupVersionedOrphans');
+        $method->setAccessible(true);
+        $extension = $obj->getExtensionInstance(Versioned::class);
+        $extension->setOwner($obj);
+        try {
+            $method->invoke($extension, 'VersionedTest_Dataobject_versions', 'versionedTest_subclass_versions');
+        } finally {
+            $extension->clearOwner();
+        }
 
+        // Check orphaned records remaining
         $versions = DB::query(
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
             . " WHERE \"RecordID\" = '$obj->ID'"

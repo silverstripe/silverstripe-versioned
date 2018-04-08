@@ -21,6 +21,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\Queries\SQLDelete;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -892,14 +893,23 @@ SQL
      */
     protected function cleanupVersionedOrphans($baseTable, $childTable)
     {
+        // Avoid if disabled
+        if ($this->owner->config()->get('versioned_orphans_disabled')) {
+            return;
+        }
+
+        // Skip if tables are the same (ignore case)
+        if (strcasecmp($childTable, $baseTable) === 0) {
+            return;
+        }
+
         // Skip if child table doesn't exist
-        if (!DB::get_schema()->hasTable($childTable)) {
+        // If it does, ensure query case matches found case
+        $tables = DB::get_schema()->tableList();
+        if (!array_key_exists(strtolower($childTable), $tables)) {
             return;
         }
-        // Skip if tables are the same
-        if ($childTable === $baseTable) {
-            return;
-        }
+        $childTable = $tables[strtolower($childTable)];
 
         // Select all orphaned version records
         $orphanedQuery = SQLSelect::create()
@@ -908,7 +918,9 @@ SQL
 
         // If we have a parent table limit orphaned records
         // to only those that exist in this
-        if (DB::get_schema()->hasTable($baseTable)) {
+        if (array_key_exists(strtolower($baseTable), $tables)) {
+            // Ensure we match db table case
+            $baseTable = $tables[strtolower($baseTable)];
             $orphanedQuery
                 ->addLeftJoin(
                     $baseTable,
