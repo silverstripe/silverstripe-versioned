@@ -168,6 +168,21 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     ];
 
     /**
+     * Ensure versioned records cast extra fields properly
+     *
+     * @config
+     * @var array
+     */
+    private static $casting = [
+        "RecordID" => "Int",
+        "WasPublished" => "Boolean",
+        "WasDeleted" => "Boolean",
+        "WasDraft" => "Boolean",
+        "AuthorID" => "Int",
+        "PublisherID" => "Int"
+    ];
+
+    /**
      * @var array
      * @config
      */
