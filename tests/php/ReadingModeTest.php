@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\ReadingMode;
 
@@ -142,6 +143,25 @@ class ReadingModeTest extends SapphireTest
                 ],
                 'archiveDate=2017-11-15+11%3A31%3A42&stage=Live',
             ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideTestInvalidStage
+     * @param string $stage
+     */
+    public function testInvalidStage($stage)
+    {
+        $this->expectException(InvalidArgumentException::class);
+        ReadingMode::validateStage($stage);
+    }
+
+    public function provideTestInvalidStage()
+    {
+        return [
+            [''],
+            ['stage'],
+            ['bob'],
         ];
     }
 }
