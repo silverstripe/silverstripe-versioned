@@ -21,7 +21,6 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\ORM\Queries\SQLDelete;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -489,9 +488,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             return;
         }
         $stage = $dataQuery->getQueryParam('Versioned.stage');
-        if (!in_array($stage, [static::DRAFT, static::LIVE])) {
-            throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
-        }
+        ReadingMode::validateStage($stage);
         if ($stage === static::DRAFT) {
             return;
         }
@@ -599,9 +596,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Validate stage
         $stage = $dataQuery->getQueryParam('Versioned.stage');
-        if (!in_array($stage, [static::DRAFT, static::LIVE])) {
-            throw new InvalidArgumentException("Invalid stage provided \"{$stage}\"");
-        }
+        ReadingMode::validateStage($stage);
 
         // Filter on appropriate stage column in addition to date
         $stageColumn = $stage === static::LIVE
@@ -2146,9 +2141,7 @@ SQL
      */
     public static function set_stage($stage)
     {
-        if (!in_array($stage, [static::LIVE, static::DRAFT])) {
-            throw new \InvalidArgumentException("Invalid stage name \"{$stage}\"");
-        }
+        ReadingMode::validateStage($stage);
         static::set_reading_mode('Stage.' . $stage);
     }
 
@@ -2206,6 +2199,7 @@ SQL
      */
     public static function reading_archived_date($date, $stage = self::DRAFT)
     {
+        ReadingMode::validateStage($stage);
         Versioned::set_reading_mode('Archive.' . $date . '.' . $stage);
     }
 
@@ -2239,6 +2233,7 @@ SQL
      */
     public static function get_versionnumber_by_stage($class, $stage, $id, $cache = true)
     {
+        ReadingMode::validateStage($stage);
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $stageTable = DataObject::getSchema()->tableName($baseClass);
         if ($stage === static::LIVE) {
@@ -2284,6 +2279,7 @@ SQL
      */
     public static function prepopulate_versionnumber_cache($class, $stage, $idList = null)
     {
+        ReadingMode::validateStage($stage);
         if (!Config::inst()->get(static::class, 'prepopulate_versionnumber_cache')) {
             return;
         }
@@ -2338,6 +2334,7 @@ SQL
         $limit = null,
         $containerClass = DataList::class
     ) {
+        ReadingMode::validateStage($stage);
         $result = DataObject::get($class, $filter, $sort, $join, $limit, $containerClass);
         return $result->setDataQueryParam([
             'Versioned.mode' => 'stage',
@@ -2352,6 +2349,7 @@ SQL
      */
     public function deleteFromStage($stage)
     {
+        ReadingMode::validateStage($stage);
         $owner = $this->owner;
         static::withVersionedMode(function () use ($stage, $owner) {
             Versioned::set_stage($stage);
@@ -2374,6 +2372,7 @@ SQL
      */
     public function writeToStage($stage, $forceInsert = false)
     {
+        ReadingMode::validateStage($stage);
         $owner = $this->owner;
         return static::withVersionedMode(function () use ($stage, $forceInsert, $owner) {
             $oldParams = $owner->getSourceQueryParams();
