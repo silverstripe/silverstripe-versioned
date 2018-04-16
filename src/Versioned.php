@@ -36,6 +36,7 @@ use SilverStripe\View\TemplateGlobalProvider;
  *
  * @property int $Version
  * @property DataObject|RecursivePublishable|Versioned $owner
+ * @mixin RecursivePublishable
  */
 class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
 {
@@ -132,7 +133,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
 
     /**
-     * Prevents delete() from creating a _Versioned record (in case this must be deferred)
+     * Prevents delete() from creating a _Versions record (in case this must be deferred)
      * Best used with suppressDeleteVersion()
      */
     const DELETE_WRITES_VERSION_DISABLED = 'DeleteWritesVersionDisabled';
@@ -337,6 +338,26 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
+     * Get this record at a specific version
+     *
+     * @param int|string $from Version or stage to get at
+     * @return Versioned|DataObject
+     */
+    public function getAtVersion($from)
+    {
+        $baseClass = $this->owner->baseClass();
+        $id = $this->owner->ID ?: $this->owner->OldID;
+
+        // By version number
+        if (is_numeric($from)) {
+            return Versioned::get_version($baseClass, $id, $from);
+        }
+
+        // By stage
+        return Versioned::get_by_stage($baseClass, $from)->byID($id);
+    }
+
+    /**
      * Get modified date for the given version
      *
      * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion instead
@@ -530,7 +551,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Augment SQL to select from `_Versioned` table instead.
+     * Augment SQL to select from `_Versions` table instead.
      *
      * @param SQLSelect $query
      */
@@ -554,7 +575,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             // Rewrite all usages of `Table` to `Table_Versions`
             $query->renameTable($alias, $alias . '_Versions');
             // However, add an alias back to the base table in case this must later be joined.
-            // See ApplyVersionFilters for example which joins _Versioned back onto draft table.
+            // See ApplyVersionFilters for example which joins _Versions back onto draft table.
             $query->renameTable($alias . '_Draft', $alias);
         }
 
@@ -591,7 +612,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             throw new InvalidArgumentException("Invalid archive date");
         }
 
-        // Query against _Versioned table first
+        // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         // Validate stage
@@ -638,7 +659,7 @@ SQL
      */
     protected function augmentSQLVersionedLatest(SQLSelect $query)
     {
-        // Query against _Versioned table first
+        // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         // Join and select only latest version
@@ -676,7 +697,7 @@ SQL
             throw new InvalidArgumentException("Invalid version");
         }
 
-        // Query against _Versioned table first
+        // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         // Add filter on version field
@@ -693,7 +714,7 @@ SQL
      */
     protected function augmentSQLVersionedAll(SQLSelect $query)
     {
-        // Query against _Versioned table first
+        // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         $baseTable = $this->baseTable();
@@ -1727,34 +1748,9 @@ SQL
     {
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeRevertToLive');
-        $owner->copyVersionToStage(static::LIVE, static::DRAFT);
+        $owner->rollbackRecursive(static::LIVE);
         $owner->invokeWithExtensions('onAfterRevertToLive');
         return true;
-    }
-
-    /**
-     * Trigger revert of all owned objects to stage
-     */
-    public function onAfterRevertToLive()
-    {
-        $owner = $this->owner;
-        /** @var Versioned|RecursivePublishable|DataObject $liveOwner */
-        $liveOwner = static::get_by_stage(get_class($owner), static::LIVE)
-            ->byID($owner->ID);
-
-        // Revert any owned objects from the live stage only
-        foreach ($liveOwner->findOwned(false) as $object) {
-            // Skip unversioned owned objects
-            if (!$object->hasExtension(Versioned::class)) {
-                continue;
-            }
-            /** @var Versioned|DataObject $object */
-            $object->doRevertToLive();
-        }
-
-        // Unlink any objects disowned as a result of this action
-        // I.e. objects which aren't owned anymore by this record, but are by the old draft record
-        $owner->unlinkDisownedObjects(Versioned::LIVE, Versioned::DRAFT);
     }
 
     /**
@@ -1784,14 +1780,10 @@ SQL
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $createNewVersion);
 
-        $baseClass = $owner->baseClass();
-        /** @var Versioned|DataObject $from */
-        if (is_numeric($fromStage)) {
-            $from = Versioned::get_version($baseClass, $owner->ID, $fromStage);
-        } else {
-            $from = Versioned::get_by_stage($baseClass, $fromStage)->byID($owner->ID);
-        }
+        // Get at specific version
+        $from = $this->getAtVersion($fromStage);
         if (!$from) {
+            $baseClass = $owner->baseClass();
             throw new InvalidArgumentException("Can't find {$baseClass}#{$owner->ID} in stage {$fromStage}");
         }
 
@@ -2403,33 +2395,64 @@ SQL
      *
      * {@see doRevertToLive()} to reollback to live
      *
+     * @deprecated 4.2..5.0 Use rollbackRecursive() instead
      * @param int $version Version number
      */
     public function doRollbackTo($version)
     {
+        Deprecation::notice('5.0', 'Use rollbackRecursive() instead');
         $owner = $this->owner;
         $owner->extend('onBeforeRollback', $version);
-        $owner->copyVersionToStage($version, static::DRAFT);
+        $owner->rollbackRecursive($version);
         $owner->extend('onAfterRollback', $version);
     }
 
-    public function onAfterRollback($version)
+    /**
+     * Recursively rollback draft to the given version
+     *
+     * @param int|string $version Version ID or Versioned::LIVE to rollback from live.
+     * @return DataObject|Versioned The object rolled back
+     */
+    public function rollbackRecursive($version)
     {
-        // Find record at this version
-        $baseClass = DataObject::getSchema()->baseDataClass($this->owner);
-        /** @var Versioned|RecursivePublishable|DataObject $recordVersion */
-        $recordVersion = static::get_version($baseClass, $this->owner->ID, $version);
+        $owner = $this->owner;
+        $owner->invokeWithExtensions('onBeforeRollbackRecursive', $version);
+        $owner->rollbackSingle($version);
 
-        // Note that unlike other publishing actions, rollback is NOT recursive;
-        // The owner collects all objects and writes them back using writeToStage();
-        foreach ($recordVersion->findOwned() as $object) {
-            // Skip unversioned owned objects
-            if (!$object->hasExtension(Versioned::class)) {
-                continue;
-            }
-            /** @var Versioned|DataObject $object */
-            $object->writeToStage(static::DRAFT);
+        // Rollback relations on this item (works on unversioned records too)
+        $rolledBackOwner = $this->getAtVersion($version);
+        if ($rolledBackOwner) {
+            $rolledBackOwner->rollbackRelations($version);
         }
+
+        // Unlink any objects disowned as a result of this action
+        // I.e. objects which aren't owned anymore by this record, but are by the old draft record
+        $rolledBackOwner->unlinkDisownedObjects($rolledBackOwner, Versioned::DRAFT);
+        $rolledBackOwner->invokeWithExtensions('onAfterRollbackRecursive', $version);
+
+        // Get rolled back version on draft
+        return $this->getAtVersion(Versioned::DRAFT);
+    }
+
+    /**
+     * Rollback draft to a given version
+     *
+     * @param int|string $version Version ID or Versioned::LIVE to rollback from live
+     */
+    public function rollbackSingle($version)
+    {
+        // Validate $version and safely cast
+        if (!is_numeric($version) && $version !== self::LIVE) {
+            throw new InvalidArgumentException("Invalid rollback source version $version");
+        }
+        if (is_numeric($version)) {
+            $version = (int)$version;
+        }
+        // Copy version between stage
+        $owner = $this->owner;
+        $owner->invokeWithExtensions('onBeforeRollbackSingle', $version);
+        $owner->copyVersionToStage($version, self::DRAFT);
+        $owner->invokeWithExtensions('onAfterRollbackSingle', $version);
     }
 
     /**

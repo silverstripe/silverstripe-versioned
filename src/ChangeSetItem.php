@@ -332,7 +332,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     {
         $object = $this->getObjectInStage(Versioned::DRAFT);
         if ($object) {
-            $object->unlinkDisownedObjects(Versioned::DRAFT, Versioned::LIVE);
+            $object->unlinkDisownedObjects($object, Versioned::LIVE);
         }
     }
 
