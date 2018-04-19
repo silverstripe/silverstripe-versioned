@@ -88,9 +88,9 @@ class RecursivePublishable extends DataExtension
         // Rollback recursively
         foreach ($owner->findOwned(false) as $object) {
             if ($object->hasExtension(Versioned::class)) {
-                // Prevent version ID from inheriting, as these are not shared between classes
-                $objectVersion = is_numeric($version) ? $object->Version : $version;
-                $object->rollbackRecursive($objectVersion);
+                // Pass in null to rollback to self version
+                /** @var Versioned $object */
+                $object->rollbackRecursive(null);
             } else {
                 // Rollback unversioned record (inherits parent query parameters)
                 $object->rollbackRelations($version);

@@ -340,11 +340,16 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Get this record at a specific version
      *
-     * @param int|string $from Version or stage to get at
+     * @param int|string|null $from Version or stage to get at. Null mean returns self object
      * @return Versioned|DataObject
      */
     public function getAtVersion($from)
     {
+        // Null implies return current version
+        if (is_null($from)) {
+            return $this->owner;
+        }
+
         $baseClass = $this->owner->baseClass();
         $id = $this->owner->ID ?: $this->owner->OldID;
 
@@ -1765,7 +1770,8 @@ SQL
     /**
      * Move a database record from one stage to the other.
      *
-     * @param int|string $fromStage Place to copy from.  Can be either a stage name or a version number.
+     * @param int|string|null $fromStage Place to copy from.  Can be either a stage name or a version number.
+     * Null copies current object to stage
      * @param string $toStage Place to copy to.  Must be a stage name.
      * @param bool $createNewVersion [DEPRECATED] This parameter is ignored, as copying to stage should always
      * create a new version.
@@ -1788,7 +1794,6 @@ SQL
         }
 
         $from->writeToStage($toStage);
-        $from->destroy();
         $owner->invokeWithExtensions('onAfterVersionedPublish', $fromStage, $toStage, $createNewVersion);
     }
 
@@ -2410,10 +2415,11 @@ SQL
     /**
      * Recursively rollback draft to the given version
      *
-     * @param int|string $version Version ID or Versioned::LIVE to rollback from live.
+     * @param int|string|null $version Version ID or Versioned::LIVE to rollback from live.
+     * Pass in null to rollback to the current object
      * @return DataObject|Versioned The object rolled back
      */
-    public function rollbackRecursive($version)
+    public function rollbackRecursive($version = null)
     {
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeRollbackRecursive', $version);
@@ -2437,15 +2443,16 @@ SQL
     /**
      * Rollback draft to a given version
      *
-     * @param int|string $version Version ID or Versioned::LIVE to rollback from live
+     * @param int|string|null $version Version ID or Versioned::LIVE to rollback from live.
+     * Null to rollback current owner object.
      */
     public function rollbackSingle($version)
     {
         // Validate $version and safely cast
-        if (!is_numeric($version) && $version !== self::LIVE) {
+        if (isset($version) && !is_numeric($version) && $version !== self::LIVE) {
             throw new InvalidArgumentException("Invalid rollback source version $version");
         }
-        if (is_numeric($version)) {
+        if (isset($version) && is_numeric($version)) {
             $version = (int)$version;
         }
         // Copy version between stage
