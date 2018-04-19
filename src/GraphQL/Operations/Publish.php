@@ -21,7 +21,7 @@ class Publish extends PublishOperation
      */
     protected function createOperationName()
     {
-        return 'publish' . ucfirst($this->typeName());
+        return 'publish' . ucfirst($this->getTypeName());
     }
 
     /**

@@ -3,7 +3,8 @@
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use Exception;
-use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
+use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
@@ -15,7 +16,7 @@ if (!class_exists(ListQueryScaffolder::class)) {
 /**
  * Scaffolds a generic read operation for DataObjects.
  */
-class ReadVersions extends ListQueryScaffolder implements ResolverInterface
+class ReadVersions extends ListQueryScaffolder implements OperationResolver
 {
     /**
      * ReadOperationScaffolder constructor.
@@ -30,7 +31,7 @@ class ReadVersions extends ListQueryScaffolder implements ResolverInterface
         parent::__construct($operationName, $versionTypeName, $this);
     }
 
-    public function resolve($object, $args, $context, $info)
+    public function resolve($object, array $args, $context, ResolveInfo $info)
     {
         /** @var DataObject|Versioned $object */
         if (!$object->hasExtension(Versioned::class)) {
