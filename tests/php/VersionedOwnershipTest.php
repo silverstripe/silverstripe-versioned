@@ -651,6 +651,19 @@ class VersionedOwnershipTest extends SapphireTest
         $subclass2->write();
         $subclass2VersionSecond = $subclass2->Version;
 
+        // make a modification to the root and grand node, but not intermediary
+        // this ensures that "gaps" in the hierarchy don't prohibit deeply nested rollbacks
+        $this->sleep(1);
+
+        $attachment3->Title = 'Attachment 3c';
+        $attachment3->write();
+
+        // Note: Don't write middle object here
+
+        $subclass2->Title = 'Subclass 2c';
+        $subclass2->write();
+        $subclass2VersionThird = $subclass2->Version;
+
         // Make modifications involving removal of objects
         $this->sleep(1);
         $relatedMany4->delete();
@@ -658,18 +671,18 @@ class VersionedOwnershipTest extends SapphireTest
         $subclass2->RelatedID = null;
 
         // Modify related many
-        $relatedManyNew->Title = 'new related many c';
+        $relatedManyNew->Title = 'new related many d';
         $relatedManyNew->write();
 
         // Modify attachment. Note on special case below: due to $related2 being deleted, this is now
         // an orphaned and not owned by the parent object
-        $attachment3->Title = 'Attachment 3c';
+        $attachment3->Title = 'Attachment 3d';
         $attachment3->write();
 
         // Modify root object
-        $subclass2->Title = 'Subclass 2c';
+        $subclass2->Title = 'Subclass 2d';
         $subclass2->write();
-        $subclass2VersionThird = $subclass2->Version;
+        $subclass2VersionFourth = $subclass2->Version;
 
         $this->sleep(1);
 
@@ -686,7 +699,7 @@ class VersionedOwnershipTest extends SapphireTest
         // Check version restored at root
         $this->assertEquals('Subclass 2b', $subclass2->Title);
         // Assert version incremented for version
-        $this->assertGreaterThan($subclass2VersionThird, $subclass2->Version);
+        $this->assertGreaterThan($subclass2VersionFourth, $subclass2->Version);
         // Deleted Related was restored
         $this->assertEquals('Related 2b', $subclass2->Related()->Title);
         // Deleted RelatedMany was restored
@@ -702,21 +715,21 @@ class VersionedOwnershipTest extends SapphireTest
         // Read historic Banners() for this record prior to rollback.
         // This should be the final "rolled back" list.
         $this->assertListEquals([
-            ['Title' => 'new related many c'],
-        ], $subclass2->getAtVersion($subclass2VersionThird)->Banners());
+            ['Title' => 'new related many d'],
+        ], $subclass2->getAtVersion($subclass2VersionFourth)->Banners());
 
         // Test rollback can go forwards also from B to C
-        $subclass2 = $subclass2->rollbackRecursive($subclass2VersionThird);
+        $subclass2 = $subclass2->rollbackRecursive($subclass2VersionFourth);
 
         // Related object is removed again
         $this->assertEmpty($subclass2->RelatedID);
 
         // Check version restored at root
-        $this->assertEquals('Subclass 2c', $subclass2->Title);
-        
+        $this->assertEquals('Subclass 2d', $subclass2->Title);
+
         // Deleted RelatedMany was restored but deleted again (bye!)
         $this->assertListEquals([
-            ['Title' => 'new related many c'],
+            ['Title' => 'new related many d'],
         ], $subclass2->Banners());
 
         // RelatedMany4 still exists, but is "unlinked" thanks to unlinkDisownedObjects()
@@ -728,6 +741,10 @@ class VersionedOwnershipTest extends SapphireTest
         // because the intermediary `Related` object was deleted. Thus this is NOT restored,
         // and stays at version B
         $this->assertEquals('Attachment 3b', $attachment3->getAtVersion(Versioned::DRAFT)->Title);
+
+        // Finally, test that rolling back to a version with a gap in it safely rolls back nested records
+        $subclass2->rollbackRecursive($subclass2VersionThird);
+        $this->assertEquals('Attachment 3c', $attachment3->getAtVersion(Versioned::DRAFT)->Title);
     }
 
     /**
