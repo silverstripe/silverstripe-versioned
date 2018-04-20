@@ -2427,7 +2427,10 @@ SQL
     }
 
     /**
-     * Recursively rollback draft to the given version
+     * Recursively rollback draft to the given version. This will also rollback any owned objects
+     * at that point in time to the same date. Objects which didn't exist (or weren't attached)
+     * to the record at the target point in time will be "unlinked", which dis-associates
+     * the record without requiring a hard deletion.
      *
      * @param int|string|null $version Version ID or Versioned::LIVE to rollback from live.
      * Pass in null to rollback to the current object
