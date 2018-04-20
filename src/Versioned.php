@@ -1759,6 +1759,13 @@ SQL
     }
 
     /**
+     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
+     */
+    public function onAfterRevertToLive()
+    {
+    }
+
+    /**
      * @deprecated 4.0..5.0
      */
     public function publish($fromStage, $toStage, $createNewVersion = true)
@@ -2410,6 +2417,13 @@ SQL
         $owner->extend('onBeforeRollback', $version);
         $owner->rollbackRecursive($version);
         $owner->extend('onAfterRollback', $version);
+    }
+
+    /**
+     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
+     */
+    public function onAfterRollback()
+    {
     }
 
     /**
