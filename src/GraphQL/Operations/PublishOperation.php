@@ -7,7 +7,6 @@ use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ValidationException;
@@ -23,18 +22,16 @@ if (!class_exists(MutationScaffolder::class)) {
  */
 abstract class PublishOperation extends MutationScaffolder implements ResolverInterface
 {
-    use DataObjectTypeTrait;
-
     /**
      * @param string $dataObjectClass
      */
     public function __construct($dataObjectClass)
     {
-        $this->dataObjectClass = $dataObjectClass;
         parent::__construct(
             $this->createOperationName(),
             $this->typeName(),
-            $this
+            $this,
+            $dataObjectClass
         );
     }
 

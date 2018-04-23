@@ -7,7 +7,6 @@ use InvalidArgumentException;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
-use SilverStripe\GraphQL\Scaffolding\Traits\DataObjectTypeTrait;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
@@ -20,8 +19,6 @@ if (!class_exists(MutationScaffolder::class)) {
  */
 class CopyToStage extends MutationScaffolder implements ResolverInterface
 {
-    use DataObjectTypeTrait;
-
     /**
      * CreateOperationScaffolder constructor.
      *
@@ -29,11 +26,11 @@ class CopyToStage extends MutationScaffolder implements ResolverInterface
      */
     public function __construct($dataObjectClass)
     {
-        $this->dataObjectClass = $dataObjectClass;
         parent::__construct(
             'copy'.ucfirst($this->typeName()).'ToStage',
             $this->typeName(),
-            $this
+            $this,
+            $dataObjectClass
         );
     }
 

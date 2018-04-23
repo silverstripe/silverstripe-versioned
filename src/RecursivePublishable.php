@@ -3,19 +3,20 @@
 
 namespace SilverStripe\Versioned;
 
-use LogicException;
+use InvalidArgumentException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\ORM\Queries\SQLUpdate;
 
 /**
  * Provides owns / owned_by and recursive publishing API for all objects.
  * This extension is added to DataObject by default
+ *
+ * @property DataObject|RecursivePublishable $owner
  */
 class RecursivePublishable extends DataExtension
 {
@@ -68,6 +69,32 @@ class RecursivePublishable extends DataExtension
         $changeset->write();
         $changeset->addObject($this->owner);
         return $changeset->publish();
+    }
+
+    /**
+     * Rollback all related objects on this stage.
+     *
+     * Note: This method should be called on the source object queried in the appropriate "from"
+     * for this rollback, as it will rely on the parent object's query parameters to return
+     * nested objects.
+     *
+     * @internal Do not call this directly! This should only be invoked by Versioned::rollbackRecursive()
+     * @param int|string $version Parent version / stage to rollback from
+     */
+    public function rollbackRelations($version)
+    {
+        $owner = $this->owner;
+        // Rollback recursively
+        foreach ($owner->findOwned(false) as $object) {
+            if ($object->hasExtension(Versioned::class)) {
+                // Pass in null to rollback to self version
+                /** @var Versioned $object */
+                $object->rollbackRecursive(null);
+            } else {
+                // Rollback unversioned record (inherits parent query parameters)
+                $object->rollbackRelations($version);
+            }
+        }
     }
 
     /**
@@ -231,11 +258,13 @@ class RecursivePublishable extends DataExtension
      *
      * Note that this operation does not create any new Versions
      *
-     * @param string $sourceStage Objects in this stage will not be unlinked.
-     * @param string $targetStage Objects which exist in this stage but not $sourceStage
-     * will be unlinked.
+     * @param string|int|DataObject $source Objects in this stage / version / record will not be unlinked.
+     * Provide number if saving records from a version, or string if saving records from a stage
+     * @param string $targetStage Objects which exist in this stage but not $sourceVersion
+     * will be unlinked. This parameter only supports stage name, as you cannot modify specific versions
+     * @throws InvalidArgumentException
      */
-    public function unlinkDisownedObjects($sourceStage, $targetStage)
+    public function unlinkDisownedObjects($source, $targetStage)
     {
         $owner = $this->owner;
 
@@ -243,64 +272,100 @@ class RecursivePublishable extends DataExtension
         // dis-connected from this object (set ForeignKeyID = 0)
         $owns = $owner->config()->get('owns');
         $hasMany = $owner->config()->get('has_many');
-        if (empty($owns) || empty($hasMany)) {
+        $ownedHasMany = array_intersect($owns, array_keys($hasMany));
+        if (empty($ownedHasMany)) {
             return;
         }
 
-        $schema = DataObject::getSchema();
-        $ownedHasMany = array_intersect($owns, array_keys($hasMany));
-        foreach ($ownedHasMany as $relationship) {
-            // Check the owned object is actually versioned and staged
-            $joinClass = $schema->hasManyComponent(get_class($owner), $relationship);
-            $joinInstance = DataObject::singleton($joinClass);
-
-            /** @var Versioned $versioned */
-            $versioned = $joinInstance->getExtensionInstance(Versioned::class);
-            if (!$versioned || !$versioned->hasStages()) {
-                continue;
-            }
-
-            // Find metadata on relationship
-            $joinField = $schema->getRemoteJoinField(get_class($owner), $relationship, 'has_many', $polymorphic);
-            $idField = $polymorphic ? "{$joinField}ID" : $joinField;
-            $joinTable = DataObject::getSchema()->tableForField($joinClass, $idField);
-
-            // Generate update query which will unlink disowned objects
-            $targetTable = $versioned->stageTable($joinTable, $targetStage);
-            $disowned = new SQLUpdate("\"{$targetTable}\"");
-            $disowned->assign("\"{$idField}\"", 0);
-            $disowned->addWhere([
-                "\"{$targetTable}\".\"{$idField}\"" => $owner->ID
-            ]);
-
-            // Build exclusion list (items to owned objects we need to keep)
-            $sourceTable = $versioned->stageTable($joinTable, $sourceStage);
-            $owned = new SQLSelect("\"{$sourceTable}\".\"ID\"", "\"{$sourceTable}\"");
-            $owned->addWhere([
-                "\"{$sourceTable}\".\"{$idField}\"" => $owner->ID
-            ]);
-
-            // Apply class condition if querying on polymorphic has_one
-            if ($polymorphic) {
-                $disowned->assign("\"{$joinField}Class\"", null);
-                $disowned->addWhere([
-                    "\"{$targetTable}\".\"{$joinField}Class\"" => get_class($owner)
-                ]);
-                $owned->addWhere([
-                    "\"{$sourceTable}\".\"{$joinField}Class\"" => get_class($owner)
-                ]);
-            }
-
-            // Merge queries and perform unlink
-            $ownedSQL = $owned->sql($ownedParams);
-            $disowned->addWhere([
-                "\"{$targetTable}\".\"ID\" NOT IN ({$ownedSQL})" => $ownedParams
-            ]);
-
-            $owner->extend('updateDisownershipQuery', $disowned, $sourceStage, $targetStage, $relationship);
-
-            $disowned->execute();
+        // Get exclusion list based on parent object
+        /** @var Versioned|DataObject $sourceOwner */
+        $sourceOwner = null;
+        if ($source instanceof DataObject) {
+            $sourceOwner = $source;
+        } elseif (is_numeric($source)) {
+            $sourceOwner = Versioned::get_version($owner->baseClass(), $owner->ID, $source);
+        } elseif (is_string($source)) {
+            ReadingMode::validateStage($source);
+            $sourceOwner = Versioned::get_by_stage($owner->baseClass(), $source)->byID($owner->ID);
         }
+
+        // Make sure the record exists at all
+        if (!$sourceOwner || !$sourceOwner->isInDB()) {
+            throw new InvalidArgumentException(
+                '$source parameter provided was not a valid stage, version, or saved record'
+            );
+        }
+
+        // Unlink each relationship
+        foreach ($ownedHasMany as $relationship) {
+            $sourceOwner->unlinkDisownedRelationship($source, $targetStage, $relationship);
+        }
+    }
+
+    /**
+     * Unlink an object with a specific named relationship against the owner.
+     * Note: The owner object should be queried in the correct stage / view mode
+     * that includes objects that should NOT be unlinked.
+     * E.g. if disowning objects from live, the owner object should be queried
+     * in draft, and vice versa (or some other source version ID)
+     *
+     * @param string|int|DataObject $source Objects in this stage / version / record will not be unlinked.
+     * Provide number if saving records from a version, or string if saving records from a stage
+     * @param string $targetStage Objects which exist in this stage but not $sourceVersion
+     * will be unlinked. This parameter only supports stage name, as you cannot modify specific versions
+     * @param string $relationship Name of has_many relationship to unlink
+     */
+    public function unlinkDisownedRelationship($source, $targetStage, $relationship)
+    {
+        $owner = $this->owner;
+
+        // Check the owned object is actually versioned and staged
+        $schema = DataObject::getSchema();
+        $joinClass = $schema->hasManyComponent(get_class($owner), $relationship);
+        $joinInstance = DataObject::singleton($joinClass);
+
+        // Skip unversioned relationships
+        /** @var Versioned $versioned */
+        $versioned = $joinInstance->getExtensionInstance(Versioned::class);
+        if (!$versioned) {
+            return;
+        }
+
+        // Find table and field to join on
+        $joinField = $schema->getRemoteJoinField(get_class($owner), $relationship, 'has_many', $polymorphic);
+        $joinTable = DataObject::getSchema()->tableForField(
+            $joinClass,
+            $polymorphic ? "{$joinField}ID" : $joinField
+        );
+
+        // Generate update query which will unlink disowned objects
+        $targetTable = $versioned->stageTable($joinTable, $targetStage);
+        $disowned = new SQLUpdate("\"{$targetTable}\"");
+        if ($polymorphic) {
+            $disowned
+                ->assign("\"{$joinField}ID\"", 0)
+                ->assign("\"{$joinField}Class\"", null)
+                ->addWhere([
+                    "\"{$targetTable}\".\"{$joinField}ID\"" => $owner->ID,
+                    "\"{$targetTable}\".\"{$joinField}Class\"" => get_class($owner),
+                ]);
+        } else {
+            $disowned
+                ->assign("\"{$joinField}\"", 0)
+                ->addWhere([
+                    "\"{$targetTable}\".\"{$joinField}\"" => $owner->ID
+                ]);
+        }
+
+        // Query the source for the list of items to NOT remove
+        $ownedSQL = $owner->getComponents($relationship)->sql($ownedParams);
+        $disowned->addWhere([
+            "\"{$targetTable}\".\"ID\" NOT IN (SELECT \"Source\".\"ID\" FROM ({$ownedSQL}) AS \"Source\")" => $ownedParams
+        ]);
+
+        $owner->extend('updateDisownershipQuery', $disowned, $source, $targetStage, $relationship);
+
+        $disowned->execute();
     }
 
     /**
