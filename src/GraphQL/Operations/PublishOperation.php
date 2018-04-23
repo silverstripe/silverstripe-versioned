@@ -3,9 +3,10 @@
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use Exception;
+use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\Manager;
-use SilverStripe\GraphQL\Scaffolding\Interfaces\ResolverInterface;
+use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\DB;
@@ -20,29 +21,38 @@ if (!class_exists(MutationScaffolder::class)) {
 /**
  * Scaffolds a generic update operation for DataObjects.
  */
-abstract class PublishOperation extends MutationScaffolder implements ResolverInterface
+abstract class PublishOperation extends MutationScaffolder implements OperationResolver
 {
     /**
      * @param string $dataObjectClass
      */
     public function __construct($dataObjectClass)
     {
-        parent::__construct(
-            $this->createOperationName(),
-            $this->typeName(),
-            $this,
-            $dataObjectClass
-        );
+        parent::__construct(null, null, $this, $dataObjectClass);
     }
 
-    public function resolve($object, $args, $context, $info)
+    /**
+     * @return string
+     */
+    public function getName()
     {
-        $obj = Versioned::get_by_stage($this->dataObjectClass, $this->getReadingStage())
+        $name = parent::getName();
+        if ($name) {
+            return $name;
+        }
+
+        // Abstract operation name mocking
+        return $this->createOperationName();
+    }
+
+    public function resolve($object, array $args, $context, ResolveInfo $info)
+    {
+        $obj = Versioned::get_by_stage($this->getDataObjectClass(), $this->getReadingStage())
             ->byID($args['ID']);
         if (!$obj) {
             throw new Exception(sprintf(
                 '%s with ID %s not found',
-                $this->dataObjectClass,
+                $this->getDataObjectClass(),
                 $args['ID']
             ));
         }
@@ -50,7 +60,7 @@ abstract class PublishOperation extends MutationScaffolder implements ResolverIn
         if (!$this->checkPermission($obj, $context['currentUser'])) {
             throw new Exception(sprintf(
                 'Not allowed to change published state of this %s',
-                $this->dataObjectClass
+                $this->getDataObjectClass()
             ));
         }
 
@@ -67,7 +77,7 @@ abstract class PublishOperation extends MutationScaffolder implements ResolverIn
         } catch (ValidationException $e) {
             throw new Exception(
                 'Could not changed published state of %s. Got error: %s',
-                $this->dataObjectClass,
+                $this->getDataObjectClass(),
                 $e->getMessage()
             );
         }
