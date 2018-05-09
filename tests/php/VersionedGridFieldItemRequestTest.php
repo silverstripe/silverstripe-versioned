@@ -47,10 +47,8 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $this->assertNull($actions->fieldByName('action_doPublish'));
         $this->assertInstanceOf(FormAction::class, $actions->fieldByName('action_doSave'));
 
-        /** @var LiteralField $warningField */
-        $warningField = $actions->fieldByName('warning');
-        $this->assertInstanceOf(LiteralField::class, $warningField);
-        $this->assertRegExp('/will be published/', $warningField->getContent());
+        // No warning for new items
+        $this->assertNull($actions->fieldByName('warning'));
     }
 
     /**
@@ -124,6 +122,12 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
 
         // Nested child is published
         $this->assertTrue($newChild->isPublished());
+
+        /** @var LiteralField $warningField */
+        $actions = $form->Actions();
+        $warningField = $actions->fieldByName('warning');
+        $this->assertInstanceOf(LiteralField::class, $warningField);
+        $this->assertRegExp('/will be published/', $warningField->getContent());
     }
 
     protected function createItemRequestForObject(DataObject $obj)
