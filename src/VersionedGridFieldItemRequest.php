@@ -64,7 +64,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $ownerRecursivePublishes = !$ownerIsStaged
             && $record
             && $record->hasExtension(RecursivePublishable::class)
-            && $record->config()->get('owns');
+            && $record->findOwned()->exists();
 
         // Add extra actions prior to extensions so that these can be modified too
         if ($ownerIsStaged) {
@@ -346,7 +346,6 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if (!$this->record->ID) {
             return;
         }
-
         $saveAction->setTitle(_t(
             __CLASS__ . '.BUTTONAPPLYCHANGES',
             'Apply changes'
