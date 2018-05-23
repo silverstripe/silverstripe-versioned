@@ -113,7 +113,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
      */
     public function clear()
     {
-        $this->pool->clear();
+        return $this->pool->clear();
     }
 
     /**
