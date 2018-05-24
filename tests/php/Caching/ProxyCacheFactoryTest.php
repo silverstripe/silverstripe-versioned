@@ -41,6 +41,5 @@ class ProxyCacheFactoryTest extends SapphireTest
         ]);
         $result = $factory->create('dummy', ['disable-container' => true]);
         $this->assertTrue($result instanceof PhpFilesCache);
-
     }
 }

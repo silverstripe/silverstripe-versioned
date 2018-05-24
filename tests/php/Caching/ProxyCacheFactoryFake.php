@@ -15,5 +15,4 @@ class ProxyCacheFactoryFake extends ProxyCacheFactory
     {
         return true;
     }
-
 }

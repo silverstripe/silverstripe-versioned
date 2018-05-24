@@ -37,6 +37,5 @@ class ProxyCacheFactory extends DefaultCacheFactory
         }
 
         return $backend;
-
     }
 }
