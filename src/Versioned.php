@@ -991,20 +991,20 @@ SQL
 
         // Add any extra, unchanged fields to the version record.
         if (!$isDelete) {
-        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
-        if ($data) {
-            $fields = $schema->databaseFields($class, false);
-            if (is_array($fields)) {
-                $data = array_intersect_key($data, $fields);
+            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+            if ($data) {
+                $fields = $schema->databaseFields($class, false);
+                if (is_array($fields)) {
+                    $data = array_intersect_key($data, $fields);
 
-                foreach ($data as $k => $v) {
-                    // If the value is not set at all in the manipulation currently, use the existing value from the database
-                    if (!array_key_exists($k, $newManipulation['fields'])) {
-                        $newManipulation['fields'][$k] = $v;
+                    foreach ($data as $k => $v) {
+                        // If the value is not set at all in the manipulation currently, use the existing value from the database
+                        if (!array_key_exists($k, $newManipulation['fields'])) {
+                            $newManipulation['fields'][$k] = $v;
+                        }
                     }
                 }
             }
-        }
         }
 
         // Ensure that the ID is instead written to the RecordID field
@@ -1044,8 +1044,8 @@ SQL
 
             // Update main table version if not previously known
             if (isset($manipulation[$table]['fields'])) {
-            $manipulation[$table]['fields']['Version'] = $nextVersion;
-        }
+                $manipulation[$table]['fields']['Version'] = $nextVersion;
+            }
         }
 
         // Update _Versions table manipulation
@@ -1531,12 +1531,12 @@ SQL
     public function canViewStage($stage = self::LIVE, $member = null)
     {
         return static::withVersionedMode(function () use ($stage, $member) {
-        Versioned::set_stage($stage);
+            Versioned::set_stage($stage);
 
-        $owner = $this->owner;
-        $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
+            $owner = $this->owner;
+            $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
 
-        return $versionFromStage ? $versionFromStage->canView($member) : false;
+            return $versionFromStage ? $versionFromStage->canView($member) : false;
         });
     }
 
@@ -1653,8 +1653,8 @@ SQL
         $owner->deleteFromChangeSets();
         // Unpublish without creating deleted version
         $this->suppressDeletedVersion(function () use ($owner) {
-        $owner->doUnpublish();
-        $owner->deleteFromStage(static::DRAFT);
+            $owner->doUnpublish();
+            $owner->deleteFromStage(static::DRAFT);
         });
         // Create deleted version in both stages
         $this->createDeletedVersion([
@@ -1689,11 +1689,11 @@ SQL
 
         // Modify in isolated mode
         static::withVersionedMode(function () use ($owner) {
-        static::set_stage(static::LIVE);
+            static::set_stage(static::LIVE);
 
         // This way our ID won't be unset
-        $clone = clone $owner;
-        $clone->delete();
+            $clone = clone $owner;
+            $clone->delete();
         });
 
         $owner->invokeWithExtensions('onAfterUnpublish');
@@ -1945,7 +1945,7 @@ SQL
             // Set draft site security if disabled for this session
             if ($request->getSession()->get('unsecuredDraftSite')) {
                 static::set_draft_site_secured(false);
-        }
+            }
         }
 
         // Verify if querystring contains valid reading mode
@@ -2128,7 +2128,7 @@ SQL
             Versioned::set_stage($stage);
             return DataObject::get_one($class, $filter, $cache, $sort);
         });
-        }
+    }
 
     /**
      * Gets the current version number of a specific record.
@@ -2260,9 +2260,9 @@ SQL
         ReadingMode::validateStage($stage);
         $owner = $this->owner;
         static::withVersionedMode(function () use ($stage, $owner) {
-        Versioned::set_stage($stage);
-        $clone = clone $owner;
-        $clone->delete();
+            Versioned::set_stage($stage);
+            $clone = clone $owner;
+            $clone->delete();
         });
 
         // Fix the version number cache (in case you go delete from stage and then check ExistsOnLive)
@@ -2286,7 +2286,7 @@ SQL
             $oldParams = $owner->getSourceQueryParams();
             try {
                 // Lazy load and reset version in current stage prior to resetting write stage
-        $owner->forceChange();
+                $owner->forceChange();
                 $owner->Version = null;
 
                 // Migrate stage prior to write
