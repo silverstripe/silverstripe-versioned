@@ -2,13 +2,13 @@
 
 namespace SilverStripe\Versioned;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 use LogicException;
-use SilverStripe\Core\Extensible;
-use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\CMSPreviewable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
@@ -16,7 +16,6 @@ use SilverStripe\ORM\SS_List;
 use SilverStripe\ORM\UnexpectedDataException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
-use BadMethodCallException;
 use SilverStripe\Security\Security;
 
 /**
@@ -332,7 +331,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     {
         $object = $this->getObjectInStage(Versioned::DRAFT);
         if ($object) {
-            $object->unlinkDisownedObjects(Versioned::DRAFT, Versioned::LIVE);
+            $object->unlinkDisownedObjects($object, Versioned::LIVE);
         }
     }
 

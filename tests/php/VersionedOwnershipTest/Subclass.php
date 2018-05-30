@@ -11,8 +11,9 @@ use SilverStripe\ORM\HasManyList;
  * - owns has_many objects
  *
  * @property string $Description
+ * @property int $RelatedID
  * @method Related Related()
- * @method HasManyList Banners()
+ * @method HasManyList|RelatedMany[] Banners()
  */
 class Subclass extends TestObject implements TestOnly
 {

@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Versioned\ChangeSet;
 use SilverStripe\Versioned\ChangeSetItem;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\RelatedMany;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
@@ -604,82 +605,146 @@ class VersionedOwnershipTest extends SapphireTest
     /**
      * Test that rolling back to a single version works recursively
      */
-    public function testRecursiveRollback()
+    public function testRollbackRecursive()
     {
+        // Get all objects to be modified in initial state
+        $this->sleep(1);
+
         /** @var VersionedOwnershipTest\Subclass $subclass2 */
-        $this->sleep(1);
         $subclass2 = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass2_published');
+        // Subclass has_one Related
+        /** @var VersionedOwnershipTest\Related $related2 */
+        $related2 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related2_published');
+        // Related many_many Attachment
+        // Note: many_many ITSELF is not versioned, so only testing modification to attachment record itself
+        /** @var VersionedOwnershipTest\Attachment $attachment3 */
+        $attachment3 = $this->objFromFixture(VersionedOwnershipTest\Attachment::class, 'attachment3_published');
+        // Subclass has_many RelatedMany
+        /** @var VersionedOwnershipTest\RelatedMany $relatedMany4 */
+        $relatedMany4 = $this->objFromFixture(VersionedOwnershipTest\RelatedMany::class, 'relatedmany4_published');
+        $relatedMany4ID = $relatedMany4->ID;
+        $subclass2VersionFirst = $subclass2->Version;
 
-        // Create a few new versions
-        $versions = [];
-        for ($version = 1; $version <= 3; $version++) {
-            // Write owned objects
-            $this->sleep(1);
-            foreach ($subclass2->findOwned(true) as $obj) {
-                $obj->Title .= " - v{$version}";
-                $obj->write();
-            }
-            // Write parent
-            $this->sleep(1);
-            $subclass2->Title .= " - v{$version}";
-            $subclass2->write();
-            $versions[$version] = $subclass2->Version;
-        }
-
-
-        // Check reverting to first version
+        // Make first set of modifications
         $this->sleep(1);
-        $subclass2->doRollbackTo($versions[1]);
-        /** @var VersionedOwnershipTest\Subclass $subclass2Draft */
-        $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
-            ->byID($subclass2->ID);
-        $this->assertEquals('Subclass 2 - v1', $subclass2Draft->Title);
-        $this->assertListEquals(
-            [
-                ['Title' => 'Related 2 - v1'],
-                ['Title' => 'Attachment 3 - v1'],
-                ['Title' => 'Attachment 4 - v1'],
-                ['Title' => 'Attachment 5 - v1'],
-                ['Title' => 'Related Many 4 - v1'],
-            ],
-            $subclass2Draft->findOwned(true)
-        );
 
-        // Check rolling forward to a later version
-        $this->sleep(1);
-        $subclass2->doRollbackTo($versions[3]);
-        /** @var VersionedOwnershipTest\Subclass $subclass2Draft */
-        $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
-            ->byID($subclass2->ID);
-        $this->assertEquals('Subclass 2 - v1 - v2 - v3', $subclass2Draft->Title);
-        $this->assertListEquals(
-            [
-                ['Title' => 'Related 2 - v1 - v2 - v3'],
-                ['Title' => 'Attachment 3 - v1 - v2 - v3'],
-                ['Title' => 'Attachment 4 - v1 - v2 - v3'],
-                ['Title' => 'Attachment 5 - v1 - v2 - v3'],
-                ['Title' => 'Related Many 4 - v1 - v2 - v3'],
-            ],
-            $subclass2Draft->findOwned(true)
-        );
+        // add another related many
+        $relatedManyNew = new VersionedOwnershipTest\RelatedMany();
+        $relatedManyNew->Title = 'new related many';
+        $relatedManyNew->PageID = $subclass2->ID;
+        $relatedManyNew->write();
 
-        // And rolling back one version
+        // Modify existing related many
+        $relatedMany4->Title = 'Related Many 4b';
+        $relatedMany4->write();
+
+        // Modify has_one related object
+        $related2->Title = 'Related 2b';
+        $related2->write();
+
+        // modify grandchild object
+        $attachment3->Title = 'Attachment 3b';
+        $attachment3->write();
+
+        // modify root object
+        $subclass2->Title = 'Subclass 2b';
+        $subclass2->write();
+        $subclass2VersionSecond = $subclass2->Version;
+
+        // make a modification to the root and grand node, but not intermediary
+        // this ensures that "gaps" in the hierarchy don't prohibit deeply nested rollbacks
         $this->sleep(1);
-        $subclass2->doRollbackTo($versions[2]);
-        /** @var VersionedOwnershipTest\Subclass $subclass2Draft */
-        $subclass2Draft = Versioned::get_by_stage(VersionedOwnershipTest\Subclass::class, Versioned::DRAFT)
-            ->byID($subclass2->ID);
-        $this->assertEquals('Subclass 2 - v1 - v2', $subclass2Draft->Title);
-        $this->assertListEquals(
-            [
-                ['Title' => 'Related 2 - v1 - v2'],
-                ['Title' => 'Attachment 3 - v1 - v2'],
-                ['Title' => 'Attachment 4 - v1 - v2'],
-                ['Title' => 'Attachment 5 - v1 - v2'],
-                ['Title' => 'Related Many 4 - v1 - v2'],
-            ],
-            $subclass2Draft->findOwned(true)
-        );
+
+        $attachment3->Title = 'Attachment 3c';
+        $attachment3->write();
+
+        // Note: Don't write middle object here
+
+        $subclass2->Title = 'Subclass 2c';
+        $subclass2->write();
+        $subclass2VersionThird = $subclass2->Version;
+
+        // Make modifications involving removal of objects
+        $this->sleep(1);
+        $relatedMany4->delete();
+        $related2->delete();
+        $subclass2->RelatedID = null;
+
+        // Modify related many
+        $relatedManyNew->Title = 'new related many d';
+        $relatedManyNew->write();
+
+        // Modify attachment. Note on special case below: due to $related2 being deleted, this is now
+        // an orphaned and not owned by the parent object
+        $attachment3->Title = 'Attachment 3d';
+        $attachment3->write();
+
+        // Modify root object
+        $subclass2->Title = 'Subclass 2d';
+        $subclass2->write();
+        $subclass2VersionFourth = $subclass2->Version;
+
+        $this->sleep(1);
+
+        // Read historic Banners() for this record prior to rollback.
+        // This should be the final "rolled back" list.
+        $this->assertListEquals([
+            ['Title' => 'Related Many 4b'],
+            ['Title' => 'new related many'],
+        ], $subclass2->getAtVersion($subclass2VersionSecond)->Banners());
+
+        // Rollback from version C to B
+        $subclass2 = $subclass2->rollbackRecursive($subclass2VersionSecond);
+
+        // Check version restored at root
+        $this->assertEquals('Subclass 2b', $subclass2->Title);
+        // Assert version incremented for version
+        $this->assertGreaterThan($subclass2VersionFourth, $subclass2->Version);
+        // Deleted Related was restored
+        $this->assertEquals('Related 2b', $subclass2->Related()->Title);
+        // Deleted RelatedMany was restored
+        $this->assertListEquals([
+            ['Title' => 'Related Many 4b'],
+            ['Title' => 'new related many'],
+        ], $subclass2->Banners());
+        // Attachment was restored
+        $this->assertEquals('Attachment 3b', $attachment3->getAtVersion(Versioned::DRAFT)->Title);
+
+        $this->sleep(1);
+
+        // Read historic Banners() for this record prior to rollback.
+        // This should be the final "rolled back" list.
+        $this->assertListEquals([
+            ['Title' => 'new related many d'],
+        ], $subclass2->getAtVersion($subclass2VersionFourth)->Banners());
+
+        // Test rollback can go forwards also from B to C
+        $subclass2 = $subclass2->rollbackRecursive($subclass2VersionFourth);
+
+        // Related object is removed again
+        $this->assertEmpty($subclass2->RelatedID);
+
+        // Check version restored at root
+        $this->assertEquals('Subclass 2d', $subclass2->Title);
+
+        // Deleted RelatedMany was restored but deleted again (bye!)
+        $this->assertListEquals([
+            ['Title' => 'new related many d'],
+        ], $subclass2->Banners());
+
+        // RelatedMany4 still exists, but is "unlinked" thanks to unlinkDisownedObjects()
+        $relatedMany4 = VersionedOwnershipTest\RelatedMany::get()->byID($relatedMany4ID);
+        $this->assertNotEmpty($relatedMany4);
+        $this->assertEquals(0, $relatedMany4->PageID);
+
+        // Test for special edge case: Attachment is no longer attached to the parent record
+        // because the intermediary `Related` object was deleted. Thus this is NOT restored,
+        // and stays at version B
+        $this->assertEquals('Attachment 3b', $attachment3->getAtVersion(Versioned::DRAFT)->Title);
+
+        // Finally, test that rolling back to a version with a gap in it safely rolls back nested records
+        $subclass2->rollbackRecursive($subclass2VersionThird);
+        $this->assertEquals('Attachment 3c', $attachment3->getAtVersion(Versioned::DRAFT)->Title);
     }
 
     /**

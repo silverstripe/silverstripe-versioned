@@ -343,8 +343,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if (!$saveAction) {
             return;
         }
-        $ownsObjects = !empty($record->config()->get('owns'));
-        if (!$ownsObjects) {
+        if (!$this->record->ID) {
             return;
         }
 

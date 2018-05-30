@@ -423,11 +423,6 @@ class ChangeSetTest extends SapphireTest
         $changeSet->publish();
     }
 
-    public function testCanRevert()
-    {
-        $this->markTestSkipped("Requires ChangeSet::revert to be implemented first");
-    }
-
     public function testCanEdit()
     {
         // Create changeset containing all items (unpublished)

@@ -24,7 +24,7 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         $scaffolder = new DataObjectScaffolder(Fake::class);
         $scaffolder->addFields(['Name', 'Title']);
         $scaffolder->addToManager($manager);
-        $typeName = $scaffolder->typeName();
+        $typeName = $scaffolder->getTypeName();
 
         $type = $manager->getType($typeName);
         $this->assertInstanceOf(ObjectType::class, $type);
@@ -42,7 +42,7 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         $manager->addType((new VersionedStage())->toType());
         $scaffolder = new DataObjectScaffolder(UnversionedWithField::class);
         $scaffolder->addToManager($manager);
-        $typeName = $scaffolder->typeName();
+        $typeName = $scaffolder->getTypeName();
 
         $type = $manager->getType($typeName);
         $this->assertInstanceOf(ObjectType::class, $type);

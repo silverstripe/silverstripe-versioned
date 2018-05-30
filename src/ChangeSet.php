@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned;
 
 use BadMethodCallException;
 use Exception;
-use LogicException;
 use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\FieldList;

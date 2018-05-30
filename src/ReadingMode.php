@@ -28,12 +28,14 @@ class ReadingMode
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;
+                self::validateStage($archiveStage);
                 return [
                     'Versioned.mode' => 'archive',
                     'Versioned.date' => $parts[1],
                     'Versioned.stage' => $archiveStage,
                 ];
             case 'Stage':
+                self::validateStage($parts[1]);
                 return [
                     'Versioned.mode' => 'stage',
                     'Versioned.stage' => $parts[1],
@@ -88,7 +90,7 @@ class ReadingMode
             ? $query['archiveDate']
             : null;
 
-        // Check stage
+        // Check stage (ignore invalid stages)
         $stage = null;
         if (isset($query['stage']) && strcasecmp($query['stage'], Versioned::DRAFT) === 0) {
             $stage = Versioned::DRAFT;
@@ -131,17 +133,31 @@ class ReadingMode
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;
+                self::validateStage($archiveStage);
                 return [
                     'archiveDate' => $parts[1],
                     'stage' => $archiveStage,
                 ];
             case 'Stage':
+                self::validateStage($parts[1]);
                 return [
                     'stage' => $parts[1],
                 ];
             default:
                 // Unsupported mode
                 return null;
+        }
+    }
+
+    /**
+     * Validate the stage is valid, throwing an exception if it's not
+     *
+     * @param string $stage
+     */
+    public static function validateStage($stage)
+    {
+        if (!in_array($stage, [Versioned::LIVE, Versioned::DRAFT])) {
+            throw new InvalidArgumentException("Invalid stage name \"{$stage}\"");
         }
     }
 }
