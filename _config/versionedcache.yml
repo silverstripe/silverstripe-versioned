@@ -1,0 +1,11 @@
+---
+Name: versionedcache
+After:
+  - '#corecache'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Core\Cache\CacheFactory:
+    class: 'SilverStripe\Versioned\Caching\ProxyCacheFactory'
+    constructor:
+      args:
+        container: 'SilverStripe\Versioned\Caching\VersionedCacheAdapter'
