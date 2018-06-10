@@ -15,6 +15,8 @@ class VersionedGridFieldStateExtension extends Extension
     {
         /** @var GridFieldConfig $owner */
         $owner = $this->getOwner();
-        $owner->addComponent(new VersionedGridFieldState());
+        if (!$owner->getComponentByType(VersionedGridFieldState::class)) {
+            $owner->addComponent(new VersionedGridFieldState());
+        }
     }
 }
