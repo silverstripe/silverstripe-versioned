@@ -26,7 +26,6 @@
         "phpunit/phpunit": "^5.7",
         "silverstripe/admin": "^1"
     },
-    "extra": [],
     "autoload": {
         "psr-4": {
             "SilverStripe\\Versioned\\": "src/",
