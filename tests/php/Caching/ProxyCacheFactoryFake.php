@@ -10,9 +10,4 @@ class ProxyCacheFactoryFake extends ProxyCacheFactory
     {
         return false;
     }
-
-    protected function isPHPFilesSupported()
-    {
-        return true;
-    }
 }

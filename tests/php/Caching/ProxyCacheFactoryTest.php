@@ -3,10 +3,20 @@
 namespace SilverStripe\Versioned\Tests\Caching;
 
 use SilverStripe\Dev\SapphireTest;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\Cache\Simple\PhpFilesCache;
 
 class ProxyCacheFactoryTest extends SapphireTest
 {
+    protected function setUp()
+    {
+        parent::setUp();
+
+        if (!PhpFilesAdapter::isSupported()) {
+            $this->markTestSkipped("This test requires opcache enabled");
+        }
+    }
+
     public function testCreateFallback()
     {
         $factory = new ProxyCacheFactoryFake([
