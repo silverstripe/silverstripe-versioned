@@ -128,7 +128,13 @@ class VersionedTest extends SapphireTest
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
             . " WHERE \"RecordID\" = '$obj->ID'"
         )->value();
-        $obj->extend('augmentDatabase', $dummy);
+
+        $extension->setOwner($obj);
+        try {
+            $method->invoke($extension, 'VersionedTest_Dataobject_versions', 'VersionedTest_Subclass_Versions');
+        } finally {
+            $extension->clearOwner();
+        }
 
         $count2 = DB::query(
             "SELECT COUNT(*) FROM \"VersionedTest_Subclass_Versions\""
