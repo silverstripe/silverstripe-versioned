@@ -26,11 +26,7 @@
         "phpunit/phpunit": "^5.7",
         "silverstripe/admin": "^1"
     },
-    "extra": {
-        "branch-alias": {
-            "1.x-dev": "1.2.x-dev"
-        }
-    },
+    "extra": [],
     "autoload": {
         "psr-4": {
             "SilverStripe\\Versioned\\": "src/",
