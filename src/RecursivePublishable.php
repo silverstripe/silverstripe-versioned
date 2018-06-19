@@ -11,6 +11,8 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLUpdate;
+use SilverStripe\ORM\SS_List;
+use SilverStripe\ORM\Tests\MySQLDatabaseTest\Data;
 
 /**
  * Provides owns / owned_by and recursive publishing API for all objects.
@@ -135,6 +137,36 @@ class RecursivePublishable extends DataExtension
     {
         // Find objects in these relationships
         return $this->owner->findRelatedObjects('owns', $recursive, $list);
+    }
+
+    /**
+     * Returns true if the record has any owned relationships that exist
+     * @return bool
+     */
+    public function hasOwned()
+    {
+        if (!$this->owner->isInDB()) {
+            return false;
+        }
+
+        $ownedRelationships = $this->owner->config()->get('owns') ?: [];
+        foreach ($ownedRelationships as $relationship) {
+            if (!$this->owner->hasMethod($relationship)) {
+                trigger_error(sprintf(
+                    "Invalid ownership of \"%s\" on class \"%s\"",
+                    $relationship,
+                    get_class($this)
+                ), E_USER_WARNING);
+                continue;
+            }
+            /* @var DataObject|SS_List $result */
+            $result = $this->owner->{$relationship}();
+            if ($result->exists()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

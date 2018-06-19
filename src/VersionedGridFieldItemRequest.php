@@ -64,7 +64,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $ownerRecursivePublishes = !$ownerIsStaged
             && $record
             && $record->hasExtension(RecursivePublishable::class)
-            && $record->findOwned()->exists();
+            && $record->hasOwned();
 
         // Add extra actions prior to extensions so that these can be modified too
         if ($ownerIsStaged) {

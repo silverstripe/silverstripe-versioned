@@ -4,7 +4,13 @@ namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Versioned\ChangeSet;
 use SilverStripe\Versioned\ChangeSetItem;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Attachment;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Banner;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Image;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Related;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\RelatedMany;
+use SilverStripe\Versioned\Tests\VersionedOwnershipTest\TestPage;
+use SilverStripe\Versioned\Tests\VersionedTest\Subclass;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
@@ -150,6 +156,27 @@ class VersionedOwnershipTest extends SapphireTest
             ],
             $related2->findOwned()
         );
+    }
+
+    public function testHasOwned()
+    {
+        $this->assertFalse(Subclass::create()->hasOwned(), 'hasOwned returns false on unwritten objects');
+
+        /** @var VersionedOwnershipTest\Subclass $subclass1 */
+        $subclass1 = $this->objFromFixture(VersionedOwnershipTest\Subclass::class, 'subclass1_published');
+        $this->assertTrue($subclass1->hasOwned());
+
+        /** @var VersionedOwnershipTest\Related $related1 */
+        $related1 = $this->objFromFixture(VersionedOwnershipTest\Related::class, 'related1');
+
+        // Test when the list is empty
+        $related1->Attachments()->removeAll();
+        $this->assertFalse($related1->hasOwned(), 'hasOwned is false when relation is empty');
+
+        $banner = $this->objFromFixture(Banner::class, 'banner1_published');
+        $this->assertTrue($banner->hasOwned(), 'hasOwned is true when a has_one exists');
+        $banner->ImageID = 0;
+        $this->assertFalse($banner->hasOwned(), 'hasOwned is false when a has_one does not exist');
     }
 
     /**
