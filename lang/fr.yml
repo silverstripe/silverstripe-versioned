@@ -1,14 +1,27 @@
 fr:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Vide
+    ITEMS_CHANGES:
+      one: '{total} (1 modification)'
+      other: '{total} ({count} modifications)'
+    ITEMS_TOTAL:
+      one: '1 au total'
+      other: '{count} au total'
     NAME: Nom
     PLURALNAME: Campagnes
+    PLURALS:
+      one: 'Une campagne'
+      other: '{count} Campagnes'
+    PUBLISHED_DATE_BY: '{date} par {name}'
     PUBLISHED_TODAY: 'Aujourd''hui {time}'
+    PUBLISHED_TODAY_BY: 'Aujourd''hui {time} par {name}'
     PUBLISHER_NAME: 'Publié par'
     PUBLISH_DATE: 'Date de publication'
     SINGULARNAME: Campagne
+    STATE: Statut
     STATE_OPEN: Active
     STATE_PUBLISHED: Publié
+    STATE_REVERTED: Revenu
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
