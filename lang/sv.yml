@@ -1,0 +1,49 @@
+sv:
+  SilverStripe\Versioned\ChangeSet:
+    EMPTY: Tom
+    ITEMS_CHANGES:
+      one: '{total} (1 ändring)'
+      other: '{total} ({count} ändringar)'
+    ITEMS_TOTAL:
+      one: '1 totalt'
+      other: '{count} totalt'
+    NAME: Namn
+    PLURALNAME: Kampanjer
+    PLURALS:
+      one: 'En kampanj'
+      other: '{count} kampanjer'
+    PUBLISHED_DATE_BY: '{date} av {name}'
+    PUBLISHED_TODAY: 'Idag {time}'
+    PUBLISHED_TODAY_BY: 'Idag {time} av {name}'
+    PUBLISHER_NAME: 'Publicerad av'
+    PUBLISH_DATE: Publiceringsdatum
+    SINGULARNAME: Kampanj
+    STATE: Status
+    STATE_OPEN: Aktiv
+    STATE_PUBLISHED: Publicerad
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Skapad genom publicering av ''{title}'' {created}'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Versioner
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    ARCHIVE: Arkiv
+    Archived: 'Arkiverade {name} {title}'
+    BUTTONAPPLYCHANGES: 'Applicera ändringar'
+    BUTTONARCHIVEDESC: 'Avpublicera och arkivera'
+    BUTTONPUBLISH: Publicera
+    BUTTONUNPUBLISH: Avpublicera
+    BUTTONUNPUBLISHDESC: 'Ta bort detta object från den publicerade webbplatsen'
+    DRAFT: Utkast
+    MODIFIED: Ändrad
+    PUBLISHITEMSWARNING: 'Utkast/ändrade objekt kommer att publiceras'
+    Published: 'Publicerade {name} {link}'
+    Unpublished: 'Avpublicerade {name} {title}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Objektet har inte publicerats ännu'
+    ADDEDTODRAFTSHORT: Utkast
+    ARCHIVEDPAGESHORT: Arkiverad
+    MODIFIEDONDRAFTHELP: 'Objektet har opublicerade ändringar'
+    MODIFIEDONDRAFTSHORT: Ändrad
+    ONLIVEONLYSHORTHELP: 'Objektet är publicerat, men har raderats från utkast'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Du måste logga in med ditt CMS-lösenord för att se utkast eller arkiverat innehåll. <a href="{link}">Klicka här för att gå tillbaka till den publicerade webbplatsen.</a>'

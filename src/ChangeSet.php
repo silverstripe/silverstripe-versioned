@@ -314,8 +314,8 @@ class ChangeSet extends DataObject
                 // If a ChangeSetItem exists, but isn't in $implicit, it's no longer required, so delete it
                 if (!array_key_exists($objectKey, $implicit)) {
                     $item->delete();
-                } // Otherwise it is required, so update ReferencedBy and remove from $implicit
-                else {
+                } else {
+                    // Otherwise it is required, so update ReferencedBy and remove from $implicit
                     $item->ReferencedBy()->setByIDList($implicit[$objectKey]['ReferencedBy']);
                     unset($implicit[$objectKey]);
                 }
