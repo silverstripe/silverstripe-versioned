@@ -38,7 +38,7 @@ class Publish extends PublishOperation
      * @param Member $member
      * @return boolean
      */
-    protected function checkPermission(DataObjectInterface $obj, Member $member)
+    protected function checkPermission(DataObjectInterface $obj, Member $member = null)
     {
         /** @var Versioned $obj */
         return $obj->canPublish($member);

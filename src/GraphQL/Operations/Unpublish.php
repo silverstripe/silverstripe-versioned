@@ -38,7 +38,7 @@ class Unpublish extends PublishOperation
      * @param Member $member
      * @return boolean
      */
-    protected function checkPermission(DataObjectInterface $obj, Member $member)
+    protected function checkPermission(DataObjectInterface $obj, Member $member = null)
     {
         /** @var Versioned|DataObject $obj */
         return $obj->canUnpublish($member);
