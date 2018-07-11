@@ -41,6 +41,7 @@ en:
     RESTORE_CHANGEDPROPERTY: 'A {model} already exists with the same {property}. "{id}" has been restored with a new {property} ({value}).'
     RESTORE_FALIURE_PERMISSION: 'Insufficient permission to restore item'
     RESTORE_FALIURE_STATE: 'This item already exists and cannot be restored'
+    RESTORE_FALIURE_RECORD: 'Unable to restore item'
     RESTORE_SUCCESS: 'Successfully restored the {model} "{id}"'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versions

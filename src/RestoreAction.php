@@ -17,6 +17,7 @@ class RestoreAction
      *
      * @param Object $item
      * @return array $message
+     * @throws ValidationException if the record cannot be restored
      */
     public static function restore($item)
     {
@@ -28,7 +29,8 @@ class RestoreAction
                 _t(
                     __CLASS__ . '.RESTORE_FALIURE_PERMISSION',
                     'Insufficient permission to restore item'
-                )
+                ),
+                403
             );
         }
 
@@ -37,7 +39,8 @@ class RestoreAction
                 _t(
                     __CLASS__ . '.RESTORE_FALIURE_STATE',
                     'This item already exists and cannot be restored'
-                )
+                ),
+                409
             );
         }
 
@@ -45,16 +48,18 @@ class RestoreAction
         $id = $item->ID;
 
         if (!$classname || !$id) {
-            return new ValidationException("Unable to restore item", 400);
+            return new ValidationException(
+                _t(
+                    __CLASS__ . '.RESTORE_FALIURE_RECORD',
+                    'Unable to restore item'
+                ),
+                400
+            );
         }
 
         $changedLocation = self::shouldRestoreToRoot($item);
 
         $archivedItem = Versioned::get_latest_version($classname, $id);
-
-        if (!$archivedItem) {
-            return new ValidationException($classname . " #$id not found", 400);
-        }
 
         if (method_exists($archivedItem, 'doRestoreToStage')) {
             $restoredItem = $archivedItem->doRestoreToStage();
