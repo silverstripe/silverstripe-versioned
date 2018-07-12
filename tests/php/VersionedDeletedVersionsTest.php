@@ -315,4 +315,28 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $companyPageV2 = Versioned::get_version(CompanyPage::class, $companyPage1->ID, 2);
         $this->assertCount(0, $companyPageV2->OfficeLocations());
     }
+
+    public function testCanRestoreToDraft()
+    {
+        DBDatetime::set_mock_now(DBDatetime::now());
+        /* @var OfficeLocation $location1 */
+        $location1 = new OfficeLocation([
+            'Title' => 'OfficeLocation1v1'
+        ]);
+        $location1->write(); // v1
+
+        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
+        $location1->doArchive();
+        $this->assertTrue($location1->isArchived());
+        $this->assertTrue($location1->canRestoreToDraft());
+
+        $this->logOut();
+        $this->assertFalse($location1->canRestoreToDraft());
+
+        $this->logInWithPermission('SOME_PERMISSION');
+        $this->assertFalse($location1->canRestoreToDraft());
+
+        $this->logInWithPermission('ADMIN');
+        $this->assertTrue($location1->canRestoreToDraft());
+    }
 }
