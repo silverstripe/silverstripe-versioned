@@ -323,19 +323,12 @@ class VersionedDeletedVersionsTest extends SapphireTest
         $location1 = new OfficeLocation([
             'Title' => 'OfficeLocation1v1'
         ]);
-        $this->assertFalse($location1->canRestoreToDraft());
-
         $location1->write(); // v1
-        $this->assertFalse($location1->canRestoreToDraft());
-
-        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
-        $location1->publishRecursive(); // v2
-        $this->assertTrue($location1->isPublished());
-        $this->assertFalse($location1->canRestoreToDraft());
 
         DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $location1->doArchive();
         $this->assertTrue($location1->isArchived());
+        $this->assertTrue($location1->canRestoreToDraft());
 
         $this->logOut();
         $this->assertFalse($location1->canRestoreToDraft());
@@ -345,9 +338,5 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
         $this->logInWithPermission('ADMIN');
         $this->assertTrue($location1->canRestoreToDraft());
-
-        DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
-        $location1->writeToStage(Versioned::DRAFT);
-        $this->assertFalse($location1->canRestoreToDraft());
     }
 }

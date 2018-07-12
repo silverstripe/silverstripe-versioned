@@ -1453,11 +1453,6 @@ SQL
             return null;
         }
 
-        // Can't revert if not archived
-        if (!$owner->isArchived()) {
-            return false;
-        }
-
         if (!$member) {
             $member = Security::getCurrentUser();
         }
