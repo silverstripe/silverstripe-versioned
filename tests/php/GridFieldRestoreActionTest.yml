@@ -1,0 +1,19 @@
+SilverStripe\Security\Permission:
+  admin:
+    Code: ADMIN
+SilverStripe\Security\Group:
+  admins:
+    Code: admins
+    Permissions: '=>SilverStripe\Security\Permission.admin'
+SilverStripe\Security\Member:
+  admin:
+    Email: admin@test.com
+    Groups: '=>SilverStripe\Security\Group.admins'
+
+SilverStripe\Versioned\Tests\VersionedTest\TestObject:
+  object1:
+    Title: 'Object 1'
+  object2:
+    Title: 'Object 2'
+  object3:
+    Title: 'Object 3'

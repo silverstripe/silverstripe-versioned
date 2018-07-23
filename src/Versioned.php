@@ -628,7 +628,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             WHERE "{$baseTable}_Versions"."LastEdited" <= ?
                 AND "{$baseTable}_Versions"."{$stageColumn}" = 1
             GROUP BY "{$baseTable}_Versions"."RecordID"
-            )                                
+            )
 SQL
             ,
             <<<SQL
@@ -666,7 +666,7 @@ SQL
             FROM "{$baseTable}_Versions"
             WHERE "{$baseTable}_Versions"."WasDeleted" = 0
             GROUP BY "{$baseTable}_Versions"."RecordID"
-            )                                
+            )
 SQL
             ,
             <<<SQL
@@ -1429,6 +1429,39 @@ SQL
     {
         // Prevent canRevertToLive() extending itself
         return null;
+    }
+
+    /**
+     * Check if the user can restore this record to draft
+     *
+     * @param Member $member
+     * @return bool
+     */
+    public function canRestoreToDraft($member = null)
+    {
+        $owner = $this->owner;
+
+        // Skip if invoked by extendedCan()
+        if (func_num_args() > 4) {
+            return null;
+        }
+
+        if (!$member) {
+            $member = Security::getCurrentUser();
+        }
+
+        if (Permission::checkMember($member, "ADMIN")) {
+            return true;
+        }
+
+        // Standard mechanism for accepting permission changes from extensions
+        $extended = $owner->extendedCan('canRestoreToDraft', $member);
+        if ($extended !== null) {
+            return $extended;
+        }
+
+        // Default to canEdit
+        return $owner->canEdit($member);
     }
 
     /**
