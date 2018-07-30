@@ -151,14 +151,6 @@ class RecursivePublishable extends DataExtension
 
         $ownedRelationships = $this->owner->config()->get('owns') ?: [];
         foreach ($ownedRelationships as $relationship) {
-            if (!$this->owner->hasMethod($relationship)) {
-                trigger_error(sprintf(
-                    "Invalid ownership of \"%s\" on class \"%s\"",
-                    $relationship,
-                    get_class($this)
-                ), E_USER_WARNING);
-                continue;
-            }
             /* @var DataObject|SS_List $result */
             $result = $this->owner->{$relationship}();
             if ($result->exists()) {
