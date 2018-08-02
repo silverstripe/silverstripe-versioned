@@ -64,7 +64,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $ownerRecursivePublishes = !$ownerIsStaged
             && $record
             && $record->hasExtension(RecursivePublishable::class)
-            && $record->hasOwned();
+            && $record->config()->get('owns');
 
         // Add extra actions prior to extensions so that these can be modified too
         if ($ownerIsStaged) {
@@ -350,15 +350,5 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             __CLASS__ . '.BUTTONAPPLYCHANGES',
             'Apply changes'
         ))->addExtraClass('btn-primary font-icon-save');
-
-        $actions->push(LiteralField::create(
-            'warning',
-            '<span class="btn actions-warning font-icon-info-circled">'
-            . _t(
-                __CLASS__ . '.PUBLISHITEMSWARNING',
-                'Draft/modified items will be published'
-            )
-            . '</span>'
-        ));
     }
 }
