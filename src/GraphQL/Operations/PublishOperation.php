@@ -99,7 +99,7 @@ abstract class PublishOperation extends MutationScaffolder implements OperationR
         ];
     }
 
-    abstract protected function checkPermission(DataObjectInterface $obj, Member $member);
+    abstract protected function checkPermission(DataObjectInterface $obj, Member $member = null);
 
     abstract protected function doMutation(DataObjectInterface $obj);
 
