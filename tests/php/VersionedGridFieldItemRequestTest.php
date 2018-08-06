@@ -126,8 +126,8 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         /** @var LiteralField $warningField */
         $actions = $form->Actions();
         $warningField = $actions->fieldByName('warning');
-        $this->assertInstanceOf(LiteralField::class, $warningField);
-        $this->assertRegExp('/will be published/', $warningField->getContent());
+        // Warning was removed as part of #154 ... it may be brough back later
+        $this->assertNull($warningField);
     }
 
     protected function createItemRequestForObject(DataObject $obj)
