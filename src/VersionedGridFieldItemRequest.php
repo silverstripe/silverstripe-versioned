@@ -319,11 +319,12 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             // "archive"
             $actions->push(
                 FormAction::create('doArchive', _t(__CLASS__ . '.ARCHIVE', 'Archive'))
+                    ->setUseButtonTag(true)
                     ->setDescription(_t(
                         __CLASS__ . '.BUTTONARCHIVEDESC',
                         'Unpublish and send to archive'
                     ))
-                    ->addExtraClass('delete btn-secondary')
+                    ->addExtraClass('btn-secondary action--archive font-icon-box')
             );
         }
     }
