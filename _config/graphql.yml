@@ -22,11 +22,6 @@ SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:
     copyToStage: SilverStripe\Versioned\GraphQL\Operations\CopyToStage
     publish: SilverStripe\Versioned\GraphQL\Operations\Publish
     unpublish: SilverStripe\Versioned\GraphQL\Operations\Unpublish
-SilverStripe\GraphQL\Controller:
-  schema:
-    types:
-      VersionedStage: SilverStripe\Versioned\GraphQL\Types\VersionedStage
-      VersionedStatus: SilverStripe\Versioned\GraphQL\Types\VersionedStatus
-      VersionedQueryMode: SilverStripe\Versioned\GraphQL\Types\VersionedQueryMode
-      VersionedInputType: SilverStripe\Versioned\GraphQL\Types\VersionedInputType
-      CopyToStageInputType: SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType
+SilverStripe\GraphQL\Manager:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ManagerExtension

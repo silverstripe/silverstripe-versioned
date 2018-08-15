@@ -346,20 +346,9 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if (!$this->record->ID) {
             return;
         }
-
         $saveAction->setTitle(_t(
             __CLASS__ . '.BUTTONAPPLYCHANGES',
             'Apply changes'
         ))->addExtraClass('btn-primary font-icon-save');
-
-        $actions->push(LiteralField::create(
-            'warning',
-            '<span class="btn actions-warning font-icon-info-circled">'
-            . _t(
-                __CLASS__ . '.PUBLISHITEMSWARNING',
-                'Draft/modified items will be published'
-            )
-            . '</span>'
-        ));
     }
 }
