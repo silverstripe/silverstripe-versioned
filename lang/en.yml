@@ -28,6 +28,9 @@ en:
       one: 'A Change Set Item'
       other: '{count} Change Set Items'
     SINGULARNAME: 'Change Set Item'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Archive
+    ArchivePermissionsFailure: 'No archive permissions'
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: Restore to draft
   SilverStripe\Versioned\RecursivePublishable:
