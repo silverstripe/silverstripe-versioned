@@ -24,7 +24,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      */
     public function getTitle($gridField, $record, $columnName)
     {
-        $field = $this->getArchiveAction($gridField, $record, $columnName);
+        $field = $this->getArchiveAction($gridField, $record);
 
         if ($field) {
             return $field->getAttribute('title');
@@ -38,7 +38,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      */
     public function getGroup($gridField, $record, $columnName)
     {
-        $field = $this->getArchiveAction($gridField, $record, $columnName);
+        $field = $this->getArchiveAction($gridField, $record);
 
         return $field ? GridField_ActionMenuItem::DEFAULT_GROUP: null;
     }
@@ -48,12 +48,12 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      * @param GridField $gridField
      * @param DataObject $record
      * @param string $columnName
-     * @return string|null the attribles for the action
+     * @return array|null the attributes for the action
      */
     public function getExtraData($gridField, $record, $columnName)
     {
 
-        $field = $this->getArchiveAction($gridField, $record, $columnName);
+        $field = $this->getArchiveAction($gridField, $record);
 
         if ($field) {
             return $field->getAttributes();
@@ -105,6 +105,8 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
         if ($columnName == 'Actions') {
             return ['title' => ''];
         }
+
+        return [];
     }
 
     /**
@@ -138,7 +140,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      */
     public function getColumnContent($gridField, $record, $columnName)
     {
-        $field = $this->getArchiveAction($gridField, $record, $columnName);
+        $field = $this->getArchiveAction($gridField, $record);
 
         if ($field) {
             return $field->Field();
@@ -158,10 +160,8 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      */
     public function handleAction(GridField $gridField, $actionName, $arguments, $data)
     {
-        $handledActions = $this->getActions($gridField);
-
         if ($actionName === 'archiverecord') {
-            /** @var DataObject $item */
+            /** @var DataObject|Versioned $item */
             $item = $gridField->getList()->byID($arguments['RecordID']);
             if (!$item) {
                 return;
@@ -182,29 +182,29 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      *
      * @param GridField $gridField
      * @param DataObject $record
-     * @param string $columnName
      * @return GridField_FormAction|null
      */
-    public function getArchiveAction($gridField, $record, $columnName)
+    public function getArchiveAction($gridField, $record)
     {
-        if ($record->hasMethod('canArchive') && $record->canArchive()) {
-            $title = _t(__CLASS__ . '.Archive', "Archive");
-
-            $field = GridField_FormAction::create(
-                $gridField,
-                'ArchiveRecord' . $record->ID,
-                false,
-                "archiverecord",
-                ['RecordID' => $record->ID]
-            )
-                ->addExtraClass('action--archive btn--icon-md font-icon-box btn--no-text grid-field__icon-action action-menu--handled')
-                ->setAttribute('classNames', 'action--archive font-icon-box')
-                ->setDescription($title)
-                ->setAttribute('aria-label', $title);
-
-            return $field;
+        /* @var DataObject|Versioned $record */
+        if (!$record->hasMethod('canArchive') || !$record->canArchive()) {
+            return null;
         }
 
-        return null;
+        $title = _t(__CLASS__ . '.Archive', "Archive");
+
+        $field = GridField_FormAction::create(
+            $gridField,
+            'ArchiveRecord' . $record->ID,
+            false,
+            "archiverecord",
+            ['RecordID' => $record->ID]
+        )
+            ->addExtraClass('action--archive btn--icon-md font-icon-box btn--no-text grid-field__icon-action action-menu--handled')
+            ->setAttribute('classNames', 'action--archive font-icon-box')
+            ->setDescription($title)
+            ->setAttribute('aria-label', $title);
+
+        return $field;
     }
 }
