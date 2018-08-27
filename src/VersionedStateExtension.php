@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Extension;
@@ -46,6 +47,11 @@ class VersionedStateExtension extends Extension
         $queryargs = ReadingMode::toQueryString($readingMode);
         if (!$queryargs) {
             return;
+        }
+
+        // Don't touch Admin/CMS links
+        if (class_exists(LeftAndMain::class) && $this->getOwner() instanceof LeftAndMain) {
+            return false;
         }
 
         // Decorate
