@@ -62,6 +62,6 @@ class VersionedHTTPMiddleware implements HTTPMiddleware
         ));
 
         // Force output since RequestFilter::preRequest doesn't support response overriding
-        return Security::permissionFailure(null, $permissionMessage);
+        return Security::permissionFailure(null, DBField::create_field('HTMLVarchar', $permissionMessage));
     }
 }
