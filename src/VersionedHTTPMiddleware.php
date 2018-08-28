@@ -8,6 +8,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
 use SilverStripe\Core\Convert;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\Security\Security;
 
 /**
@@ -53,14 +54,14 @@ class VersionedHTTPMiddleware implements HTTPMiddleware
 
         // Build error message
         $link = Convert::raw2xml(Controller::join_links(Director::baseURL(), $request->getURL(), "?stage=Live"));
-        $permissionMessage = _t(
+        $permissionMessage = DBField::create_field('HTMLFragment', _t(
             __CLASS__.'.DRAFT_SITE_ACCESS_RESTRICTION',
             'You must log in with your CMS password in order to view the draft or archived content. '
             . '<a href="{link}">Click here to go back to the published site.</a>',
-            [ 'link' => $link ]
-        );
+            ['link' => $link]
+        ));
 
         // Force output since RequestFilter::preRequest doesn't support response overriding
-        return Security::permissionFailure(null, $permissionMessage);
+        return Security::permissionFailure(null, DBField::create_field('HTMLVarchar', $permissionMessage));
     }
 }
