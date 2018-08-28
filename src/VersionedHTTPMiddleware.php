@@ -8,6 +8,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
 use SilverStripe\Core\Convert;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\Security\Security;
 
 /**
@@ -61,6 +62,6 @@ class VersionedHTTPMiddleware implements HTTPMiddleware
         );
 
         // Force output since RequestFilter::preRequest doesn't support response overriding
-        return Security::permissionFailure(null, $permissionMessage);
+        return Security::permissionFailure(null, DBField::create_field('HTMLVarchar', $permissionMessage));
     }
 }
