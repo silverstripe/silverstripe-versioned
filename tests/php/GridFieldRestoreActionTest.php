@@ -64,16 +64,15 @@ class GridFieldRestoreActionTest extends SapphireTest
 
     public function testDontShowRestoreButtons()
     {
-        if (Security::getCurrentUser()) {
-            Security::setCurrentUser(null);
-        }
+        $this->logOut();
+
         $content = new CSSContentParser($this->gridField->FieldHolder());
         // Check that there are content
-        $this->assertEquals(4, count($content->getBySelector('.ss-gridfield-item')));
+        $this->assertCount(4, $content->getBySelector('.ss-gridfield-item'));
         // Make sure that there are no restore buttons
-        $this->assertEquals(
+        $this->assertCount(
             0,
-            count($content->getBySelector('.action-restore')),
+            $content->getBySelector('.action-restore'),
             'Restore buttons should not show when not logged in.'
         );
     }

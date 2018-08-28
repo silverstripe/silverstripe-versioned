@@ -1442,7 +1442,7 @@ SQL
         $owner = $this->owner;
 
         // Skip if invoked by extendedCan()
-        if (func_num_args() > 4) {
+        if (func_num_args() > 1) {
             return null;
         }
 
