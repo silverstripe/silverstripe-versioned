@@ -51,7 +51,7 @@ class VersionedStateExtension extends Extension
 
         // Don't touch Admin/CMS links
         if (class_exists(LeftAndMain::class) && $this->getOwner() instanceof LeftAndMain) {
-            return false;
+            return;
         }
 
         // Decorate
