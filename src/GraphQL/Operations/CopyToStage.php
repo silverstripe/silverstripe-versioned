@@ -40,7 +40,7 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
             return $name;
         }
 
-        $typeName = $this->getTypeName();
+        $typeName = $this->getResolvedTypeName();
 
         return 'copy'.ucfirst($typeName).'ToStage';
     }
@@ -79,7 +79,7 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
         if (!$can) {
             throw new InvalidArgumentException(sprintf(
                 'Copying %s from %s to %s is not allowed',
-                $this->getTypeName(),
+                $this->getResolvedTypeName(),
                 $from,
                 $to
             ));
