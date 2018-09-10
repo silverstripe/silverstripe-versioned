@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\VersionedStateExtension;
@@ -60,5 +61,20 @@ class VersionedStateExtensionTest extends SapphireTest
         $obj1Live = Versioned::get_by_stage(VersionedStateExtensionTest\LinkableObject::class, Versioned::LIVE)
             ->byID($obj1ID);
         $this->assertEquals('item/myobject/', $obj1Live->Link());
+    }
+
+    public function testDontUpdateLeftAndMainLinks()
+    {
+        $controller = new LeftAndMain();
+
+        $liveClientConfig = $controller->getClientConfig();
+        Versioned::set_stage(Versioned::DRAFT);
+        $stageClientConfig = $controller->getClientConfig();
+
+        $this->assertEquals(
+            $liveClientConfig,
+            $stageClientConfig,
+            'LeftAndMain Client config should not be affected by versionned stage.'
+        );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Extension;
@@ -45,6 +46,11 @@ class VersionedStateExtension extends Extension
         // Determine if query args are supported for the current mode
         $queryargs = ReadingMode::toQueryString($readingMode);
         if (!$queryargs) {
+            return;
+        }
+
+        // Don't touch Admin/CMS links
+        if (class_exists(LeftAndMain::class) && $this->getOwner() instanceof LeftAndMain) {
             return;
         }
 
