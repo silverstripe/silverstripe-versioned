@@ -1904,6 +1904,19 @@ SQL
     }
 
     /**
+     * NOTE: Versions() will be replaced with this method in SilverStripe 5.0
+     *
+     * @internal
+     * @return DataList
+     */
+    public function VersionsList()
+    {
+        $id = $this->owner->ID ?: $this->owner->OldID;
+        $class = get_class($this->owner);
+        return Versioned::get_all_versions($class, $id);
+    }
+
+    /**
      * Return a list of all the versions available.
      *
      * @param  string $filter
@@ -2849,5 +2862,36 @@ SQL
         } finally {
             static::set_reading_mode($origReadingMode);
         }
+    }
+
+    /**
+     * Get author of this record.
+     * Note: Only works on records selected via Versions()
+     *
+     * @return Member|null
+     */
+    public function Author()
+    {
+        if (!$this->owner->AuthorID) {
+            return null;
+        }
+        /** @var Member $member */
+        $member = Member::get()->byID($this->owner->AuthorID);
+        return $member;
+    }
+    /**
+     * Get publisher of this record.
+     * Note: Only works on records selected via Versions()
+     *
+     * @return Member|null
+     */
+    public function Publisher()
+    {
+        if (!$this->owner->PublisherID) {
+            return null;
+        }
+        /** @var Member $member */
+        $member = Member::get()->byID($this->owner->PublisherID);
+        return $member;
     }
 }
