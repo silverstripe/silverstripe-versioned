@@ -1491,45 +1491,4 @@ class VersionedTest extends SapphireTest
         $this->assertFalse($modifiedOnDraftPage->isOnLiveOnly());
         $this->assertTrue($modifiedOnDraftPage->isModifiedOnDraft());
     }
-
-    public function testVersionNumberCache()
-    {
-        $pageOne = $this->objFromFixture(VersionedTest\TestObject::class, 'page1');
-        $pageOneVersionNum = Versioned::get_versionnumber_by_stage(
-            VersionedTest\TestObject::class,
-            Versioned::DRAFT,
-            $pageOne->ID,
-            false
-        );
-
-        $this->assertEquals(
-            $pageOneVersionNum,
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, $pageOne->ID, true),
-            'get_versionnumber_by_stage should return the right version number when the value is not cached.'
-        );
-        $this->assertEquals(
-            $pageOneVersionNum,
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, $pageOne->ID, true),
-            'get_versionnumber_by_stage should return the right version number when the value is cached.'
-        );
-        $this->assertNull(
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, 999, false),
-            'get_versionnumber_by_stage should return null when fetching a version number for un unexisting object.'
-        );
-
-        $this->assertNull(
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, 999, true),
-            'get_versionnumber_by_stage should return null when fetching a version number for unchached unexisting object'
-        );
-        $this->assertNull(
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, 999, true),
-            'get_versionnumber_by_stage should return null when fetching a version number for cached unexisting object'
-        );
-
-        Versioned::prepopulate_versionnumber_cache(VersionedTest\TestObject::class, Versioned::DRAFT);
-        $this->assertNull(
-            Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, Versioned::DRAFT, 888, true),
-            'get_versionnumber_by_stage should return null when fetching a version number for unexisting object with prepopulate_versionnumber_caching'
-        );
-    }
 }

@@ -2278,16 +2278,15 @@ SQL
         }
 
         // cached call
-        if ($cache && isset(self::$cache_versionnumber[$baseClass][$stage][$id])) {
-            return self::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
+        if ($cache) {
+            if (isset(self::$cache_versionnumber[$baseClass][$stage][$id])) {
+                return self::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
+            } elseif (isset(self::$cache_versionnumber[$baseClass][$stage]['_complete'])) {
+                // if the cache was marked as "complete" then we know the record is missing, just return null
+                // this is used for treeview optimisation to avoid unnecessary re-requests for draft pages
+                return null;
+            }
         }
-
-        // if the cache was marked as "complete" then we know the record is missing, just return null
-        // this is used for treeview optimisation to avoid unnecessary re-requests for draft pages
-        if (!empty(self::$cache_versionnumber[$baseClass][$stage]['_complete'])) {
-            return null;
-        }
-
 
         // get version as performance-optimized SQL query (gets called for each record in the sitetree)
         $version = DB::prepared_query(
