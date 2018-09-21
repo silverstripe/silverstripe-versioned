@@ -2312,6 +2312,20 @@ SQL
     }
 
     /**
+     * Hook into {@link Hierarchy::prepopulateTreeDataCache}.
+     *
+     * @param DataList $recordList The list of records to prepopulate caches for. Null for all records.
+     * @param array $options A map of hints about what should be cached. "numChildrenMethod" and
+     *                       "childrenMethod" are allowed keys.
+     */
+    public function onPrepopulateTreeDataCache(DataList $recordList = null, array $options = [])
+    {
+        $idList = $recordList ? $recordList->column('ID') : null;
+        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
+        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
+    }
+
+    /**
      * Pre-populate the cache for Versioned::get_versionnumber_by_stage() for
      * a list of record IDs, for more efficient database querying.  If $idList
      * is null, then every record will be pre-cached.
