@@ -4,13 +4,17 @@ namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use Page;
+use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 
 /**
  * @internal Only test the right values are returned, not that the cache is actually used.
  */
 class VersionedNumberCacheTest extends SapphireTest
 {
+
+    public static $extra_dataobjects = [
+        VersionedTest\TestObject::class
+    ];
 
     /**
      * @var int
@@ -30,7 +34,7 @@ class VersionedNumberCacheTest extends SapphireTest
         parent::setUpBeforeClass();
 
         // Initialise our dummy object
-        $obj = Page::create(['Title' => 'Initial version']);
+        $obj = TestObject::create(['Title' => 'Initial version']);
         $obj->write();
         self::$publishedID = $obj->ID;
 
@@ -46,7 +50,7 @@ class VersionedNumberCacheTest extends SapphireTest
         $draftVersion = $obj->Version;
 
         // This object won't ne publish
-        $draftOnly = Page::create(['Title' => 'Draft Only object']);
+        $draftOnly = TestObject::create(['Title' => 'Draft Only object']);
         $draftOnly->write();
         self::$draftOnlyID = $draftOnly->ID;
 
@@ -60,7 +64,7 @@ class VersionedNumberCacheTest extends SapphireTest
     public function setUp()
     {
         parent::setUp();
-        Page::singleton()->flushCache();
+        TestObject::singleton()->flushCache();
     }
 
     public function cacheDataProvider()
@@ -81,12 +85,12 @@ class VersionedNumberCacheTest extends SapphireTest
      */
     public function testVersionNumberCache($stage, $ID, $cache, $expected)
     {
-        $actual = Versioned::get_versionnumber_by_stage(Page::class, $stage, self::${$ID}, $cache);
+        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
         $this->assertEquals(self::$expectedVersions[$expected], $actual);
 
         if ($cache) {
             // When cahing is eanbled, try re-accessing version number to make sure the cache returns the same value
-            $actual = Versioned::get_versionnumber_by_stage(Page::class, $stage, self::${$ID}, $cache);
+            $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
             $this->assertEquals(self::$expectedVersions[$expected], $actual);
         }
     }
@@ -96,8 +100,8 @@ class VersionedNumberCacheTest extends SapphireTest
      */
     public function testPrepopulatedVersionNumberCache($stage, $ID, $cache, $expected)
     {
-        Versioned::prepopulate_versionnumber_cache(Page::class, $stage);
-        $actual = Versioned::get_versionnumber_by_stage(Page::class, $stage, self::${$ID}, $cache);
+        Versioned::prepopulate_versionnumber_cache(TestObject::class, $stage);
+        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
         $this->assertEquals(self::$expectedVersions[$expected], $actual);
     }
 }
