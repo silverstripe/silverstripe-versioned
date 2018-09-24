@@ -199,18 +199,20 @@ class RecursivePublishable extends DataExtension
         $owner = $this->owner;
         $owners = $owner->findRelatedObjects('owned_by', false);
 
-        // Second pass: Find owners via reverse lookup list
-        foreach ($lookup as $ownedClass => $classLookups) {
-            // Skip owners of other objects
-            if (!is_a($this->owner, $ownedClass)) {
-                continue;
-            }
-            foreach ($classLookups as $classLookup) {
-                // Merge new owners into this object's owners
-                $ownerClass = $classLookup['class'];
-                $ownerRelation = $classLookup['relation'];
-                $result = $this->owner->inferReciprocalComponent($ownerClass, $ownerRelation);
-                $owner->mergeRelatedObjects($owners, $result);
+        // Second pass: Find owners via reverse lookup list if possible
+        if ($owner->ID) {
+            foreach ($lookup as $ownedClass => $classLookups) {
+                // Skip owners of other objects
+                if (!is_a($owner, $ownedClass)) {
+                    continue;
+                }
+                foreach ($classLookups as $classLookup) {
+                    // Merge new owners into this object's owners
+                    $ownerClass = $classLookup['class'];
+                    $ownerRelation = $classLookup['relation'];
+                    $result = $owner->inferReciprocalComponent($ownerClass, $ownerRelation);
+                    $owner->mergeRelatedObjects($owners, $result);
+                }
             }
         }
 
