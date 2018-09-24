@@ -200,7 +200,7 @@ class RecursivePublishable extends DataExtension
         $owners = $owner->findRelatedObjects('owned_by', false);
 
         // Second pass: Find owners via reverse lookup list if possible
-        if ($owner->ID) {
+        if ($owner->isInDB()) {
             foreach ($lookup as $ownedClass => $classLookups) {
                 // Skip owners of other objects
                 if (!is_a($owner, $ownedClass)) {
