@@ -53,6 +53,10 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
         }
 
         // Get all versions
-        return $object->VersionsList();
+        $list = $object->VersionsList();
+
+        $this->extend('updateList', $list, $object, $args, $context, $info);
+
+        return $list;
     }
 }
