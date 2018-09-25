@@ -100,7 +100,7 @@ class VersionedNumberCacheTest extends SapphireTest
      */
     public function testPrepopulatedVersionNumberCache($stage, $ID, $cache, $expected)
     {
-        Versioned::prepopulate_versionnumber_cache(TestObject::class, $stage);
+        TestObject::singleton()->onPrepopulateTreeDataCache();
         $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
         $this->assertEquals(self::$expectedVersions[$expected], $actual);
     }
