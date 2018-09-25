@@ -2876,7 +2876,7 @@ SQL
             return null;
         }
         /** @var Member $member */
-        $member = Member::get()->byID($this->owner->AuthorID);
+        $member = DataObject::get_by_id(Member::class, $this->owner->AuthorID);
         return $member;
     }
     /**
@@ -2891,7 +2891,7 @@ SQL
             return null;
         }
         /** @var Member $member */
-        $member = Member::get()->byID($this->owner->PublisherID);
+        $member = DataObject::get_by_id(Member::class, $this->owner->PublisherID);
         return $member;
     }
 }
