@@ -99,4 +99,11 @@ class ReadVersionsTest extends SapphireTest
         $this->assertEquals(1, $result->first()->Version);
         $this->assertEquals(3, $result->last()->Version);
     }
+
+    public function testVersionFieldIsSortable()
+    {
+        $operation = new ReadVersions(Fake::class, 'FakeClass');
+
+        $this->assertContains('Version', $operation->getSortableFields());
+    }
 }

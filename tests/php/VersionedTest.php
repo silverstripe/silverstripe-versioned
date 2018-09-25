@@ -1491,4 +1491,33 @@ class VersionedTest extends SapphireTest
         $this->assertFalse($modifiedOnDraftPage->isOnLiveOnly());
         $this->assertTrue($modifiedOnDraftPage->isModifiedOnDraft());
     }
+
+    public function testAuthor()
+    {
+        $record = new VersionedTest\TestObject();
+        $record->write();
+
+        $versions = $record->VersionsList();
+        $latestVersion = $versions->last();
+
+        $author = $latestVersion->Author();
+        $this->assertNotEmpty($author);
+        // See: SapphireTest::createMemberWithPermission()
+        $this->assertSame('ADMIN@example.org', $author->Email);
+    }
+
+    public function testPublisher()
+    {
+        $record = new VersionedTest\TestObject();
+        $record->write();
+        $record->publishRecursive();
+
+        $versions = $record->VersionsList();
+        $latestVersion = $versions->last();
+
+        $publisher = $latestVersion->Publisher();
+        $this->assertNotEmpty($publisher);
+        // See: SapphireTest::createMemberWithPermission()
+        $this->assertSame('ADMIN@example.org', $publisher->Email);
+    }
 }
