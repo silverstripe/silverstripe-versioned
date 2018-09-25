@@ -2314,13 +2314,14 @@ SQL
     /**
      * Hook into {@link Hierarchy::prepopulateTreeDataCache}.
      *
-     * @param DataList $recordList The list of records to prepopulate caches for. Null for all records.
+     * @param DataList|array $recordList The list of records to prepopulate caches for. Null for all records.
      * @param array $options A map of hints about what should be cached. "numChildrenMethod" and
      *                       "childrenMethod" are allowed keys.
      */
-    public function onPrepopulateTreeDataCache(DataList $recordList = null, array $options = [])
+    public function onPrepopulateTreeDataCache($recordList = null, array $options = [])
     {
-        $idList = $recordList ? $recordList->column('ID') : null;
+        $idList = is_array($recordList) ? $recordList :
+            ($recordList instanceof DataList ? $recordList->column('ID') : null);
         self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
         self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
     }
