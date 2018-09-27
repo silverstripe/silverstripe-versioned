@@ -104,6 +104,11 @@ class ReadVersionsTest extends SapphireTest
     {
         $operation = new ReadVersions(Fake::class, 'FakeClass');
 
+        // Omit the test if the API isn't available (must be running silverstripe-graphql < 3)
+        if (!method_exists($operation, 'getSortableFields')) {
+            $this->markTestSkipped('getSortableFields API is missing');
+        }
+
         $this->assertContains('Version', $operation->getSortableFields());
     }
 }
