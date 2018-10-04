@@ -28,6 +28,10 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
     {
         $this->dataObjectClass = $dataObjectClass;
         $operationName = 'read' . ucfirst($versionTypeName);
+
+        // Allow clients to sort the versions list by Version ID
+        $this->addSortableFields(['Version']);
+
         parent::__construct($operationName, $versionTypeName, $this);
     }
 
@@ -49,6 +53,10 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
         }
 
         // Get all versions
-        return $object->Versions();
+        $list = $object->VersionsList();
+
+        $this->extend('updateList', $list, $object, $args, $context, $info);
+
+        return $list;
     }
 }
