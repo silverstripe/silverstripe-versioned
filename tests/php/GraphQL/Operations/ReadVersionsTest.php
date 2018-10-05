@@ -2,19 +2,18 @@
 
 namespace SilverStripe\Versioned\Tests\GraphQL\Operations;
 
+use Exception;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
-use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
-use Exception;
-use SilverStripe\Versioned\Versioned_Version;
 
 class ReadVersionsTest extends SapphireTest
 {
@@ -94,10 +93,16 @@ class ReadVersionsTest extends SapphireTest
             new ResolveInfo([])
         );
 
-        $this->assertInstanceOf(DataList::class, $result);
+        $this->assertInstanceOf(SS_List::class, $result);
         $this->assertCount(3, $result);
         $this->assertInstanceOf(Fake::class, $result->first());
         $this->assertEquals(1, $result->first()->Version);
         $this->assertEquals(3, $result->last()->Version);
+    }
+
+    public function testVersionFieldIsSortable()
+    {
+        $operation = new ReadVersions(Fake::class, 'FakeClass');
+        $this->assertContains('Version', $operation->getSortableFields());
     }
 }

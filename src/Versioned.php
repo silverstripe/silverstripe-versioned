@@ -2182,8 +2182,14 @@ SQL
         }
 
         // cached call
-        if ($cache && isset(self::$cache_versionnumber[$baseClass][$stage][$id])) {
-            return self::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
+        if ($cache) {
+            if (isset(self::$cache_versionnumber[$baseClass][$stage][$id])) {
+                return self::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
+            } elseif (isset(self::$cache_versionnumber[$baseClass][$stage]['_complete'])) {
+                // if the cache was marked as "complete" then we know the record is missing, just return null
+                // this is used for treeview optimisation to avoid unnecessary re-requests for draft pages
+                return null;
+            }
         }
 
         // get version as performance-optimized SQL query (gets called for each record in the sitetree)
@@ -2210,6 +2216,21 @@ SQL
     }
 
     /**
+     * Hook into {@link Hierarchy::prepopulateTreeDataCache}.
+     *
+     * @param DataList|array $recordList The list of records to prepopulate caches for. Null for all records.
+     * @param array $options A map of hints about what should be cached. "numChildrenMethod" and
+     *                       "childrenMethod" are allowed keys.
+     */
+    public function onPrepopulateTreeDataCache($recordList = null, array $options = [])
+    {
+        $idList = is_array($recordList) ? $recordList :
+            ($recordList instanceof DataList ? $recordList->column('ID') : null);
+        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
+        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
+    }
+
+    /**
      * Pre-populate the cache for Versioned::get_versionnumber_by_stage() for
      * a list of record IDs, for more efficient database querying.  If $idList
      * is null, then every record will be pre-cached.
@@ -2224,6 +2245,13 @@ SQL
         if (!Config::inst()->get(static::class, 'prepopulate_versionnumber_cache')) {
             return;
         }
+
+        /** @var Versioned|DataObject $singleton */
+        $singleton = DataObject::singleton($class);
+        $baseClass = $singleton->baseClass();
+        $baseTable = $singleton->baseTable();
+        $stageTable = $singleton->stageTable($baseTable, $stage);
+
         $filter = "";
         $parameters = [];
         if ($idList) {
@@ -2238,13 +2266,12 @@ SQL
             }
             $filter = 'WHERE "ID" IN ('.DB::placeholders($idList).')';
             $parameters = $idList;
-        }
 
-        /** @var Versioned|DataObject $singleton */
-        $singleton = DataObject::singleton($class);
-        $baseClass = $singleton->baseClass();
-        $baseTable = $singleton->baseTable();
-        $stageTable = $singleton->stageTable($baseTable, $stage);
+        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
+        // no subsequent call is necessary
+        } else {
+            self::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
+        }
 
         $versions = DB::prepared_query("SELECT \"ID\", \"Version\" FROM \"$stageTable\" $filter", $parameters)->map();
 
@@ -2721,10 +2748,9 @@ SQL
             return null;
         }
         /** @var Member $member */
-        $member = Member::get()->byID($this->owner->AuthorID);
+        $member = DataObject::get_by_id(Member::class, $this->owner->AuthorID);
         return $member;
     }
-
     /**
      * Get publisher of this record.
      * Note: Only works on records selected via Versions()
@@ -2737,7 +2763,7 @@ SQL
             return null;
         }
         /** @var Member $member */
-        $member = Member::get()->byID($this->owner->PublisherID);
+        $member = DataObject::get_by_id(Member::class, $this->owner->PublisherID);
         return $member;
     }
 
