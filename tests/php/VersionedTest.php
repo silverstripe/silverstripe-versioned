@@ -1497,7 +1497,7 @@ class VersionedTest extends SapphireTest
         $record = new VersionedTest\TestObject();
         $record->write();
 
-        $versions = $record->VersionsList();
+        $versions = $record->Versions();
         $latestVersion = $versions->last();
 
         $author = $latestVersion->Author();
@@ -1512,7 +1512,7 @@ class VersionedTest extends SapphireTest
         $record->write();
         $record->publishRecursive();
 
-        $versions = $record->VersionsList();
+        $versions = $record->Versions();
         $latestVersion = $versions->last();
 
         $publisher = $latestVersion->Publisher();
