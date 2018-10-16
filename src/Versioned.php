@@ -625,9 +625,14 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         ReadingMode::validateStage($stage);
 
         // Filter on appropriate stage column in addition to date
-        $stageColumn = $stage === static::LIVE
-            ? 'WasPublished'
-            : 'WasDraft';
+        if ($this->hasStages()) {
+            $stageColumn = $stage === static::LIVE
+                ? 'WasPublished'
+                : 'WasDraft';
+            $stageCondition = "AND \"{$baseTable}_Versions\".\"{$stageColumn}\" = 1";
+        } else {
+            $stageCondition = '';
+        }
 
         // Join on latest version filtered by date
         $query->addInnerJoin(
@@ -637,7 +642,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
             FROM "{$baseTable}_Versions"
             WHERE "{$baseTable}_Versions"."LastEdited" <= ?
-                AND "{$baseTable}_Versions"."{$stageColumn}" = 1
+                {$stageCondition}
             GROUP BY "{$baseTable}_Versions"."RecordID"
             )                                
 SQL
@@ -1165,7 +1170,7 @@ SQL
                 unset($manipulation[$table]['fields']['Version']);
             } else {
                 // All writes are to draft, only live affect both
-                $stages = static::get_stage() === static::LIVE
+                $stages = !$this->hasStages() || static::get_stage() === static::LIVE
                     ? [self::DRAFT, self::LIVE]
                     : [self::DRAFT];
                 $this->augmentWriteVersioned($manipulation, $class, $table, $id, $stages, false);
