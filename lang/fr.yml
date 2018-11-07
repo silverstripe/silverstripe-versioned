@@ -34,7 +34,6 @@ fr:
     BUTTONUNPUBLISHDESC: 'Retirer cette entrée du site publié'
     DRAFT: Brouillon
     MODIFIED: Modifié
-    PUBLISHITEMSWARNING: 'Les éléments brouillons/modifiés seront publiés'
     Published: '{name} {link} publié'
     Unpublished: '{name} {title} dépublié'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:

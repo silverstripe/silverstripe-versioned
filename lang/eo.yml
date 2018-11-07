@@ -42,7 +42,6 @@ eo:
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
     DRAFT: Malneto
     MODIFIED: Ŝanĝita
-    PUBLISHITEMSWARNING: 'Malneto/ŝanĝoj publikiĝos'
     Published: 'Pubikigita {name} {link}'
     Unpublished: 'Nepublikigita {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
