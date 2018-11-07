@@ -35,7 +35,6 @@ sv:
     BUTTONUNPUBLISHDESC: 'Ta bort detta object från den publicerade webbplatsen'
     DRAFT: Utkast
     MODIFIED: Ändrad
-    PUBLISHITEMSWARNING: 'Utkast/ändrade objekt kommer att publiceras'
     Published: 'Publicerade {name} {link}'
     Unpublished: 'Avpublicerade {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:

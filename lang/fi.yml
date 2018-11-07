@@ -1,26 +1,57 @@
 fi:
   SilverStripe\Versioned\ChangeSet:
+    EMPTY: Tyhjä
+    ITEMS_CHANGES:
+      one: '{total} (1 muutos)'
+      other: '{total} ({count} muutosta)'
+    ITEMS_TOTAL:
+      one: 'Yhteensä 1'
+      other: 'Yhteensä {count}'
     NAME: Nimi
     PLURALNAME: Kampanjat
     PLURALS:
       one: 'Yksi kampanja'
       other: '{count} kampanjaa'
+    PUBLISHED_DATE_BY: '{date} » {name}'
+    PUBLISHED_TODAY: 'Tänään {time}'
+    PUBLISHED_TODAY_BY: 'Tänään {time} tekijänä {name}'
+    PUBLISHER_NAME: Julkaisija
+    PUBLISH_DATE: Julkaisupäivä
     SINGULARNAME: Kampanja
     STATE: Tila
+    STATE_OPEN: Aktiivinen
+    STATE_PUBLISHED: Julkaistu
+    STATE_REVERTED: Palautettu
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Muuta valikoiman kohteita'
     PLURALS:
       one: 'Muutos valikoiman kohteessa'
       other: '{count} Muutosta vailkoiman kohteissa'
     SINGULARNAME: 'Muuta valikoiman kohdetta'
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Luotiin julkaisuna ''{title}'' » {created}'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versiot
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Arkisto
+    Archived: 'Arkistoitiin {name} {title}'
+    BUTTONAPPLYCHANGES: 'Hyväksy muutokset'
     BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
     BUTTONPUBLISH: Julkaise
     BUTTONUNPUBLISH: 'Poista julkaisusta'
     BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
+    DRAFT: Vedos
+    MODIFIED: Muokattu
     Published: 'Julkaistiin {name} {link}'
+    Unpublished: 'Poistettiin julkaisusta {name} {title}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Kohdetta ei ole vielä julkaistu'
+    ADDEDTODRAFTSHORT: Vedos
+    ARCHIVEDPAGEHELP: 'Kohde on poistettu vedoksista ja näkyvältä sivustolta'
+    ARCHIVEDPAGESHORT: Arkistoitu
+    MODIFIEDONDRAFTHELP: 'Kohteella on julkaisemattomia muutoksia'
+    MODIFIEDONDRAFTSHORT: Muokattu
+    ONLIVEONLYSHORT: 'Vain näyvällä sivustolla'
+    ONLIVEONLYSHORTHELP: 'Kohde on julkaistu, mutta on poistettu vedoksista'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Sinun on kirjauduttava CMS-järjestelmän salasanalla nähdäksesi vedokset tai arkistoitu sisältö. <a href="{link}">Klikkaa tästä palataksesi julkaistulle sivustolle.</a>'
