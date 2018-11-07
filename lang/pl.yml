@@ -50,7 +50,6 @@ pl:
     BUTTONUNPUBLISHDESC: 'Usuń rekord z opublikowanych stron'
     DRAFT: Szkic
     MODIFIED: Zmodyfikowano
-    PUBLISHITEMSWARNING: 'Szkice/Zmodyfikowane strony zostaną opublikowane'
     Published: 'Opublikowano {name} {link}'
     Unpublished: 'Cofnięto publikację {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:

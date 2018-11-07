@@ -1,17 +1,27 @@
 nl:
   SilverStripe\Versioned\ChangeSet:
+    EMPTY: Leeg
     NAME: Naam
     PLURALNAME: Campagnes
     SINGULARNAME: Campagne
     STATE: Status
+    STATE_OPEN: Actief
+    STATE_PUBLISHED: Gepubliceerd
+    STATE_REVERTED: Teruggedraaid
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiveren
+    BUTTONAPPLYCHANGES: 'Veranderingen toepassen'
     BUTTONARCHIVEDESC: 'Publicatie intrekken en archiveren'
     BUTTONPUBLISH: Publiceren
     BUTTONUNPUBLISH: 'Publicatie intrekken'
     BUTTONUNPUBLISHDESC: 'Dit record van de gepubliceerde site verwijderen'
+    MODIFIED: Aangepast
     Published: 'Gepubliceerd: {name} {link}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ARCHIVEDPAGESHORT: Gearchiveerd
+    MODIFIEDONDRAFTSHORT: Aangepast
+    ONLIVEONLYSHORT: 'Alleen op Live versie'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Om de concept site en de archieven te kunnen zien, moet u eerst inloggen met uw CMS wachtwoord. <a href="{link}">Klik hier om terug te gaan naar de gepubliceerde site.</a>'
