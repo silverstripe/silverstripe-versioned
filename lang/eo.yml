@@ -28,17 +28,30 @@ eo:
       one: 'Unu ŝanĝara ero'
       other: '{count} ŝanĝaraj eroj'
     SINGULARNAME: 'Ŝangi agordon'
-  SilverStripe\Versioned\Versioned:
+  SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: 'Generita pro publikigo de ''{title}'' je {created}'
+  SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Enarkivigi
     Archived: 'Enarkivigita {name} {titolo}'
+    BUTTONAPPLYCHANGES: 'Apliki ŝanĝojn'
     BUTTONARCHIVEDESC: 'Malpublikigi kaj enarkivigi'
     BUTTONPUBLISH: Publikigi
     BUTTONUNPUBLISH: Malpublikigi
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
+    DRAFT: Malneto
+    MODIFIED: Ŝanĝita
     Published: 'Pubikigita {name} {link}'
     Unpublished: 'Nepublikigita {name} {title}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Elemento ankoraŭ ne estas publikigita'
+    ADDEDTODRAFTSHORT: Malneto
+    ARCHIVEDPAGEHELP: 'Elemento estas forigita el malneto kaj publika'
+    ARCHIVEDPAGESHORT: Enarkivigita
+    MODIFIEDONDRAFTHELP: 'Elemento havas nepublikigitajn ŝanĝojn'
+    MODIFIEDONDRAFTSHORT: Ŝanĝita
+    ONLIVEONLYSHORT: 'Nur en publika'
+    ONLIVEONLYSHORTHELP: 'Elemento estas publikigita, sed estas forigita el malneto'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Por vidigi la malneton aŭ enarkivigitan enhavon, necesas ke vi ensalutu per via CMS-pasvorto. <a href="{link}">Alklaku ĉi tie por reiri al la publika retejo.</a>'

@@ -8,7 +8,6 @@ sk:
     PLURALNAME: 'Zmeniť nastavenie položiek'
     SINGULARNAME: 'Zmeniť nastavenie položky'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Generované vydavetaľom ''{title}'' v {created}'
     has_many_Versions: Verzie
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archív
