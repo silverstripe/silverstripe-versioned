@@ -16,7 +16,11 @@ if (!class_exists(MutationScaffolder::class)) {
 }
 
 /**
- * A generic "create" operation for a DataObject.
+ * Scaffolds a "copy to stage" operation for DataObjects.
+ *
+ * copy[TypeName]ToStage(ID!, FromVersion!, FromStage!, ToStage!)
+ *
+ * @internal This is a low level API that might be removed in the future. Consider using the "rollback" mutation instead
  */
 class CopyToStage extends MutationScaffolder implements OperationResolver
 {
