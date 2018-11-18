@@ -10,6 +10,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\ChangeSet;
 use SilverStripe\Versioned\ChangeSetItem;
 use SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject;
+use SilverStripe\Versioned\Tests\ChangeSetTest\ChangeSetSyncStub;
 use SilverStripe\Versioned\Tests\ChangeSetTest\MidObject;
 use SilverStripe\Versioned\Tests\ChangeSetTest\Permissions;
 use SilverStripe\Versioned\Versioned;
@@ -721,5 +722,14 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
+    }
+
+    public function testIsSyncedCanBeSkipped()
+    {
+        $changeset = new ChangeSetSyncStub();
+
+        $changeset->publish(true);
+
+        $this->assertFalse($changeset->isSyncCalled, 'isSynced is skipped when providing truthy argument to publish');
     }
 }
