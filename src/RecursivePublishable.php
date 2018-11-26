@@ -70,7 +70,7 @@ class RecursivePublishable extends DataExtension
         );
         $changeset->write();
         $changeset->addObject($this->owner);
-        return $changeset->publish();
+        return $changeset->publish(true);
     }
 
     /**
