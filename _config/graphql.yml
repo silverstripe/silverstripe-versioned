@@ -22,6 +22,7 @@ SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:
     copyToStage: SilverStripe\Versioned\GraphQL\Operations\CopyToStage
     publish: SilverStripe\Versioned\GraphQL\Operations\Publish
     unpublish: SilverStripe\Versioned\GraphQL\Operations\Unpublish
+    rollback: SilverStripe\Versioned\GraphQL\Operations\Rollback
 SilverStripe\GraphQL\Manager:
   extensions:
     - SilverStripe\Versioned\GraphQL\Extensions\ManagerExtension

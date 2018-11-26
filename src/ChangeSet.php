@@ -115,10 +115,13 @@ class ChangeSet extends DataObject
      *
      * User code should call {@see canPublish()} prior to invoking this method.
      *
-     * @throws Exception
+     * @throws BadMethodCallException ChangeSet has already been published or reverted.
+     * @throws ValidationException ChangeSet is not synced an can not be published.
+     * @param boolean $isSynced Whatever to assume the ChangeSet is synced. Only set this to true if the ChangetSet
+     * just got built. Defaults to false.
      * @return bool True if successful
      */
-    public function publish()
+    public function publish($isSynced = false)
     {
         // Logical checks prior to publish
         if ($this->State !== static::STATE_OPEN) {
@@ -126,7 +129,7 @@ class ChangeSet extends DataObject
                 "ChangeSet can't be published if it has been already published or reverted."
             );
         }
-        if (!$this->isSynced()) {
+        if (!$isSynced && !$this->isSynced()) {
             throw new ValidationException(
                 "ChangeSet does not include all necessary changes and cannot be published."
             );
