@@ -15,7 +15,7 @@ class VersionedRelationsTest extends SapphireTest
 {
     protected $usesDatabase = true;
 
-    public static $extra_dataobjects = [
+    protected static $extra_dataobjects = [
         ParentObject::class,
         ChildContainerObject::class,
         ChildObject::class,
