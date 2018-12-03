@@ -634,6 +634,21 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $stageCondition = '';
         }
 
+        // Get base query conditions and add them to the inner join as well, this helps with performance
+        // in larger data sets
+        $baseQueryConditions = '';
+        $baseQueryParams = [];
+        foreach ($query->getWhere() as $condition) {
+            foreach ($condition as $key => $value) {
+                $baseQueryConditions .= ' AND ' . $key;
+                // Normalise array values
+                if (is_array($value) && count($value) === 1) {
+                    $value = reset($value);
+                }
+                $baseQueryParams[] = $value;
+            }
+        }
+
         // Join on latest version filtered by date
         $query->addInnerJoin(
             <<<SQL
@@ -643,6 +658,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             FROM "{$baseTable}_Versions"
             WHERE "{$baseTable}_Versions"."LastEdited" <= ?
                 {$stageCondition}
+                {$baseQueryConditions}
             GROUP BY "{$baseTable}_Versions"."RecordID"
             )
 SQL
@@ -654,7 +670,7 @@ SQL
             ,
             "{$baseTable}_Versions_Latest",
             20,
-            [$date]
+            array_merge([$date], $baseQueryParams)
         );
     }
 
