@@ -10,6 +10,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Convert;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
@@ -629,38 +630,31 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $stageColumn = $stage === static::LIVE
                 ? 'WasPublished'
                 : 'WasDraft';
-            $stageCondition = "AND \"{$baseTable}_Versions\".\"{$stageColumn}\" = 1";
+            $stageCondition = "AND \"{$baseTable}_Versions_Latest\".\"{$stageColumn}\" = 1";
         } else {
             $stageCondition = '';
         }
 
-        // Join on latest version filtered by date
-        $query->addInnerJoin(
-            <<<SQL
-            (
-            SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
-            FROM "{$baseTable}_Versions"
-            WHERE "{$baseTable}_Versions"."LastEdited" <= ?
+        // Filter by latest version (based on date)
+        $date = DB::get_conn()->quoteString(Convert::raw2sql($date));
+        $latestVersionSql = <<<SQL
+        (
+            SELECT MAX("{$baseTable}_Versions_Latest"."Version")
+            FROM "{$baseTable}_Versions" AS "{$baseTable}_Versions_Latest"
+            WHERE "{$baseTable}_Versions_Latest"."LastEdited" <= {$date}
+                AND "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
                 {$stageCondition}
-            GROUP BY "{$baseTable}_Versions"."RecordID"
-            )
-SQL
-            ,
-            <<<SQL
-            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
-            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
-SQL
-            ,
-            "{$baseTable}_Versions_Latest",
-            20,
-            [$date]
-        );
+        )
+SQL;
+        $query->addWhere([
+            "\"{$baseTable}_Versions\".\"Version\" = {$latestVersionSql}",
+            "\"{$baseTable}_Versions\".\"Version\" IS NOT NULL",
+        ]);
     }
 
     /**
      * Return latest version instances, regardless of whether they are on a particular stage.
-     * This provides "show all, including deleted" functonality.
+     * This provides "show all, including deleted" functionality.
      *
      * Note: latest_version ignores deleted versions, and will select the latest non-deleted
      * version.
@@ -674,24 +668,20 @@ SQL
 
         // Join and select only latest version
         $baseTable = $this->baseTable();
-        $query->addInnerJoin(
-            <<<SQL
-            (
-            SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
-            FROM "{$baseTable}_Versions"
-            WHERE "{$baseTable}_Versions"."WasDeleted" = 0
-            GROUP BY "{$baseTable}_Versions"."RecordID"
-            )
-SQL
-            ,
-            <<<SQL
-            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
-            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
-SQL
-            ,
-            "{$baseTable}_Versions_Latest"
-        );
+
+        // Filter by latest version
+        $latestVersionSql = <<<SQL
+        (
+            SELECT MAX("{$baseTable}_Versions_Latest"."Version")
+            FROM "{$baseTable}_Versions" AS "{$baseTable}_Versions_Latest"
+            WHERE "{$baseTable}_Versions_Latest"."WasDeleted" = 0
+              AND "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
+        )
+SQL;
+        $query->addWhere([
+            "\"{$baseTable}_Versions\".\"Version\" = {$latestVersionSql}",
+            "\"{$baseTable}_Versions\".\"Version\" IS NOT NULL",
+        ]);
     }
 
     /**
