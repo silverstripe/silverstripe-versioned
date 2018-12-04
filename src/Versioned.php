@@ -639,7 +639,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $date = Convert::raw2sql($date);
         $latestVersionSql = <<<SQL
         (
-            SELECT MAX("{$baseTable}_Versions"."Version")
+            SELECT MAX("{$baseTable}_Versions_Latest"."Version")
             FROM "{$baseTable}_Versions" AS "{$baseTable}_Versions_Latest"
             WHERE "{$baseTable}_Versions_Latest"."LastEdited" <= {$date}
                 AND "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
