@@ -10,6 +10,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Convert;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
@@ -634,44 +635,18 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $stageCondition = '';
         }
 
-        // Get base query conditions and add them to the inner join as well, this helps with performance
-        // in larger data sets
-        $baseQueryConditions = '';
-        $baseQueryParams = [];
-        foreach ($query->getWhere() as $condition) {
-            foreach ($condition as $key => $value) {
-                $baseQueryConditions .= ' AND ' . $key;
-                // Normalise array values
-                if (is_array($value) && count($value) === 1) {
-                    $value = reset($value);
-                }
-                $baseQueryParams[] = $value;
-            }
-        }
-
-        // Join on latest version filtered by date
-        $query->addInnerJoin(
-            <<<SQL
-            (
-            SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
-            FROM "{$baseTable}_Versions"
-            WHERE "{$baseTable}_Versions"."LastEdited" <= ?
+        // Filter by latest version (based on date)
+        $date = Convert::raw2sql($date);
+        $latestVersionSql = <<<SQL
+        (
+            SELECT MAX("{$baseTable}_Versions"."Version")
+            FROM "{$baseTable}_Versions" AS "{$baseTable}_Versions_Latest"
+            WHERE "{$baseTable}_Versions"."LastEdited" <= {$date}
+                AND "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
                 {$stageCondition}
-                {$baseQueryConditions}
-            GROUP BY "{$baseTable}_Versions"."RecordID"
-            )
-SQL
-            ,
-            <<<SQL
-            "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
-            AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
-SQL
-            ,
-            "{$baseTable}_Versions_Latest",
-            20,
-            array_merge([$date], $baseQueryParams)
-        );
+        )
+SQL;
+        $query->addWhere(["\"{$baseTable}_Versions\".\"Version\"" => $latestVersionSql]);
     }
 
     /**
