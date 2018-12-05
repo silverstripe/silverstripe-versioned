@@ -630,7 +630,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $stageColumn = $stage === static::LIVE
                 ? 'WasPublished'
                 : 'WasDraft';
-            $stageCondition = "AND \"{$baseTable}_Versions\".\"{$stageColumn}\" = 1";
+            $stageCondition = "AND \"{$baseTable}_Versions_Latest\".\"{$stageColumn}\" = 1";
         } else {
             $stageCondition = '';
         }
