@@ -92,6 +92,6 @@ class DataObjectScaffolderExtension extends Extension
      */
     protected function createVersionedTypeName($class)
     {
-        return StaticSchema::inst()->typeNameForDataObject($class).'Version';
+        return StaticSchema::inst()->typeNameForDataObject($class) . 'Version';
     }
 }

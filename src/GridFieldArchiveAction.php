@@ -40,7 +40,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
     {
         $field = $this->getArchiveAction($gridField, $record);
 
-        return $field ? GridField_ActionMenuItem::DEFAULT_GROUP: null;
+        return $field ? GridField_ActionMenuItem::DEFAULT_GROUP : null;
     }
 
     /**

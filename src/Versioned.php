@@ -2269,7 +2269,7 @@ SQL
                     );
                 }
             }
-            $filter = 'WHERE "ID" IN ('.DB::placeholders($idList).')';
+            $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
             $parameters = $idList;
 
         // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
@@ -2707,7 +2707,7 @@ SQL
      */
     public function cacheKeyComponent()
     {
-        return 'versionedmode-'.static::get_reading_mode();
+        return 'versionedmode-' . static::get_reading_mode();
     }
 
     /**

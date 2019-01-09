@@ -24,7 +24,7 @@ class VersionableExtensionsTest extends SapphireTest
 
         // Check that the right tables exist
         foreach ($check as $tableName) {
-            $this->assertContains($tableName, array_keys($tables), 'Contains table: '.$tableName);
+            $this->assertContains($tableName, array_keys($tables), 'Contains table: ' . $tableName);
         }
     }
 }

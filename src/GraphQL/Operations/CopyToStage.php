@@ -46,7 +46,7 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
 
         $typeName = $this->getTypeName();
 
-        return 'copy'.ucfirst($typeName).'ToStage';
+        return 'copy' . ucfirst($typeName) . 'ToStage';
     }
 
     protected function createDefaultArgs(Manager $manager)

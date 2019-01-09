@@ -619,11 +619,11 @@ class ChangeSet extends DataObject
     {
         switch ($this->State) {
             case self::STATE_OPEN:
-                return _t(__CLASS__.'.STATE_OPEN', 'Active');
+                return _t(__CLASS__ . '.STATE_OPEN', 'Active');
             case self::STATE_PUBLISHED:
-                return _t(__CLASS__.'.STATE_PUBLISHED', 'Published');
+                return _t(__CLASS__ . '.STATE_PUBLISHED', 'Published');
             case self::STATE_REVERTED:
-                return _t(__CLASS__.'.STATE_REVERTED', 'Reverted');
+                return _t(__CLASS__ . '.STATE_REVERTED', 'Reverted');
             default:
                 return null;
         }
@@ -652,8 +652,8 @@ class ChangeSet extends DataObject
         $labels = parent::fieldLabels($includerelations);
         $labels['Name'] = _t(__CLASS__ . '.NAME', 'Name');
         $labels['State'] = _t(__CLASS__ . '.STATE', 'State');
-        $labels['PublishDate'] = _t(__CLASS__.'.PUBLISH_DATE', 'Publish date');
-        $labels['PublisherName'] = _t(__CLASS__.'.PUBLISHER_NAME', 'Published by');
+        $labels['PublishDate'] = _t(__CLASS__ . '.PUBLISH_DATE', 'Publish date');
+        $labels['PublisherName'] = _t(__CLASS__ . '.PUBLISHER_NAME', 'Published by');
         return $labels;
     }
 

@@ -34,7 +34,7 @@ class GridFieldRestoreAction implements GridField_ColumnProvider, GridField_Acti
     {
         $field = $this->getRestoreAction($gridField, $record, $columnName);
 
-        return $field ? GridField_ActionMenuItem::DEFAULT_GROUP: null;
+        return $field ? GridField_ActionMenuItem::DEFAULT_GROUP : null;
     }
 
     /**
