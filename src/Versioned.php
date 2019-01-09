@@ -420,14 +420,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         // Adjust query based on original selection criterea
         switch ($params['Versioned.mode']) {
             case 'all_versions':
-            {
                 // Versioned.mode === all_versions doesn't inherit very well, so default to stage
                 $params['Versioned.mode'] = 'stage';
                 $params['Versioned.stage'] = static::DRAFT;
                 break;
-            }
             case 'version':
-            {
                 // If we selected this object from a specific version, we need
                 // to find the date this version was published, and ensure
                 // inherited queries select from that date.
@@ -447,7 +444,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                     $params['Versioned.stage'] = static::DRAFT;
                 }
                 break;
-            }
         }
     }
 
@@ -1003,7 +999,8 @@ SQL
                     $data = array_intersect_key($data, $fields);
 
                     foreach ($data as $k => $v) {
-                        // If the value is not set at all in the manipulation currently, use the existing value from the database
+                        // If the value is not set at all in the manipulation currently, use the existing
+                        // value from the database
                         if (!array_key_exists($k, $newManipulation['fields'])) {
                             $newManipulation['fields'][$k] = $v;
                         }
@@ -1635,7 +1632,8 @@ SQL
     }
 
     /**
-     * Determines if the current draft version is the same as live or rather, that there are no outstanding draft changes
+     * Determines if the current draft version is the same as live or rather, that there are no
+     * outstanding draft changes
      *
      * @return bool
      */
@@ -2272,8 +2270,8 @@ SQL
             $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
             $parameters = $idList;
 
-        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
-        // no subsequent call is necessary
+        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case
+        // of a cache-miss no subsequent call is necessary
         } else {
             self::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
         }

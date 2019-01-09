@@ -12,6 +12,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
@@ -91,7 +92,8 @@ class GridFieldRestoreActionTest extends SapphireTest
         $this->expectException(HTTPResponse_Exception::class);
         $this->expectExceptionMessage(_t(
             "SilverStripe\\Forms\\Form.CSRF_FAILED_MESSAGE",
-            "There seems to have been a technical problem. Please click the back button, " . "refresh your browser, and try again."
+            "There seems to have been a technical problem. Please click the back button, "
+            . "refresh your browser, and try again."
         ));
         $this->expectExceptionCode(400);
         $stateID = 'testGridStateActionField';

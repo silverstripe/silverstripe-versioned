@@ -200,7 +200,9 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
             "archiverecord",
             ['RecordID' => $record->ID]
         )
-            ->addExtraClass('action--archive btn--icon-md font-icon-box btn--no-text grid-field__icon-action action-menu--handled')
+            ->addExtraClass(
+                'action--archive btn--icon-md font-icon-box btn--no-text grid-field__icon-action action-menu--handled'
+            )
             ->setAttribute('classNames', 'action--archive font-icon-box')
             ->setDescription($title)
             ->setAttribute('aria-label', $title);

@@ -291,17 +291,15 @@ class ChangeSetItem extends DataObject implements Thumbnail
         // Enact change
         $changeType = $this->getChangeType();
         switch ($changeType) {
-            case static::CHANGE_NONE: {
+            case static::CHANGE_NONE:
                 break;
-            }
-            case static::CHANGE_DELETED: {
+            case static::CHANGE_DELETED:
                 // Non-recursive delete
                 $object = $this->getObjectInStage(Versioned::LIVE);
                 $object->deleteFromStage(Versioned::LIVE);
                 break;
-            }
             case static::CHANGE_MODIFIED:
-            case static::CHANGE_CREATED: {
+            case static::CHANGE_CREATED:
                 // Non-recursive publish
                 $object = $this->getObjectInStage(Versioned::DRAFT);
                 $object->publishSingle();
@@ -315,7 +313,6 @@ class ChangeSetItem extends DataObject implements Thumbnail
                     false
                 );
                 break;
-            }
             default:
                 throw new LogicException("Invalid change type: {$changeType}");
         }
@@ -383,14 +380,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Check change type
         switch ($this->getChangeType()) {
-            case static::CHANGE_CREATED: {
+            case static::CHANGE_CREATED:
                 // Revert creation by deleting from stage
                 return $object->canDelete($member);
-            }
-            default: {
+            default:
                 // All other actions are typically editing draft stage
                 return $object->canEdit($member);
-            }
         }
     }
 
@@ -410,22 +405,20 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Check canMethod to invoke on object
         switch ($this->getChangeType()) {
-            case static::CHANGE_DELETED: {
+            case static::CHANGE_DELETED:
                 /** @var Versioned|DataObject $object */
                 $object = Versioned::get_by_stage($this->ObjectClass, Versioned::LIVE)->byID($this->ObjectID);
                 if ($object) {
                     return $object->canUnpublish($member);
                 }
                 break;
-            }
-            default: {
+            default:
                 /** @var Versioned|DataObject $object */
                 $object = Versioned::get_by_stage($this->ObjectClass, Versioned::DRAFT)->byID($this->ObjectID);
                 if ($object) {
                     return $object->canPublish($member);
                 }
                 break;
-            }
         }
 
         return true;

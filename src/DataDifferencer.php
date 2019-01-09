@@ -128,7 +128,10 @@ class DataDifferencer extends ViewableData
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
-                $diffed->setField($field, DBField::create_field('HTMLFragment', Diff::compareHTML($fromValue, $toValue)));
+                $diffed->setField(
+                    $field,
+                    DBField::create_field('HTMLFragment', Diff::compareHTML($fromValue, $toValue))
+                );
             }
         }
 

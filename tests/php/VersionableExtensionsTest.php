@@ -13,18 +13,30 @@ class VersionableExtensionsTest extends SapphireTest
         VersionableExtensionsTest\TestObject::class,
     ];
 
-    public function testTablesAreCreated()
+    /**
+     * @param string $tableName
+     * @dataProvider tableNameProvider
+     */
+    public function testTablesAreCreated($tableName)
     {
         $tables = DB::table_list();
 
-        $check = [
-            'versionableextensionstest_dataobject_test1_live', 'versionableextensionstest_dataobject_test2_live', 'versionableextensionstest_dataobject_test3_live',
-            'versionableextensionstest_dataobject_test1_versions', 'versionableextensionstest_dataobject_test2_versions', 'versionableextensionstest_dataobject_test3_versions'
-        ];
-
         // Check that the right tables exist
-        foreach ($check as $tableName) {
-            $this->assertContains($tableName, array_keys($tables), 'Contains table: ' . $tableName);
-        }
+        $this->assertContains($tableName, array_keys($tables), 'Contains table: ' . $tableName);
+    }
+
+    /**
+     * @return array[]
+     */
+    public function tableNameProvider()
+    {
+        return [
+            ['versionableextensionstest_dataobject_test1_live'],
+            ['versionableextensionstest_dataobject_test2_live'],
+            ['versionableextensionstest_dataobject_test3_live'],
+            ['versionableextensionstest_dataobject_test1_versions'],
+            ['versionableextensionstest_dataobject_test2_versions'],
+            ['versionableextensionstest_dataobject_test3_versions'],
+        ];
     }
 }

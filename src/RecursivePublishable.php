@@ -386,7 +386,7 @@ class RecursivePublishable extends DataExtension
         // Query the source for the list of items to NOT remove
         $ownedSQL = $owner->getComponents($relationship)->sql($ownedParams);
         $disowned->addWhere([
-            "\"{$targetTable}\".\"ID\" NOT IN (SELECT \"Source\".\"ID\" FROM ({$ownedSQL}) AS \"Source\")" => $ownedParams
+            "\"$targetTable\".\"ID\" NOT IN (SELECT \"Source\".\"ID\" FROM ($ownedSQL) AS \"Source\")" => $ownedParams
         ]);
 
         $owner->extend('updateDisownershipQuery', $disowned, $source, $targetStage, $relationship);

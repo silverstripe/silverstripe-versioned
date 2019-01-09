@@ -129,8 +129,13 @@ class GridFieldRestoreAction implements GridField_ColumnProvider, GridField_Acti
                 ? _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_TO_ROOT', 'Restore to draft at top level')
                 : _t('SilverStripe\\Versioned\\RestoreAction.RESTORE', 'Restore to draft');
             $description = $restoreToRoot
-                ? _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_TO_ROOT_DESC', 'Restore the archived version to draft as a top level item')
-                : _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_DESC', 'Restore the archived version to draft');
+                ? _t(
+                    'SilverStripe\\Versioned\\RestoreAction.RESTORE_TO_ROOT_DESC',
+                    'Restore the archived version to draft as a top level item'
+                ) : _t(
+                    'SilverStripe\\Versioned\\RestoreAction.RESTORE_DESC',
+                    'Restore the archived version to draft'
+                );
 
             $field = GridField_FormAction::create(
                 $gridField,
@@ -139,7 +144,10 @@ class GridFieldRestoreAction implements GridField_ColumnProvider, GridField_Acti
                 "restore",
                 ['RecordID' => $record->ID]
             )
-                ->addExtraClass('btn btn--no-text btn--icon-md font-icon-back-in-time grid-field__icon-action action-menu--handled action-restore')
+                ->addExtraClass(
+                    'btn btn--no-text btn--icon-md font-icon-back-in-time grid-field__icon-action'
+                    . ' action-menu--handled action-restore'
+                )
                 ->setAttribute('classNames', 'font-icon-back-in-time action-restore')
                 ->setAttribute('data-to-root', $restoreToRoot)
                 ->setDescription($description)
