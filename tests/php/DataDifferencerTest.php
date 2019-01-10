@@ -100,7 +100,10 @@ class DataDifferencerTest extends SapphireTest
         $obj1v3 = Versioned::get_version(DataDifferencerTest\TestObject::class, $obj1->ID, $v3);
         $differ = new DataDifferencer($obj1v2, $obj1v3);
         $obj1Diff = $differ->diffedData();
-        $this->assertContainsIgnoreWhitespace('<ins>&lt;strong&gt;Value&lt;/strong&gt;</ins>', $obj1Diff->getField('Choices'));
+        $this->assertContainsIgnoreWhitespace(
+            '<ins>&lt;strong&gt;Value&lt;/strong&gt;</ins>',
+            $obj1Diff->getField('Choices')
+        );
 
         // Diff between plain text and html
         $differ = new DataDifferencer($obj1v1, $obj1v3);

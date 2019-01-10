@@ -121,7 +121,8 @@ class RestoreAction
             $message = [
                 'text' => _t(
                     __CLASS__ . '.RESTORE_CHANGEDPROPERTY',
-                    'A {model} already exists with the same {property}. "{id}" has been restored with a new {property} ({value}).',
+                    'A {model} already exists with the same {property}. "{id}" has been restored '
+                    . 'with a new {property} ({value}).',
                     [
                         'model' => $restoredType,
                         'property' => $changedProperty['property'],

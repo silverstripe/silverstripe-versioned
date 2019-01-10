@@ -21,7 +21,7 @@ class Unpublish extends PublishOperation
      */
     protected function createOperationName()
     {
-        return 'unpublish'.ucfirst($this->getTypeName());
+        return 'unpublish' . ucfirst($this->getTypeName());
     }
 
     /**

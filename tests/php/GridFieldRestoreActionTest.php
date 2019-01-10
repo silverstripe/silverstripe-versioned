@@ -12,6 +12,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
@@ -91,7 +92,8 @@ class GridFieldRestoreActionTest extends SapphireTest
         $this->expectException(HTTPResponse_Exception::class);
         $this->expectExceptionMessage(_t(
             "SilverStripe\\Forms\\Form.CSRF_FAILED_MESSAGE",
-            "There seems to have been a technical problem. Please click the back button, " . "refresh your browser, and try again."
+            "There seems to have been a technical problem. Please click the back button, "
+            . "refresh your browser, and try again."
         ));
         $this->expectExceptionCode(400);
         $stateID = 'testGridStateActionField';
@@ -105,7 +107,7 @@ class GridFieldRestoreActionTest extends SapphireTest
             ]
         );
         $request->setSession(new Session([]));
-        $this->gridField->gridFieldAlterAction(['StateID'=>$stateID], $this->form, $request);
+        $this->gridField->gridFieldAlterAction(['StateID' => $stateID], $this->form, $request);
     }
 
     public function testRestoreActionWithoutCorrectPermission()
@@ -138,7 +140,7 @@ class GridFieldRestoreActionTest extends SapphireTest
             ]
         );
         $request->setSession($session);
-        $this->gridField->gridFieldAlterAction(['StateID'=>$stateID], $this->form, $request);
+        $this->gridField->gridFieldAlterAction(['StateID' => $stateID], $this->form, $request);
         $this->assertEquals(
             3,
             $this->list->count(),
@@ -155,8 +157,8 @@ class GridFieldRestoreActionTest extends SapphireTest
         $session->set(
             $stateID,
             [
-                'grid'=>'',
-                'actionName'=>'restore',
+                'grid' => '',
+                'actionName' => 'restore',
                 'args' => [
                     'RecordID' => $this->idFromFixture(VersionedTest\TestObject::class, 'object1')
                 ]
@@ -168,12 +170,12 @@ class GridFieldRestoreActionTest extends SapphireTest
             'url',
             [],
             [
-                'action_gridFieldAlterAction?StateID=' . $stateID=>true,
+                'action_gridFieldAlterAction?StateID=' . $stateID => true,
                 $token->getName() => $token->getValue(),
             ]
         );
         $request->setSession($session);
-        $this->gridField->gridFieldAlterAction(['StateID'=>$stateID], $this->form, $request);
+        $this->gridField->gridFieldAlterAction(['StateID' => $stateID], $this->form, $request);
         $this->assertEquals(2, $this->list->count(), 'User should be able to restore records with ADMIN permission.');
     }
 }

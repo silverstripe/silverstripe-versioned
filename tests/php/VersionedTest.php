@@ -367,11 +367,11 @@ class VersionedTest extends SapphireTest
 
         $this->assertEquals(
             1,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = ' . $pageID)->value()
         );
         $this->assertEquals(
             1,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = ' . $pageID)->value()
         );
 
         $page1->deleteFromStage('Live');
@@ -381,11 +381,11 @@ class VersionedTest extends SapphireTest
 
         $this->assertEquals(
             1,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = ' . $pageID)->value()
         );
         $this->assertEquals(
             0,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = ' . $pageID)->value()
         );
 
         $page1->delete();
@@ -393,11 +393,11 @@ class VersionedTest extends SapphireTest
         $this->assertEquals(0, $page1->ID);
         $this->assertEquals(
             0,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject" WHERE "ID" = ' . $pageID)->value()
         );
         $this->assertEquals(
             0,
-            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = '.$pageID)->value()
+            DB::query('SELECT COUNT(*) FROM "VersionedTest_DataObject_Live" WHERE "ID" = ' . $pageID)->value()
         );
     }
 
@@ -694,7 +694,7 @@ class VersionedTest extends SapphireTest
 
     public function testGetVersionWhenClassnameChanged()
     {
-        $obj = new VersionedTest\TestObject;
+        $obj = new VersionedTest\TestObject();
         $obj->Name = "test";
         $obj->write();
         $obj->Name = "test2";

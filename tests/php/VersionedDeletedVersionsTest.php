@@ -237,7 +237,12 @@ class VersionedDeletedVersionsTest extends SapphireTest
 
         DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + 10);
         $page1->publishRecursive(); // v4
-        $liveVersion = Versioned::get_versionnumber_by_stage(GalleryBlockPage::class, Versioned::LIVE, $page1->ID, false);
+        $liveVersion = Versioned::get_versionnumber_by_stage(
+            GalleryBlockPage::class,
+            Versioned::LIVE,
+            $page1->ID,
+            false
+        );
         $this->assertEquals(4, $liveVersion);
 
         $this->assertTrue($block1->isPublished());
