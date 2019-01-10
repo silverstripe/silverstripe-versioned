@@ -36,30 +36,16 @@ pl:
       many: 'Zmień elementy {count}'
       other: 'Zmień ustawione elementy {count}'
     SINGULARNAME: 'Zmień ustawione elementy'
-  SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Wygenerowano przez opublikowanie ''{title}'' w {created}'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Wersje
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiwum
     Archived: 'Zarchiwizowano {name} {title}'
-    BUTTONAPPLYCHANGES: 'Zastosowano zmiany'
     BUTTONARCHIVEDESC: 'Cofnij publikację i wyślij do archiwum'
     BUTTONPUBLISH: Publikuj
     BUTTONUNPUBLISH: 'Cofnij publikację'
     BUTTONUNPUBLISHDESC: 'Usuń rekord z opublikowanych stron'
-    DRAFT: Szkic
-    MODIFIED: Zmodyfikowano
     Published: 'Opublikowano {name} {link}'
     Unpublished: 'Cofnięto publikację {name} {title}'
-  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
-    ADDEDTODRAFTHELP: 'Rekord nie został jeszcze opublikowany'
-    ADDEDTODRAFTSHORT: Szkic
-    ARCHIVEDPAGEHELP: 'Rekord usunięty'
-    ARCHIVEDPAGESHORT: Zarchiwizowano
-    MODIFIEDONDRAFTHELP: 'Rekord zawiera nieopublikowane zmiany'
-    MODIFIEDONDRAFTSHORT: Zmodyfikowano
-    ONLIVEONLYSHORT: 'Tylko opublikowane'
-    ONLIVEONLYSHORTHELP: 'Rekord został opublikowany (usunięto ze szkicu)'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Musisz zalogować się za pomocą swojego hasła w CMS''ie, aby wyświetlić wersję roboczą lub zarchiwizowaną zawartość. <a href="{link}">Kliknij tutaj, aby powrócić do opublikowanej strony.</a>'
