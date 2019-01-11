@@ -615,7 +615,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // Build a list of suffixes whose tables need versioning
         $allSuffixes = [];
-        $versionableExtensions = $owner->config()->get('versionableExtensions');
+        $versionableExtensions = (array)$owner->config()->get('versionableExtensions');
         if (count($versionableExtensions)) {
             foreach ($versionableExtensions as $versionableExtension => $suffixes) {
                 if ($owner->hasExtension($versionableExtension)) {
@@ -1413,7 +1413,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     public function extendWithSuffix($table)
     {
         $owner = $this->owner;
-        $versionableExtensions = $owner->config()->get('versionableExtensions');
+        $versionableExtensions = (array)$owner->config()->get('versionableExtensions');
 
         if (count($versionableExtensions)) {
             foreach ($versionableExtensions as $versionableExtension => $suffixes) {
