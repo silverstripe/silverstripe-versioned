@@ -227,6 +227,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             'type' => 'index',
             'columns' => ['PublisherID'],
         ],
+        'WasDeleted' => [
+            'type' => 'index',
+            'columns' => ['WasDeleted'],
+        ],
     ];
 
 
@@ -488,6 +492,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             case 'archive':
                 $this->augmentSQLVersionedArchive($query, $dataQuery);
                 break;
+            case 'latest_version_single':
+                $this->augmentSQLVersionedLatestSingle($query, $dataQuery);
+                break;
             case 'latest_versions':
                 $this->augmentSQLVersionedLatest($query);
                 break;
@@ -656,6 +663,31 @@ SQL
             20,
             [$date]
         );
+    }
+
+    /**
+     * Return latest version instance, regardless of whether it is on a particular stage.
+     * This is similar to augmentSQLVersionedLatest() below, except it only returns a single value
+     * selected by Versioned.id
+     *
+     * @param SQLSelect $query
+     * @param DataQuery $dataQuery
+     */
+    protected function augmentSQLVersionedLatestSingle(SQLSelect $query, DataQuery $dataQuery)
+    {
+        $id = $dataQuery->getQueryParam('Versioned.id');
+        if (!$id) {
+            throw new InvalidArgumentException("Invalid id");
+        }
+
+        // Query against _Versions table first
+        $this->augmentSQLVersioned($query);
+
+        $baseTable = $this->baseTable();
+
+        $query->addWhere(["\"$baseTable\".\"RecordID\"" => $id]);
+        $query->setOrderBy("Version DESC");
+        $query->setLimit(1);
     }
 
     /**
@@ -2568,9 +2600,11 @@ SQL
     {
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $list = DataList::create($baseClass)
-            ->setDataQueryParam("Versioned.mode", "latest_versions");
-
-        return $list->byID($id);
+            ->setDataQueryParam([
+                "Versioned.mode" => 'latest_version_single',
+                "Versioned.id" => $id
+            ]);
+        return $list->first();
     }
 
     /**
