@@ -227,10 +227,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             'type' => 'index',
             'columns' => ['PublisherID'],
         ],
-        'WasDeleted' => [
-            'type' => 'index',
-            'columns' => ['WasDeleted'],
-        ],
     ];
 
 
