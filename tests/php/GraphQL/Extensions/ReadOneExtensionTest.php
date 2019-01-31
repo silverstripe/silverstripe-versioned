@@ -9,13 +9,15 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
-use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 
 class ReadOneExtensionTest extends SapphireTest
 {
+    protected $usesDatabase = true;
+
     public static $extra_dataobjects = [
         Fake::class,
     ];
@@ -42,7 +44,7 @@ class ReadOneExtensionTest extends SapphireTest
             return $readScaffold['resolve'](
                 null,
                 $args,
-                ['currentUser' => new Member()],
+                ['currentUser' => Security::getCurrentUser()],
                 new ResolveInfo([])
             );
         };
