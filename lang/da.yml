@@ -29,7 +29,6 @@ da:
       other: '{count} Change Set Items'
     SINGULARNAME: 'Change Set Item'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Genereret ved udgivelse af ''{title}'' den {created}'
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Arkiver
