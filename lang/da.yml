@@ -29,7 +29,6 @@ da:
       other: '{count} Change Set Items'
     SINGULARNAME: 'Change Set Item'
   SilverStripe\Versioned\Versioned:
-    INFERRED_TITLE: 'Genereret ved udgivelse af ''{title}'' den {created}'
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Arkiver
@@ -38,9 +37,6 @@ da:
     BUTTONPUBLISH: Udgiv
     BUTTONUNPUBLISH: 'Fjern udgivelse'
     BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
-    DRAFT: Kladde
-    MODIFIED: Modificeret
-    PUBLISHITEMSWARNING: 'Kladde/modificerede elementer bliver udgivet'
     Published: 'Udgiv {name} {link}'
     Unpublished: 'Fjern udgivelse af {name} {title}'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
