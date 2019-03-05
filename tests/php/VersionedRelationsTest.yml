@@ -1,0 +1,69 @@
+SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage:
+  A1_Block1_Gallery1_Image1:
+    URL: 'Image 1 on Gallery 1 on Block 1 on A1'
+  A1_Block1_Gallery1_Image2:
+    URL: 'Image 2 on Gallery 1 on Block 1 on A1'
+  A1_Block1_Gallery2_Image1:
+    URL: 'Image 1 on Gallery 2 on Block 1 on A1'
+  A1_Block1_Gallery2_Image2:
+    URL: 'Image 2 on Gallery 2 on Block 1 on A1'
+  A1_Block2_Gallery1_Image1:
+    URL: 'Image 1 on Gallery 1 on Block 2 on A1'
+  A1_Block2_Gallery1_Image2:
+    URL: 'Image 2 on Gallery 1 on Block 2 on A1'
+  A2_Block1_Gallery1_Image1:
+    URL: 'Image 1 on Gallery 1 on Block 1 on A2'
+  A2_Block1_Gallery1_Image2:
+
+SilverStripe\Versioned\Tests\VersionedRelationsTest\Gallery:
+  A1_Block1_Gallery1:
+    Title: 'Gallery 1 on Block 1 on A1'
+    Images:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block1_Gallery1_Image1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block1_Gallery1_Image2
+  A1_Block1_Gallery2:
+    Title: 'Gallery 2 on Block 1 on A1'
+    Images:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block1_Gallery2_Image1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block1_Gallery2_Image2
+  A1_Block2_Gallery1:
+    Title: 'Gallery 1 on Block 2 on A1'
+    Images:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block2_Gallery1_Image1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A1_Block2_Gallery1_Image2
+  A2_Block1_Gallery1:
+    Title: 'Gallery 1 on Block 1 on A2'
+    Images:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A2_Block1_Gallery1_Image1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\GalleryImage.A2_Block1_Gallery1_Image2
+
+
+SilverStripe\Versioned\Tests\VersionedRelationsTest\Block:
+  A1_Block1:
+    Title: 'Block 1 on A1'
+    Galleries:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Gallery.A1_Block1_Gallery1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Gallery.A1_Block1_Gallery2
+  A1_Block2:
+    Title: 'Block 2 on A1'
+    Galleries:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Gallery.A1_Block2_Gallery1
+  A2_Block1:
+    Title: 'Block 1 on A2'
+    Galleries:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Gallery.A2_Block1_Gallery1
+  A2_Block2:
+    Title: 'Block 2 on A2'
+
+SilverStripe\Versioned\Tests\VersionedRelationsTest\BlockPage:
+  A1:
+    Title: 'Block Page A1'
+    Blocks:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Block.A1_Block1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Block.A1_Block2
+  A2:
+    Title: 'Block Page A2'
+    Blocks:
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Block.A2_Block1
+      - =>SilverStripe\Versioned\Tests\VersionedRelationsTest\Block.A2_Block2
+

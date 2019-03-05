@@ -161,6 +161,12 @@ class ChangeSetItem extends DataObject implements Thumbnail
         } else {
             $type = self::CHANGE_MODIFIED;
         }
+        ///
+        /// Hack!
+        /// put into extension when proven
+        ///
+        if ($this->getObjectInStage(Versioned::LIVE)->
+
         $this->extend('updateChangeType', $type, $draftVersion, $liveVersion);
         return $type;
     }

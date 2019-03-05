@@ -3,16 +3,20 @@
 
 namespace SilverStripe\Versioned;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\ManyManyThroughList;
 use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\ORM\SS_List;
-use SilverStripe\ORM\Tests\MySQLDatabaseTest\Data;
+use SilverStripe\Security\Security;
 
 /**
  * Provides owns / owned_by and recursive publishing API for all objects.
@@ -51,12 +55,20 @@ class RecursivePublishable extends DataExtension
     private static $owned_by = [];
 
     /**
+     * Global state to tell all write hooks that a snapshot is in progress.
+     * Prevents recursion and duplicity.
+     * @var Snapshot
+     */
+    protected $activeSnapshot = null;
+
+    /**
      * Publish this object and all owned objects to Live
      *
      * @return bool
      */
     public function publishRecursive()
     {
+        $this->openSnapshot();
         // Create a new changeset for this item and publish it
         $changeset = ChangeSet::create();
         $changeset->IsInferred = true;
@@ -70,7 +82,10 @@ class RecursivePublishable extends DataExtension
         );
         $changeset->write();
         $changeset->addObject($this->owner);
-        return $changeset->publish(true);
+        $result = $changeset->publish(true);
+        $this->closeSnapshot();
+
+        return $result;
     }
 
     /**
@@ -420,5 +435,191 @@ class RecursivePublishable extends DataExtension
         // Get candidates from ownership and intersect
         $owns = $this->owner->config()->get('owns');
         $relations = array_intersect($allowed, $owns);
+    }
+
+    protected function doSnapshot()
+    {
+        if ($this->activeSnapshot) {
+            return;
+        }
+
+        $owners = $this->owner->findOwners();
+        if (!$owners->exists()) {
+            if (!$this->owner->isManyManyLinkingObject()) {
+                return;
+            }
+
+            foreach($this->owner->getManyManyOwnership() as $spec) {
+                list ($parentClass, $parentName, $parent, $child) = $spec;
+                $this->openSnapshot();
+                $this->addToSnapshot($this->owner, $parent, $child);
+                foreach($parent->findOwners() as $owner) {
+                    $this->addToSnapshot($owner);
+                }
+                $this->closeSnapshot();
+
+            }
+
+            return;
+        }
+
+        $this->openSnapshot();
+        $this->addToSnapshot($this->owner);
+
+        foreach ($owners as $owner) {
+            $this->addToSnapshot($owner);
+        }
+
+        $this->closeSnapshot();
+    }
+
+    protected function openSnapshot($origin = null)
+    {
+        if (!$origin) {
+            $origin = $this->owner;
+        }
+        $snapshot = Snapshot::create([
+            'OriginClass' => get_class($origin),
+            'OriginID' => $origin->ID,
+            'AuthorID' => Security::getCurrentUser()
+                ? Security::getCurrentUser()->ID
+                : 0
+        ]);
+        $snapshot->write();
+        $this->activeSnapshot = $snapshot;
+
+        return $snapshot;
+    }
+
+    protected function addToSnapshot(DataObject $obj, $linkedFromObj = null, $linkedToObj = null)
+    {
+        if (!$this->activeSnapshot) {
+            throw new BadMethodCallException('Cannot call addToSnapshot() before openSnapshot()');
+        }
+
+        if (!$obj->hasExtension(RecursivePublishable::class)) {
+            throw new BadMethodCallException(sprintf(
+                'addToSnapshot() only accepts objects with the %s extension',
+                RecursivePublishable::class
+            ));
+        }
+        /* @var RecursivePublishable|DataObject $obj */
+        $item = $obj->createSnapshotItem();
+        if ($linkedFromObj) {
+            $item->LinkedFromObjectClass = get_class($linkedFromObj);
+            $item->LinkedFromObjectID = $linkedFromObj->ID;
+        }
+        if ($linkedToObj) {
+            $item->LinkedToObjectClass = get_class($linkedToObj);
+            $item->LinkedToObjectID = $linkedToObj->ID;
+        }
+
+        $this->activeSnapshot->Items()->add($item);
+    }
+
+    protected function closeSnapshot()
+    {
+        $this->activeSnapshot = null;
+    }
+
+    public function onAfterWrite()
+    {
+        $this->doSnapshot();
+    }
+
+    public function onAfterDelete()
+    {
+        $this->doSnapshot();
+    }
+
+    public function createSnapshotItem($publish = false)
+    {
+        $version = Versioned::get_latest_version($this->owner->baseClass(), $this->owner->ID);
+        return SnapshotItem::create([
+            'ObjectClass' => get_class($this->owner),
+            'ObjectID' => $this->owner->ID,
+            'WasPublished' => $publish,
+            'WasDraft' => $version->WasDraft,
+            'WasDeleted' => $version->WasDeleted,
+            'Version' => $version->Version,
+            'LinkedObjectClass' => null,
+            'LinkedObjectID' => 0
+        ]);
+    }
+
+    public function onAfterPublish()
+    {
+        if ($this->activeSnapshot) {
+            $this->activeSnapshot->Items()->add($this->owner->createSnapshotItem(true));
+        }
+
+    }
+
+    /**
+     * @return array
+     */
+    public function getManyManyLinking()
+    {
+        /* @var DataObject|RecursivePublishable $owner */
+        $owner = $this->owner;
+        $cached = $owner->config()->get('many_many_linking');
+        if ($cached) {
+            return $cached;
+        }
+
+        $config = [];
+        $ownerClass = get_class($owner);
+
+        // Has to have two has_ones
+        $hasOnes = $owner->hasOne();
+        if (sizeof($hasOnes) < 2) {
+            return $config;
+        }
+
+        foreach ($hasOnes as $name => $class) {
+            /* @var DataObject $sng */
+            $sng = Injector::inst()->get($class);
+            foreach ($sng->manyMany() as $component => $spec) {
+                if (!is_array($spec)) {
+                    continue;
+                }
+                if ($spec['through'] !== $ownerClass) {
+                    continue;
+                }
+                if (!isset($config[$class])) {
+                    $config[$class][] = [$spec['from'], $spec['to']];
+                }
+            }
+        }
+        // persistent cache with flushable?
+        Config::modify()->set($ownerClass, 'many_many_linking', $config);
+
+        return $config;
+
+    }
+
+    /**
+     * @return bool
+     */
+    public function isManyManyLinkingObject()
+    {
+        return !empty($this->owner->getManyManyLinking());
+    }
+
+    public function getManyManyOwnership()
+    {
+        /* @var DataObject|RecursivePublishable $owner */
+        $owner = $this->owner;
+        $linking = $owner->getManyManyLinking();
+        foreach ($linking as $parentClass => $specs) {
+            foreach ($specs as $spec) {
+                list ($parentName, $childName) = $spec;
+                $parent = $owner->getComponent($parentName);
+                $child = $owner->getComponent($childName);
+                if ($parent->exists() && $child->exists()) {
+                    yield [$parentClass, $parentName, $parent, $child];
+                }
+            }
+        }
     }
 }

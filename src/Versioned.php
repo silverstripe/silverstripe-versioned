@@ -1225,6 +1225,7 @@ SQL
         $this->setNextWriteWithoutVersion(false);
     }
 
+
     /**
      * Check if next write is without version
      *
