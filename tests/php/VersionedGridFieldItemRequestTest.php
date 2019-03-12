@@ -20,6 +20,9 @@ use SilverStripe\Versioned\VersionedGridFieldItemRequest;
 
 class VersionedGridFieldItemRequestTest extends SapphireTest
 {
+    /**
+     * @var array
+     */
     protected static $extra_dataobjects = [
         VersionedObject::class,
         VersionedOwner::class,
@@ -27,25 +30,38 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         UnversionedObject::class,
     ];
 
+    /**
+     * @var string
+     */
+    protected static $fixture_file = 'VersionedGridFieldItemRequestTest.yml';
+
     public function testItSetsPublishedButtonsForVersionedOwners()
     {
-        $itemRequest = $this->createItemRequestForObject(new VersionedObject());
+        $testObject = $this->objFromFixture(VersionedObject::class, 'object-1');
+        $itemRequest = $this->createItemRequestForObject($testObject);
         $this->logInWithPermission('ADMIN');
         $form = $itemRequest->ItemEditForm();
         $actions = $form->Actions();
-        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('MajorActions')->fieldByName('action_doPublish'));
+
+        $this->assertInstanceOf(
+            FormAction::class,
+            $actions->fieldByName('MajorActions')->fieldByName('action_doPublish')
+        );
     }
 
     public function testActionsUnversionedOwner()
     {
-        $itemRequest = $this->createItemRequestForObject(new UnversionedOwner());
+        $itemRequest = $this->createItemRequestForObject(UnversionedOwner::create());
         $this->logInWithPermission('ADMIN');
         $form = $itemRequest->ItemEditForm();
         $actions = $form->Actions();
 
         // No publish action
         $this->assertNull($actions->fieldByName('action_doPublish'));
-        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('MajorActions')->fieldByName('action_doSave'));
+        $this->assertInstanceOf(
+            FormAction::class,
+            $actions->fieldByName('MajorActions')->fieldByName('action_doSave')
+        );
 
         // No warning for new items
         $this->assertNull($actions->fieldByName('warning'));
@@ -57,14 +73,12 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
     public function testActionsVersionedOwned()
     {
         // Object to edit
-        $object = new VersionedObject();
-        $object->Title = 'My Object';
-        $object->write();
+        $object = $this->objFromFixture(VersionedObject::class, 'object-1');
         $object->publishSingle();
 
         // 4 owners, 3 published owners
         for ($i = 1; $i <= 4; $i++) {
-            $owner = new VersionedOwner();
+            $owner = VersionedOwner::create();
             $owner->RelatedID = $object->ID;
             $owner->Title = "My Owner {$i}";
             $owner->write();
@@ -80,7 +94,11 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $actions = $form->Actions();
 
         // Get unpublish action
-        $unpublishAction = $actions->fieldByName('ActionMenus')->fieldByName('MoreOptions')->fieldByName('action_doUnpublish');
+        $unpublishAction = $actions
+            ->fieldByName('ActionMenus')
+            ->fieldByName('MoreOptions')
+            ->fieldByName('action_doUnpublish');
+
         $this->assertInstanceOf(FormAction::class, $unpublishAction);
         $this->assertEquals(3, $unpublishAction->getAttribute('data-owners'));
     }
@@ -90,9 +108,10 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
      */
     public function testVersionedObjectsNotPublished()
     {
-        $newObject = new VersionedObject();
+        $newObject = VersionedObject::create();
         $itemRequest = $this->createItemRequestForObject($newObject);
         $this->logInWithPermission('ADMIN');
+
         $form = $itemRequest->ItemEditForm();
         $form->loadDataFrom($data = ['Title' => 'New Object']);
         $itemRequest->doSave($data, $form);
@@ -106,10 +125,10 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
      */
     public function testUnversionedObjectsPublishChildren()
     {
-        $newChild = new VersionedObject();
+        $newChild = VersionedObject::create();
         $newChild->Title = 'New child versioned';
         $newChild->write();
-        $newObject = new UnversionedOwner();
+        $newObject = UnversionedOwner::create();
         $newObject->RelatedID = $newChild->ID;
         $newObject->write();
 
@@ -117,6 +136,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $itemRequest = $this->createItemRequestForObject($newObject);
         $this->logInWithPermission('ADMIN');
         $form = $itemRequest->ItemEditForm();
+
         $form->loadDataFrom($newObject);
         $itemRequest->doSave($newObject->toMap(), $form);
 
@@ -126,16 +146,17 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         /** @var LiteralField $warningField */
         $actions = $form->Actions();
         $warningField = $actions->fieldByName('warning');
+
         // Warning was removed as part of #154 ... it may be brough back later
         $this->assertNull($warningField);
     }
 
     protected function createItemRequestForObject(DataObject $obj)
     {
-        $controller = new TestController();
-        $parentForm = new Form($controller, 'Form', new FieldList(), new FieldList());
-        return new VersionedGridFieldItemRequest(
-            GridField::create('test', 'test', new ArrayList())
+        $controller = TestController::create();
+        $parentForm = Form::create($controller, 'Form', FieldList::create(), FieldList::create());
+        return VersionedGridFieldItemRequest::create(
+            GridField::create('test', 'test', ArrayList::create())
                 ->setForm($parentForm),
             new GridFieldDetailForm(),
             $obj,
