@@ -26,7 +26,7 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
      */
     public function __construct($dataObjectClass, $versionTypeName)
     {
-        $this->dataObjectClass = $dataObjectClass;
+        $this->setDataObjectClass($dataObjectClass);
         $operationName = 'read' . ucfirst($versionTypeName);
 
         // Allow clients to sort the versions list by Version ID
@@ -42,13 +42,13 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
             throw new Exception(sprintf(
                 'Types using the %s query scaffolder must have the Versioned extension applied. (See %s)',
                 __CLASS__,
-                $this->dataObjectClass
+                $this->getDataObjectClass()
             ));
         }
         if (!$object->canViewStage(Versioned::DRAFT, $context['currentUser'])) {
             throw new Exception(sprintf(
                 'Cannot view versions on %s',
-                $this->dataObjectClass
+                $this->getDataObjectClass()
             ));
         }
 
