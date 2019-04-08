@@ -53,6 +53,11 @@ class TestObject extends DataObject implements TestOnly
         'Related' => RelatedWithoutversion::class,
     ];
 
+    /**
+     * Flag to trigger some optional behaviour for tests
+     */
+    public static $setNameWithoutVersionAfterPublish = null;
+
     public function canView($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -60,5 +65,13 @@ class TestObject extends DataObject implements TestOnly
             return $extended;
         }
         return true;
+    }
+
+    public function onAfterPublish($original)
+    {
+        if (self::$setNameWithoutVersionAfterPublish !== null) {
+            $this->Name = self::$setNameWithoutVersionAfterPublish;
+            $this->writeWithoutVersion();
+        }
     }
 }
