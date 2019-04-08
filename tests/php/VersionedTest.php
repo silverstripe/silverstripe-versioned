@@ -1520,4 +1520,72 @@ class VersionedTest extends SapphireTest
         // See: SapphireTest::createMemberWithPermission()
         $this->assertSame('ADMIN@example.org', $publisher->Email);
     }
+
+    /**
+     * Test writeWithoutVersion, both direct calls and calls from within onAfterPublish
+     */
+    public function testWriteWithoutVersion()
+    {
+        // First, try the write-without-version outside of onAfterPublish
+        $record = new VersionedTest\TestObject();
+        $record->Name = 'First version';
+        $record->write();
+
+        $record->Name = 'Second version original';
+        $record->write();
+
+        $record->Name = 'Second version new';
+
+        $record->writeWithoutVersion();
+
+        // The new data is written to the main table...
+        $this->assertEquals('Second version new', VersionedTest\TestObject::get()->byID($record->ID)->Name);
+
+        // ...however the versions list has the original value
+        $this->assertEquals(
+            [
+                1 => 'First version',
+                2 => 'Second version original',
+            ],
+            $record->VersionsList()->map('Version', 'Name')->toArray()
+        );
+
+
+        // Then try within onAfterPublish
+        $record = new VersionedTest\TestObject();
+        $record->Name = 'First version';
+        $record->write();
+
+        $record->Name = 'Second version original';
+        $record->write();
+
+        VersionedTest\TestObject::$setNameWithoutVersionAfterPublish = 'Second version - after publish';
+        $record->publishRecursive();
+
+        // The new data is written to the main table...
+        $this->assertEquals('Second version - after publish', VersionedTest\TestObject::get()->byID($record->ID)->Name);
+
+        // ...however the versions list has the original value
+        // Note that publication creates a new version
+        $versions = $record->VersionsList()->map('Version', 'Name')->toArray();
+        $this->assertEquals(
+            [
+                1 => 'First version',
+                2 => 'Second version original',
+                3 => 'Second version original',
+            ],
+            $versions
+        );
+
+        // The second version has WasPublished = true
+        $versions = $record->VersionsList()->map('Version', 'WasPublished')->toArray();
+        $this->assertEquals(
+            [
+                1 => 0,
+                2 => 0,
+                3 => 1,
+            ],
+            $versions
+        );
+    }
 }
