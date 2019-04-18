@@ -37,9 +37,6 @@ it:
     BUTTONPUBLISH: Pubblica
     BUTTONUNPUBLISH: Nascondi
     BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
-    DRAFT: Bozza
-    MODIFIED: Modificato
-    PUBLISHITEMSWARNING: 'Bozza/elementi modificati saranno pubblicati'
     Published: 'Pubblicato {name} {link}'
     Unpublished: 'Nascosto {name} {title}'
   SilverStripe\Versioned\VersionedHTTPMiddleware:

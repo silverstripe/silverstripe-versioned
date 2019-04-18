@@ -37,9 +37,6 @@ da:
     BUTTONPUBLISH: Udgiv
     BUTTONUNPUBLISH: 'Fjern udgivelse'
     BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
-    DRAFT: Kladde
-    MODIFIED: Modificeret
-    PUBLISHITEMSWARNING: 'Kladde/modificerede elementer bliver udgivet'
     Published: 'Udgiv {name} {link}'
     Unpublished: 'Fjern udgivelse af {name} {title}'
   SilverStripe\Versioned\VersionedHTTPMiddleware:

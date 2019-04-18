@@ -1234,7 +1234,6 @@ SQL
 
     /**
      * Perform a write without affecting the version table.
-     * On objects without versioning.
      *
      * @return int The ID of the record
      */
