@@ -1547,7 +1547,7 @@ class VersionedTest extends SapphireTest
                 1 => 'First version',
                 2 => 'Second version original',
             ],
-            $record->VersionsList()->map('Version', 'Name')->toArray()
+            $record->Versions()->map('Version', 'Name')->toArray()
         );
 
 
@@ -1567,7 +1567,7 @@ class VersionedTest extends SapphireTest
 
         // ...however the versions list has the original value
         // Note that publication creates a new version
-        $versions = $record->VersionsList()->map('Version', 'Name')->toArray();
+        $versions = $record->Versions()->map('Version', 'Name')->toArray();
         $this->assertEquals(
             [
                 1 => 'First version',
@@ -1578,7 +1578,7 @@ class VersionedTest extends SapphireTest
         );
 
         // The second version has WasPublished = true
-        $versions = $record->VersionsList()->map('Version', 'WasPublished')->toArray();
+        $versions = $record->Versions()->map('Version', 'WasPublished')->toArray();
         $this->assertEquals(
             [
                 1 => 0,
