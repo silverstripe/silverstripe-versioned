@@ -12,10 +12,6 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
 
-if (!interface_exists(GridField_ActionMenuItem::class)) {
-    return;
-}
-
 /**
  * This class is a {@link GridField} component that replaces the delete action
  * and adds an archive action for objects.
