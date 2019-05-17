@@ -13,6 +13,10 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Versioned\RestoreAction;
 
+if (!interface_exists(GridField_ActionMenuItem::class)) {
+    return;
+}
+
 /**
  * This class is a {@link GridField} component that adds a restore action for
  * versioned objects.
