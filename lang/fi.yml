@@ -1,4 +1,10 @@
 fi:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Arkistot
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Muokkaa sivua'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: SilverStripe\VersionedAdmin\Controllers\HistoryViewerController
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Tyhjä
     ITEMS_CHANGES:
@@ -28,16 +34,46 @@ fi:
       one: 'Muutos valikoiman kohteessa'
       other: '{count} Muutosta vailkoiman kohteissa'
     SINGULARNAME: 'Muuta valikoiman kohdetta'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arkisto
+    ArchivePermissionsFailure: 'Ei oikeuksia arkistoon'
+    Delete: Poista
+  SilverStripe\Versioned\GridFieldRestoreAction:
+    RESTORE: 'Palauta vedokseksi'
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Luonut: julkaisun ''{title}'' » {created}'
+  SilverStripe\Versioned\RestoreAction:
+    RESTORE: 'Palauta vedokseksi'
+    RESTORE_CHANGEDLOCATION: 'Plautettiin {model} "{id}" päätasolle, koska alkuperäistä sijaintia ei löytynyt.'
+    RESTORE_DESC: 'Palauta arkistoitu versio vedoksena'
+    RESTORE_FALIURE_PERMISSION: 'Oikeudet eivät riitä palautukseen'
+    RESTORE_FALIURE_RECORD: 'Palautus ei onnistu'
+    RESTORE_FALIURE_STATE: 'Kohde on jo olemassa eikä voida palauttaa'
+    RESTORE_SUCCESS: 'Palautettiin onnistuneesti » {model} "{id}"'
+    RESTORE_TO_ROOT: 'Palauta vedoksena päätasolle'
+    RESTORE_TO_ROOT_DESC: 'Palauta arkistoitu versio vedoksena päätasolle'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versiot
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Arkisto
     Archived: 'Arkistoitiin {name} {title}'
+    BUTTONAPPLYCHANGES: 'Hyväksy muutokset'
     BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
     BUTTONPUBLISH: Julkaise
     BUTTONUNPUBLISH: 'Poista julkaisusta'
     BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
+    DRAFT: Vedos
+    MODIFIED: Muokattu
     Published: 'Julkaistiin {name} {link}'
     Unpublished: 'Poistettiin julkaisusta {name} {title}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Kohdetta ei ole julkaistu vielä'
+    ADDEDTODRAFTSHORT: Vedos
+    ARCHIVEDPAGEHELP: 'Kohde on poistettu vedoksista ja julkaisusta'
+    ARCHIVEDPAGESHORT: Arkistoitu
+    MODIFIEDONDRAFTHELP: 'Kohteessa on julkaisemattomia muutoksia'
+    MODIFIEDONDRAFTSHORT: Muokattu
+    ONLIVEONLYSHORT: 'Vain julkaistuna'
+    ONLIVEONLYSHORTHELP: 'Kohde on julkaistu, mutta on poistettu vedoksista'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Sinun on kirjauduttava CMS-järjestelmän salasanalla nähdäksesi vedokset tai arkistoitu sisältö. <a href="{link}">Klikkaa tästä palataksesi julkaistulle sivustolle.</a>'
