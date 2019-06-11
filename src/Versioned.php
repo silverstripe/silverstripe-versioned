@@ -686,7 +686,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     protected function promoteConditions(SQLSelect $baseQuery, SQLSelect $newQuery)
     {
-
     }
 
     /**
