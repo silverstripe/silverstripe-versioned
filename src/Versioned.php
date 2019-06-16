@@ -678,17 +678,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
-     * Inspect a given query that's being "augmented" and determine any conditions that can be "promoted" to an inner
-     * join on the same table. This helps with performance
-     *
-     * @param SQLSelect $query
-     * @param SQLSelect $newQuery
-     */
-    protected function promoteConditions(SQLSelect $baseQuery, SQLSelect $newQuery)
-    {
-    }
-
-    /**
      * Indicates if a subquery filtering versioned records should apply as a condition instead of an inner join
      *
      * @param SQLSelect $baseQuery
