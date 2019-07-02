@@ -506,7 +506,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 $this->augmentSQLVersionedLatestSingle($query, $dataQuery);
                 break;
             case 'latest_versions':
-                $this->augmentSQLVersionedLatest($query);
+                $this->augmentSQLVersionedLatest($query, $dataQuery);
                 break;
             case 'version':
                 $this->augmentSQLVersionedVersion($query, $dataQuery);
@@ -625,9 +625,10 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * inner join or sub-select on the base query
      *
      * @param SQLSelect $baseQuery
+     * @param DataQuery $dataQuery
      * @return SQLSelect
      */
-    protected function prepareMaxVersionSubSelect(SQLSelect $baseQuery)
+    protected function prepareMaxVersionSubSelect(SQLSelect $baseQuery, DataQuery $dataQuery)
     {
         $baseTable = $this->baseTable();
 
@@ -674,6 +675,15 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             $subSelect->addWhere([$conditionClause => reset($condition)]);
         }
 
+        $shouldApplySubSelectAsCondition = $this->shouldApplySubSelectAsCondition($baseQuery);
+
+        $this->owner->extend(
+            'augmentMaxVersionSubSelect',
+            $subSelect,
+            $dataQuery,
+            $shouldApplySubSelectAsCondition
+        );
+
         return $subSelect;
     }
 
@@ -715,7 +725,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $stage = $dataQuery->getQueryParam('Versioned.stage');
         ReadingMode::validateStage($stage);
 
-        $subSelect = $this->prepareMaxVersionSubSelect($query);
+        $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
 
         $subSelect->addWhere(["\"{$baseTable}_Versions_Latest\".\"LastEdited\" <= ?" => $date]);
 
@@ -789,15 +799,16 @@ SQL
      * version.
      *
      * @param SQLSelect $query
+     * @param DataQuery $dataQuery
      */
-    protected function augmentSQLVersionedLatest(SQLSelect $query)
+    protected function augmentSQLVersionedLatest(SQLSelect $query, DataQuery $dataQuery)
     {
         // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         // Join and select only latest version
         $baseTable = $this->baseTable();
-        $subSelect = $this->prepareMaxVersionSubSelect($query);
+        $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
 
         $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
 
