@@ -1943,6 +1943,7 @@ SQL
      * NOTE: Versions() will be replaced with this method in SilverStripe 5.0
      *
      * @internal
+     * @deprecated 1.5.0 Will be removed in 2.0.0, use Versions() instead
      * @return DataList
      */
     public function VersionsList()
@@ -1955,6 +1956,7 @@ SQL
     /**
      * Return a list of all the versions available.
      *
+     * @deprecated 1.5.0 Will be removed in 2.0.0, please use Versions() instead
      * @param  string $filter
      * @param  string $sort
      * @param  string $limit
