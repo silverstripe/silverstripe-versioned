@@ -20,7 +20,7 @@
     ],
     "require": {
         "silverstripe/framework": "^5",
-        "silverstripe/vendor-plugin": "^1"
+        "silverstripe/vendor-plugin": "^1",
         "symfony/cache": "^3.4"
     },
     "require-dev": {
