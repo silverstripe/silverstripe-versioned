@@ -201,6 +201,16 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     private static $prepopulate_versionnumber_cache = true;
 
     /**
+     * Indicates whether augmentSQL operations should add subselects as WHERE conditions instead of INNER JOIN
+     * intersections. Performance of the INNER JOIN scales on the size of _Versions tables where as the condition scales
+     * on the number of records being returned from the base query.
+     *
+     * @config
+     * @var bool
+     */
+    private static $use_conditions_over_inner_joins = false;
+
+    /**
      * Additional database indexes for the new
      * "_Versions" table. Used in {@link augmentDatabase()}.
      *
@@ -481,7 +491,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
                 $this->augmentSQLVersionedLatestSingle($query, $dataQuery);
                 break;
             case 'latest_versions':
-                $this->augmentSQLVersionedLatest($query);
+                $this->augmentSQLVersionedLatest($query, $dataQuery);
                 break;
             case 'version':
                 $this->augmentSQLVersionedVersion($query, $dataQuery);
@@ -596,6 +606,90 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     }
 
     /**
+     * Prepare a sub-select for determining latest versions of records on the base table. This is used as either an
+     * inner join or sub-select on the base query
+     *
+     * @param SQLSelect $baseQuery
+     * @param DataQuery $dataQuery
+     * @return SQLSelect
+     */
+    protected function prepareMaxVersionSubSelect(SQLSelect $baseQuery, DataQuery $dataQuery)
+    {
+        $baseTable = $this->baseTable();
+
+        // Create a sub-select that we determine latest versions
+        $subSelect = SQLSelect::create(
+            ['LatestVersion' => "MAX(\"{$baseTable}_Versions_Latest\".\"Version\")"],
+            [$baseTable . '_Versions_Latest' => "\"{$baseTable}_Versions\""]
+        );
+
+        $subSelect->renameTable($baseTable, "{$baseTable}_Versions");
+
+        // Determine the base table of the existing query
+        $baseFrom = $baseQuery->getFrom();
+        $baseTable = trim(reset($baseFrom), '"');
+
+        // And then the name of the base table in the new query
+        $newFrom = $subSelect->getFrom();
+        $newTable = trim(key($newFrom), '"');
+
+        // Parse "where" conditions to find those appropriate to be "promoted" into an inner join
+        // We can ONLY promote a filter on the primary key of the base table. Any other conditions will make the
+        // version returned incorrect, as we are filtering out version that may be the latest (and correct) version
+        foreach ($baseQuery->getWhere() as $condition) {
+            $conditionClause = key($condition);
+            // Pull out the table and field for this condition. We'll skip anything we can't parse
+            if (preg_match('/^"([^"]+)"\."([^"]+)"/', $conditionClause, $matches) !== 1) {
+                continue;
+            }
+
+            $table = $matches[1];
+            $field = $matches[2];
+
+            if ($table !== $baseTable || $field !== 'RecordID') {
+                continue;
+            }
+
+            // Rename conditions on the base table to the new alias
+            $conditionClause = preg_replace(
+                '/^"([^"]+)"\./',
+                "\"{$newTable}\".",
+                $conditionClause
+            );
+
+            $subSelect->addWhere([$conditionClause => reset($condition)]);
+        }
+
+        $shouldApplySubSelectAsCondition = $this->shouldApplySubSelectAsCondition($baseQuery);
+
+        $this->owner->extend(
+            'augmentMaxVersionSubSelect',
+            $subSelect,
+            $dataQuery,
+            $shouldApplySubSelectAsCondition
+        );
+
+        return $subSelect;
+    }
+
+    /**
+     * Indicates if a subquery filtering versioned records should apply as a condition instead of an inner join
+     *
+     * @param SQLSelect $baseQuery
+     */
+    protected function shouldApplySubSelectAsCondition(SQLSelect $baseQuery)
+    {
+        $baseTable = $this->baseTable();
+
+        $shouldApply =
+            $baseQuery->getLimit() === 1 || Config::inst()->get(static::class, 'use_conditions_over_inner_joins');
+
+        $this->owner->extend('updateApplyVersionedFiltersAsConditions', $shouldApply, $baseQuery, $baseTable);
+
+        return $shouldApply;
+    }
+
+    /**
      * Filter the versioned history by a specific date and archive stage
      *
      * @param SQLSelect $query
@@ -616,29 +710,36 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         $stage = $dataQuery->getQueryParam('Versioned.stage');
         ReadingMode::validateStage($stage);
 
+        $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
+
+        $subSelect->addWhere(["\"{$baseTable}_Versions_Latest\".\"LastEdited\" <= ?" => $date]);
+
         // Filter on appropriate stage column in addition to date
         if ($this->hasStages()) {
             $stageColumn = $stage === static::LIVE
                 ? 'WasPublished'
                 : 'WasDraft';
-            $stageCondition = "AND \"{$baseTable}_Versions\".\"{$stageColumn}\" = 1";
-        } else {
-            $stageCondition = '';
+            $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"{$stageColumn}\" = 1");
         }
+
+        if ($this->shouldApplySubSelectAsCondition($query)) {
+            $subSelect->addWhere(
+                "\"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\""
+            );
+
+            $query->addWhere([
+                "\"{$baseTable}_Versions\".\"Version\" = ({$subSelect->sql($params)})" => $params,
+            ]);
+
+            return;
+        }
+
+        $subSelect->addSelect("\"{$baseTable}_Versions_Latest\".\"RecordID\"");
+        $subSelect->addGroupBy("\"{$baseTable}_Versions_Latest\".\"RecordID\"");
 
         // Join on latest version filtered by date
         $query->addInnerJoin(
-            <<<SQL
-            (
-            SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
-            FROM "{$baseTable}_Versions"
-            WHERE "{$baseTable}_Versions"."LastEdited" <= ?
-                {$stageCondition}
-            GROUP BY "{$baseTable}_Versions"."RecordID"
-            )
-SQL
-            ,
+            '(' . $subSelect->sql($params) . ')',
             <<<SQL
             "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
             AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
@@ -646,7 +747,7 @@ SQL
             ,
             "{$baseTable}_Versions_Latest",
             20,
-            [$date]
+            $params
         );
     }
 
@@ -677,37 +778,51 @@ SQL
 
     /**
      * Return latest version instances, regardless of whether they are on a particular stage.
-     * This provides "show all, including deleted" functonality.
+     * This provides "show all, including deleted" functionality.
      *
      * Note: latest_version ignores deleted versions, and will select the latest non-deleted
      * version.
      *
      * @param SQLSelect $query
+     * @param DataQuery $dataQuery
      */
-    protected function augmentSQLVersionedLatest(SQLSelect $query)
+    protected function augmentSQLVersionedLatest(SQLSelect $query, DataQuery $dataQuery)
     {
         // Query against _Versions table first
         $this->augmentSQLVersioned($query);
 
         // Join and select only latest version
         $baseTable = $this->baseTable();
+        $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
+
+        $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
+
+        if ($this->shouldApplySubSelectAsCondition($query)) {
+            $subSelect->addWhere(
+                "\"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\""
+            );
+
+            $query->addWhere([
+                "\"{$baseTable}_Versions\".\"Version\" = ({$subSelect->sql($params)})" => $params,
+            ]);
+
+            return;
+        }
+
+        $subSelect->addSelect("\"{$baseTable}_Versions_Latest\".\"RecordID\"");
+        $subSelect->addGroupBy("\"{$baseTable}_Versions_Latest\".\"RecordID\"");
+
+        // Join on latest version filtered by date
         $query->addInnerJoin(
-            <<<SQL
-            (
-            SELECT "{$baseTable}_Versions"."RecordID",
-                MAX("{$baseTable}_Versions"."Version") AS "LatestVersion"
-            FROM "{$baseTable}_Versions"
-            WHERE "{$baseTable}_Versions"."WasDeleted" = 0
-            GROUP BY "{$baseTable}_Versions"."RecordID"
-            )
-SQL
-            ,
+            '(' . $subSelect->sql($params) . ')',
             <<<SQL
             "{$baseTable}_Versions_Latest"."RecordID" = "{$baseTable}_Versions"."RecordID"
             AND "{$baseTable}_Versions_Latest"."LatestVersion" = "{$baseTable}_Versions"."Version"
 SQL
             ,
-            "{$baseTable}_Versions_Latest"
+            "{$baseTable}_Versions_Latest",
+            20,
+            $params
         );
     }
 
