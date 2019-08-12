@@ -1,10 +1,4 @@
 it:
-  SilverStripe\VersionedAdmin\ArchiveAdmin:
-    MENUTITLE: Archivio
-  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
-    MENUTITLE: 'Modifica Pagina'
-  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
-    MENUTITLE: SilverStripe\VersionedAdmin\Controllers\HistoryViewerController
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Vuota
     ITEMS_CHANGES:
@@ -34,24 +28,8 @@ it:
       one: 'Un Elemento del Gruppo Modifiche'
       other: '{count} Elementi del Gruppo Modifiche'
     SINGULARNAME: 'Elemento del Gruppo Modifiche'
-  SilverStripe\Versioned\GridFieldArchiveAction:
-    Archive: Archivio
-    ArchivePermissionsFailure: 'Nessuna autorizzazione di archiviazione'
-    Delete: Elimina
-  SilverStripe\Versioned\GridFieldRestoreAction:
-    RESTORE: 'Ripristina in bozza'
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: 'Generato dalla pubblicazione di ''{title}'' il {created}'
-  SilverStripe\Versioned\RestoreAction:
-    RESTORE: 'Ripristina in bozza'
-    RESTORE_CHANGEDLOCATION: 'Ripristinato il {model} "{id}" al livello più alto in quanto la posizione originale non può essere trovata.'
-    RESTORE_DESC: 'Ripristina la versione archiviata in bozza'
-    RESTORE_FALIURE_PERMISSION: 'Autorizzazione insufficiente per ripristinare l''elemento'
-    RESTORE_FALIURE_RECORD: 'Impossibile ripristinare l''elemento'
-    RESTORE_FALIURE_STATE: 'Questo articolo esiste già e non può essere ripristinato'
-    RESTORE_SUCCESS: 'Ripristinato con successo il {model} "{id}"'
-    RESTORE_TO_ROOT: 'Ripristina la bozza al livello superiore'
-    RESTORE_TO_ROOT_DESC: 'Ripristina la versione archiviata in bozza come elemento di livello superiore'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:

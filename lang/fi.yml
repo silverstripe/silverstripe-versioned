@@ -35,8 +35,8 @@ fi:
       other: '{count} Muutosta vailkoiman kohteissa'
     SINGULARNAME: 'Muuta valikoiman kohdetta'
   SilverStripe\Versioned\GridFieldArchiveAction:
-    Archive: Arkisto
-    ArchivePermissionsFailure: 'Ei oikeuksia arkistoon'
+    Archive: Arkistoi
+    ArchivePermissionsFailure: 'Ei oikeuksia arkistoida'
     Delete: Poista
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Palauta vedokseksi'
@@ -45,7 +45,7 @@ fi:
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Palauta vedokseksi'
     RESTORE_CHANGEDLOCATION: 'Plautettiin {model} "{id}" päätasolle, koska alkuperäistä sijaintia ei löytynyt.'
-    RESTORE_DESC: 'Palauta arkistoitu versio vedoksena'
+    RESTORE_DESC: 'Palauta arkistoitu versio vedokseksi'
     RESTORE_FALIURE_PERMISSION: 'Oikeudet eivät riitä palautukseen'
     RESTORE_FALIURE_RECORD: 'Palautus ei onnistu'
     RESTORE_FALIURE_STATE: 'Kohde on jo olemassa eikä voida palauttaa'
