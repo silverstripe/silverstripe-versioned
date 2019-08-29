@@ -1275,6 +1275,8 @@ SQL
         unset($manipulation[$baseTable]);
         $this->owner->extend('augmentWriteDeletedVersion', $manipulation, $stages);
         DB::manipulate($manipulation);
+        $this->owner->Version = $manipulation["{$baseTable}_Versions"]['fields']['Version'];
+        $this->owner->extend('onAfterVersionDelete');
     }
 
     public function augmentWrite(&$manipulation)
