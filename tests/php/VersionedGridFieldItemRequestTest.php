@@ -33,7 +33,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $this->logInWithPermission('ADMIN');
         $form = $itemRequest->ItemEditForm();
         $actions = $form->Actions();
-        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('action_doPublish'));
+        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('MajorActions')->fieldByName('action_doPublish'));
     }
 
     public function testActionsUnversionedOwner()
@@ -45,7 +45,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
 
         // No publish action
         $this->assertNull($actions->fieldByName('action_doPublish'));
-        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('action_doSave'));
+        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('MajorActions')->fieldByName('action_doSave'));
 
         // No warning for new items
         $this->assertNull($actions->fieldByName('warning'));
@@ -80,7 +80,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $actions = $form->Actions();
 
         // Get unpublish action
-        $unpublishAction = $actions->fieldByName('action_doUnpublish');
+        $unpublishAction = $actions->fieldByName('ActionMenus')->fieldByName('MoreOptions')->fieldByName('action_doUnpublish');
         $this->assertInstanceOf(FormAction::class, $unpublishAction);
         $this->assertEquals(3, $unpublishAction->getAttribute('data-owners'));
     }

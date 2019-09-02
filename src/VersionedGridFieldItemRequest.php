@@ -8,7 +8,8 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
-use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\TabSet;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
@@ -270,62 +271,83 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
      */
     protected function addVersionedButtons(DataObject $record, FieldList $actions)
     {
+        $stagesDiffer = $record->stagesDiffer();
+
         // Save & Publish action
         if ($record->canPublish()) {
             // "publish", as with "save", it supports an alternate state to show when action is needed.
+            $noChangesClasses = 'btn-outline-primary font-icon-tick';
             $publish = FormAction::create(
                 'doPublish',
                 _t(__CLASS__ . '.BUTTONPUBLISH', 'Publish')
             )
+                ->addExtraClass($noChangesClasses)
+                ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-rocket')
+                ->setAttribute('data-btn-alternate-remove', $noChangesClasses)
                 ->setUseButtonTag(true)
-                ->addExtraClass('btn btn-primary font-icon-rocket');
+                ->setAttribute('data-text-alternate', _t(__CLASS__ . '.BUTTONSAVEPUBLISH', 'Publish'))
+            ;
 
-            // Insert after save
-            if ($actions->fieldByName('action_doSave')) {
-                $actions->insertAfter('action_doSave', $publish);
-            } else {
-                $actions->push($publish);
+            // Set up the initial state of the button to reflect the state of the underlying SiteTree object.
+            if ($stagesDiffer) {
+                $publish->addExtraClass('btn-primary font-icon-rocket');
+                $publish->setTitle(_t(__CLASS__ . '.BUTTONSAVEPUBLISH', 'Publish'));
+                $publish->removeExtraClass($noChangesClasses);
             }
+
+            $actions->insertAfter('action_doSave', $publish);
         }
 
-        // Unpublish action
-        if ($record->isInDB() && $record->canUnpublish()) {
-            /** @var DataObject|Versioned|RecursivePublishable $liveRecord */
-            $liveRecord = Versioned::get_by_stage($record->baseClass(), Versioned::LIVE)
-                ->byID($record->ID);
-            if ($liveRecord) {
-                $liveOwners = $liveRecord->findOwners(false)->count();
-                $actions->push(
-                    FormAction::create(
-                        'doUnpublish',
-                        _t(__CLASS__ . '.BUTTONUNPUBLISH', 'Unpublish')
-                    )
-                        ->setUseButtonTag(true)
+        // More options
+        if ($record->isInDB()) {
+            $rootTabSet = TabSet::create('ActionMenus');
+            $moreOptions = Tab::create(
+                'MoreOptions',
+                _t(__CLASS__ . '.MoreOptions', 'More options', 'Expands a view for more buttons')
+            );
+            $moreOptions->addExtraClass('popover-actions-simulate');
+            $rootTabSet->push($moreOptions);
+            $rootTabSet->addExtraClass('ss-ui-action-tabset action-menus noborder');
+
+            $actions->insertAfter('MajorActions', $rootTabSet);
+
+            // Unpublish action
+            if ($record->canUnpublish()) {
+                /** @var DataObject|Versioned|RecursivePublishable $liveRecord */
+                $liveRecord = Versioned::get_by_stage($record->baseClass(), Versioned::LIVE)
+                    ->byID($record->ID);
+                if ($liveRecord) {
+                    $liveOwners = $liveRecord->findOwners(false)->count();
+                    $moreOptions->push(
+                        FormAction::create(
+                            'doUnpublish',
+                            _t(__CLASS__ . '.BUTTONUNPUBLISH', 'Unpublish')
+                        )
+                            ->setDescription(_t(
+                                __CLASS__ . '.BUTTONUNPUBLISHDESC',
+                                'Remove this record from the published site'
+                            ))
+                            ->addExtraClass('btn-secondary')
+                            ->setAttribute('data-owners', $liveOwners)
+                    );
+                }
+            }
+
+            // Archive action
+            if ($record->canArchive()) {
+                // Replace "delete" action
+                $actions->removeByName('action_doDelete');
+
+                // "archive"
+                $moreOptions->push(
+                    FormAction::create('doArchive', _t(__CLASS__ . '.ARCHIVE', 'Archive'))
                         ->setDescription(_t(
-                            __CLASS__ . '.BUTTONUNPUBLISHDESC',
-                            'Remove this record from the published site'
+                            __CLASS__ . '.BUTTONARCHIVEDESC',
+                            'Unpublish and send to archive'
                         ))
-                        ->addExtraClass('btn-secondary')
-                        ->setAttribute('data-owners', $liveOwners)
+                        ->addExtraClass('btn-secondary action--archive font-icon-box')
                 );
             }
-        }
-
-        // Archive action
-        if ($record->isInDB() && $record->canArchive()) {
-            // Replace "delete" action
-            $actions->removeByName('action_doDelete');
-
-            // "archive"
-            $actions->push(
-                FormAction::create('doArchive', _t(__CLASS__ . '.ARCHIVE', 'Archive'))
-                    ->setUseButtonTag(true)
-                    ->setDescription(_t(
-                        __CLASS__ . '.BUTTONARCHIVEDESC',
-                        'Unpublish and send to archive'
-                    ))
-                    ->addExtraClass('btn-secondary action--archive font-icon-box')
-            );
         }
     }
 
