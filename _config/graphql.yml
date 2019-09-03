@@ -6,6 +6,9 @@ Only:
 SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
   extensions:
     - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\DeleteExtension
 SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne:
   extensions:
     - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
