@@ -73,7 +73,16 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
         $model = $gridField->getModelClass();
         $isModelVersioned = $model::has_extension(Versioned::class);
         if ($isModelVersioned) {
-            $gridField->getConfig()->removeComponentsByType(GridFieldDeleteAction::class);
+            $config = $gridField->getConfig();
+            $deleteComponents = $config->getComponentsByType(GridFieldDeleteAction::class);
+            foreach ($deleteComponents as $deleteComponent) {
+                if ($deleteComponent->getRemoveRelation()) {
+                    // The 'delete' button will "unlink" the relationship, NOT delete the item.
+                    continue;
+                }
+                // Deleting an item that is published would leave no way to unpublish it.
+                $config->removeComponent($deleteComponent);
+            }
         }
         if (!in_array('Actions', $columns)) {
             $columns[] = 'Actions';
