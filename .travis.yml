@@ -4,7 +4,7 @@ dist: trusty
 
 env:
   global:
-    - COMPOSER_ROOT_VERSION=1.5.x-dev
+    - COMPOSER_ROOT_VERSION=1.6.x-dev
 
 matrix:
   fast_finish: true
@@ -30,7 +30,7 @@ before_script:
 # Install composer
   - composer validate
   - composer install --prefer-dist
-  - composer require silverstripe/recipe-core:4.5.x-dev silverstripe/admin:1.5.x-dev silverstripe/graphql:3.2.x-dev --prefer-dist --no-update
+  - composer require silverstripe/recipe-core:4.6.x-dev silverstripe/admin:1.6.x-dev silverstripe/graphql:3.3.x-dev --prefer-dist --no-update
   - composer update
   - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:2.1.x-dev --prefer-dist; fi
 
