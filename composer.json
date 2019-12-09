@@ -28,11 +28,6 @@
         "silverstripe/admin": "^1",
         "squizlabs/php_codesniffer": "^3"
     },
-    "extra": {
-        "branch-alias": {
-            "1.x-dev": "1.6.x-dev"
-        }
-    },
     "autoload": {
         "psr-4": {
             "SilverStripe\\Versioned\\": "src/",
