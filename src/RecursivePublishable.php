@@ -67,6 +67,8 @@ class RecursivePublishable extends DataExtension
                 ->byID($owner->ID);
         }
 
+        $owner->invokeWithExtensions('onBeforePublishRecursive', $original);
+
         // Create a new changeset for this item and publish it
         $changeset = ChangeSet::create();
         $changeset->IsInferred = true;
