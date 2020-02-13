@@ -38,7 +38,7 @@ class ReadingMode
      */
     public function set(?string $readingMode, bool $prependStage = true): void
     {
-        $this->readingMode = $prependStage
+        $this->readingMode = $prependStage && $readingMode !== null && $readingMode !== ''
             ? 'Stage.' . $readingMode
             : $readingMode;
     }
