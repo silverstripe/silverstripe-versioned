@@ -3072,7 +3072,7 @@ SQL
      *
      * @return DataObject
      */
-    public function getVersion(string $class, int $id, int $version): ?DataObject
+    public function getVersionOf(string $class, int $id, int $version): ?DataObject
     {
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $list = DataList::create($baseClass)
@@ -3100,7 +3100,7 @@ SQL
      */
     public static function get_version($class, $id, $version)
     {
-        Versioned::singleton()->getVersion($class, (int) $id, (int) $version);
+        Versioned::singleton()->getVersionOf($class, (int) $id, (int) $version);
     }
 
     /**
