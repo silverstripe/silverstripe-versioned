@@ -11,6 +11,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
+use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
@@ -21,10 +22,12 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\Queries\SQLConditionGroup;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
+use SilverStripe\Versioned\State\ReadingMode as ReadingModeState;
 use SilverStripe\View\TemplateGlobalProvider;
 
 /**
@@ -40,6 +43,9 @@ use SilverStripe\View\TemplateGlobalProvider;
  */
 class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
 {
+
+    use Injectable;
+
     /**
      * Versioning mode for this object.
      * Note: Not related to the current versioning mode in the state / session
@@ -51,6 +57,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
     /**
      * The default reading mode
+     * @deprecated 4..5 use State/ReadingMode::DEFAULT
      */
     const DEFAULT_MODE = 'Stage.Live';
 
@@ -106,21 +113,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @var array
      */
     protected $versionModifiedCache = [];
-
-    /**
-     * Current reading mode. Supports stage / archive modes.
-     *
-     * @var string
-     */
-    protected static $reading_mode = null;
-
-    /**
-     * Default reading mode, if none set.
-     * Any modes which differ to this value should be assigned via querystring / session (if enabled)
-     *
-     * @var null
-     */
-    protected static $default_reading_mode = self::DEFAULT_MODE;
 
     /**
      * Field used to hold the migrating version
@@ -300,8 +292,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public static function reset()
     {
-        self::$reading_mode = '';
-        Controller::curr()->getRequest()->getSession()->clear('readingMode');
+        ReadingModeState::singleton()->reset();
     }
 
     /**
@@ -365,11 +356,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // By version number
         if (is_numeric($from)) {
-            return Versioned::get_version($baseClass, $id, $from);
+            return Versioned::singleton()->getVersion($baseClass, $id, $from);
         }
 
         // By stage
-        return Versioned::get_by_stage($baseClass, $from)->byID($id);
+        return Versioned::singleton()->getByStage($baseClass, $from)->byID($id);
     }
 
     /**
@@ -1317,7 +1308,7 @@ SQL
                 unset($manipulation[$table]['fields']['Version']);
             } else {
                 // All writes are to draft, only live affect both
-                $stages = !$this->hasStages() || static::get_stage() === static::LIVE
+                $stages = !$this->hasStages() || Versioned::singleton()->getStage() === static::LIVE
                     ? [self::DRAFT, self::LIVE]
                     : [self::DRAFT];
                 $this->augmentWriteVersioned($manipulation, $class, $table, $id, $stages, false);
@@ -1334,7 +1325,7 @@ SQL
             }
 
             // If we're editing Live, then write to (table)_Live as well as (table)
-            if ($this->hasStages() && static::get_stage() === static::LIVE) {
+            if ($this->hasStages() && Versioned::singleton()->getStage() === static::LIVE) {
                 $this->augmentWriteStaged($manipulation, $table, $id);
             }
         }
@@ -1659,14 +1650,14 @@ SQL
         $owner = $this->owner;
 
         // Bypass if site is unsecured
-        if (!self::get_draft_site_secured()) {
+        if (!Versioned::singleton()->getDraftSiteSecured()) {
             return true;
         }
 
         // Get reading mode from source query (or current mode)
         $readingParams = $owner->getSourceQueryParams()
             // Guess record mode from current reading mode instead
-            ?: ReadingMode::toDataQueryParams(static::get_reading_mode());
+            ?: ReadingMode::toDataQueryParams(ReadingModeState::singleton()->get());
 
         // If this is the live record we can view it
         if (isset($readingParams["Versioned.mode"])
@@ -1683,7 +1674,7 @@ SQL
 
         // If we weren't definitely loaded from live, and we can't view non-live content, we need to
         // check to make sure this version is the live version and so can be viewed
-        $latestVersion = Versioned::get_versionnumber_by_stage(get_class($owner), static::LIVE, $owner->ID);
+        $latestVersion = Versioned::singleton()->getVersionNumberByStage(get_class($owner), static::LIVE, $owner->ID);
         if ($latestVersion == $owner->Version) {
             // Even if this is loaded from a non-live stage, this is the live version
             return true;
@@ -1722,7 +1713,7 @@ SQL
     public function canViewStage($stage = self::LIVE, $member = null)
     {
         return static::withVersionedMode(function () use ($stage, $member) {
-            Versioned::set_stage($stage);
+            Versioned::singleton()->setStage($stage);
 
             $owner = $this->owner;
             $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
@@ -1795,14 +1786,18 @@ SQL
     public function latestPublished()
     {
         $id = $this->owner->ID ?: $this->owner->OldID;
+
         if (!$id) {
             return false;
         }
+
         if (!$this->hasStages()) {
             return true;
         }
-        $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
-        $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+
+        $draftVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::DRAFT, $id);
+        $liveVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::LIVE, $id);
+
         return $draftVersion === $liveVersion;
     }
 
@@ -1920,9 +1915,12 @@ SQL
         if (!$this->isPublished()) {
             return false;
         }
+
         // Count live owners
         /** @var Versioned|RecursivePublishable|DataObject $liveRecord */
-        $liveRecord = static::get_by_stage(get_class($this->owner), Versioned::LIVE)->byID($this->owner->ID);
+        $liveRecord = Versioned::singleton()
+            ->getByStage(get_class($this->owner), Versioned::LIVE)->byID($this->owner->ID);
+
         return $liveRecord->findOwners(false)->count() > 0;
     }
 
@@ -2036,8 +2034,9 @@ SQL
             return false;
         }
 
-        $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
-        $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+        $draftVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::DRAFT, $id);
+        $liveVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::LIVE, $id);
+
         return $draftVersion !== $liveVersion;
     }
 
@@ -2080,8 +2079,8 @@ SQL
     public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
         // Make sure the table names are not postfixed (e.g. _Live)
-        $oldMode = static::get_reading_mode();
-        static::set_stage(static::DRAFT);
+        $oldMode = ReadingModeState::singleton()->get();
+        Versioned::singleton()->setStage(static::DRAFT);
 
         $owner = $this->owner;
         $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
@@ -2123,7 +2122,8 @@ SQL
             $versions->push(new Versioned_Version($record));
         }
 
-        Versioned::set_reading_mode($oldMode);
+        ReadingModeState::singleton()->set($oldMode);
+
         return $versions;
     }
 
@@ -2138,8 +2138,8 @@ SQL
     public function compareVersions($from, $to)
     {
         $owner = $this->owner;
-        $fromRecord = Versioned::get_version(get_class($owner), $owner->ID, $from);
-        $toRecord = Versioned::get_version(get_class($owner), $owner->ID, $to);
+        $fromRecord = Versioned::singleton()->getVersion(get_class($owner), $owner->ID, $from);
+        $toRecord = Versioned::singleton()->getVersion(get_class($owner), $owner->ID, $to);
 
         $diff = new DataDifferencer($fromRecord, $toRecord);
 
@@ -2177,9 +2177,6 @@ SQL
         return $table;
     }
 
-    //-----------------------------------------------------------------------------------------------//
-
-
     /**
      * Determine if the current user is able to set the given site stage / archive
      *
@@ -2196,7 +2193,7 @@ SQL
         }
 
         // Request is allowed if unsecuredDraftSite is enabled
-        if (!static::get_draft_site_secured()) {
+        if (!Versioned::singleton()->getDraftSiteSecured()) {
             return true;
         }
 
@@ -2226,7 +2223,7 @@ SQL
      */
     public static function choose_site_stage(HTTPRequest $request)
     {
-        $mode = static::get_default_reading_mode();
+        $mode = ReadingModeState::singleton()->getDefault();
 
         // Check any pre-existing session mode
         $useSession = Config::inst()->get(static::class, 'use_session');
@@ -2237,7 +2234,7 @@ SQL
 
             // Set draft site security if disabled for this session
             if ($request->getSession()->get('unsecuredDraftSite')) {
-                static::set_draft_site_secured(false);
+                Versioned::singleton()->setDraftSiteSecured(false);
             }
         }
 
@@ -2249,7 +2246,7 @@ SQL
         }
 
         // Save reading mode
-        Versioned::set_reading_mode($mode);
+        ReadingModeState::singleton()->set($mode);
 
         // Set mode if session enabled
         if ($useSession && $updateSession) {
@@ -2257,7 +2254,7 @@ SQL
         }
 
         if (!headers_sent() && !Director::is_cli()) {
-            if (Versioned::get_stage() === static::LIVE) {
+            if (Versioned::singleton()->getStage() === static::LIVE) {
                 // clear the cookie if it's set
                 if (Cookie::get('bypassStaticCache')) {
                     Cookie::force_expiry('bypassStaticCache', null, null, false, true /* httponly */);
@@ -2274,35 +2271,65 @@ SQL
     /**
      * Set the current reading mode.
      *
-     * @param string $mode
+     * @param string $readingMode
+     * @deprecated 4..5 use ReadingMode::singleton()->set($readingMode)
      */
-    public static function set_reading_mode($mode)
+    public static function set_reading_mode($readingMode)
     {
-        self::$reading_mode = $mode;
+        ReadingModeState::singleton()->set($readingMode, false);
     }
 
     /**
      * Get the current reading mode.
      *
      * @return string
+     * @deprecated 4..5 use ReadingMode::singleton()->get()
      */
     public static function get_reading_mode()
     {
-        return self::$reading_mode;
+        return ReadingModeState::singleton()->get();
+    }
+
+    /**
+     * Get the current reading stage.
+     *
+     * @return string|null
+     */
+    public function getStage(): ?string
+    {
+        $parts = explode('.', ReadingModeState::singleton()->get());
+
+        if ($parts[0] == 'Stage' && count($parts) >= 2) {
+            return $parts[1];
+        }
+
+        return null;
     }
 
     /**
      * Get the current reading stage.
      *
      * @return string
+     * @deprecated 4..5 use Versioned::singleton()->getStage()
      */
     public static function get_stage()
     {
-        $parts = explode('.', Versioned::get_reading_mode());
+        return Versioned::singleton()->getStage();
+    }
 
-        if ($parts[0] == 'Stage') {
+    /**
+     * Get the current archive date.
+     *
+     * @return string|null
+     */
+    public function getCurrentArchivedDate(): ?string
+    {
+        $parts = explode('.', ReadingModeState::singleton()->get());
+
+        if ($parts[0] == 'Archive' && count($parts) >= 2) {
             return $parts[1];
         }
+
         return null;
     }
 
@@ -2310,14 +2337,11 @@ SQL
      * Get the current archive date.
      *
      * @return string
+     * @deprecated 4..5 use Versioned::singleton()->getCurrentArchivedDate()
      */
     public static function current_archived_date()
     {
-        $parts = explode('.', Versioned::get_reading_mode());
-        if ($parts[0] == 'Archive') {
-            return $parts[1];
-        }
-        return null;
+        return Versioned::singleton()->getCurrentArchivedDate();
     }
 
     /**
@@ -2325,13 +2349,26 @@ SQL
      *
      * @return string
      */
-    public static function current_archived_stage()
+    public function getCurrentArchivedStage(): ?string
     {
-        $parts = explode('.', Versioned::get_reading_mode());
-        if (sizeof($parts) === 3 && $parts[0] == 'Archive') {
+        $parts = explode('.', ReadingModeState::singleton()->get());
+
+        if (count($parts) === 3 && $parts[0] == 'Archive') {
             return $parts[2];
         }
+
         return static::DRAFT;
+    }
+
+    /**
+     * Get the current archive stage.
+     *
+     * @return string
+     * @deprecated 4..5 use Versioned::singleton()->getCurrentArchivedStage()
+     */
+    public static function current_archived_stage()
+    {
+        return Versioned::singleton()->getCurrentArchivedStage();
     }
 
     /**
@@ -2340,31 +2377,45 @@ SQL
      * @param string $stage New reading stage.
      * @throws InvalidArgumentException
      */
-    public static function set_stage($stage)
+    public function setStage(?string $stage): void
     {
         ReadingMode::validateStage($stage);
-        static::set_reading_mode('Stage.' . $stage);
+        ReadingModeState::singleton()->set($stage);
+    }
+
+    /**
+     * Set the reading stage.
+     *
+     * @param string $stage New reading stage.
+     * @throws InvalidArgumentException
+     * @deprecated use Versioned::singleton()->setStage($stage)
+     */
+    public static function set_stage($stage)
+    {
+       Versioned::singleton()->setStage($stage);
     }
 
     /**
      * Replace default mode.
      * An non-default mode should be specified via querystring arguments.
      *
-     * @param string $mode
+     * @param string $readingMode
+     * @deprecated 4..5 use ReadingModeState::singleton()->setDefault($readingMode)
      */
-    public static function set_default_reading_mode($mode)
+    public static function set_default_reading_mode($readingMode)
     {
-        self::$default_reading_mode = $mode;
+        ReadingModeState::singleton()->setDefault($readingMode);
     }
 
     /**
      * Get default reading mode
      *
      * @return string
+     * @deprecated 4..5 use ReadingModeState::singleton()->getDefault()
      */
     public static function get_default_reading_mode()
     {
-        return self::$default_reading_mode ?: self::DEFAULT_MODE;
+        return ReadingModeState::singleton()->getDefault();
     }
 
     /**
@@ -2373,13 +2424,26 @@ SQL
      *
      * @return bool
      */
-    public static function get_draft_site_secured()
+    public function getDraftSiteSecured(): bool
     {
         if (isset(static::$is_draft_site_secured)) {
-            return (bool)static::$is_draft_site_secured;
+            return (bool) static::$is_draft_site_secured;
         }
+
         // Config default
-        return (bool)Config::inst()->get(self::class, 'draft_site_secured');
+        return (bool) Config::inst()->get(self::class, 'draft_site_secured');
+    }
+
+    /**
+     * Check if draft site should be secured.
+     * Can be turned off if draft site unauthenticated
+     *
+     * @return bool
+     * @deprecated use Versioned::singleton()->getDraftSiteSecured()
+     */
+    public static function get_draft_site_secured()
+    {
+        return Versioned::singleton()->getDraftSiteSecured();
     }
 
     /**
@@ -2387,9 +2451,20 @@ SQL
      *
      * @param bool $secured
      */
-    public static function set_draft_site_secured($secured)
+    public function setDraftSiteSecured(bool $secured): void
     {
         static::$is_draft_site_secured = $secured;
+    }
+
+    /**
+     * Set if the draft site should be secured or not
+     *
+     * @param bool $secured
+     * @deprecated 4..5 use Versioned::singleton()->setDraftSiteSecured($secured);
+     */
+    public static function set_draft_site_secured($secured)
+    {
+        Versioned::singleton()->setDraftSiteSecured((bool) $secured);
     }
 
     /**
@@ -2397,11 +2472,28 @@ SQL
      *
      * @param string $date New reading archived date.
      * @param string $stage Set stage
+     * @deprecated 4..5 use ReadingModeState::singleton()->setWithArchiveDate($date, $stage);
      */
     public static function reading_archived_date($date, $stage = self::DRAFT)
     {
-        ReadingMode::validateStage($stage);
-        Versioned::set_reading_mode('Archive.' . $date . '.' . $stage);
+        ReadingModeState::singleton()->setWithArchiveDate($date, $stage);
+    }
+
+    /**
+     * @param string $class The class of object to be returned
+     * @param string $stage The name of the stage.
+     * @param string|array $filter A filter to be inserted into the WHERE clause.
+     * @param boolean $cache Use caching
+     * @param string|array $orderBy A sort expression to be inserted into the ORDER BY clause.
+     *
+     * @return DataObject|null The first item matching the query
+     */
+    public function getOneByStage($class, $stage, $filter = '', bool $cache = true, $orderBy = '')
+    {
+        return static::withVersionedMode(function () use ($class, $stage, $filter, $cache, $orderBy) {
+            Versioned::singleton()->setStage($stage);
+            return DataObject::get_one($class, $filter, $cache, $orderBy);
+        });
     }
 
     /**
@@ -2414,25 +2506,23 @@ SQL
      * @param string $sort A sort expression to be inserted into the ORDER BY clause.
      *
      * @return DataObject
+     * @deprecated 4..5 use Versioned::singleton()->getOneByStage($class, $stage, $filter, $cache, $sort);
      */
     public static function get_one_by_stage($class, $stage, $filter = '', $cache = true, $sort = '')
     {
-        return static::withVersionedMode(function () use ($class, $stage, $filter, $cache, $sort) {
-            Versioned::set_stage($stage);
-            return DataObject::get_one($class, $filter, $cache, $sort);
-        });
+        return Versioned::singleton()->getOneByStage($class, $stage, $filter, $cache, $sort);
     }
 
     /**
      * Gets the current version number of a specific record.
      *
-     * @param string $class Class to search
+     * @param string|object $class Class to search
      * @param string $stage Stage name
      * @param int $id ID of the record
      * @param bool $cache Set to true to turn on cache
      * @return int|null Return the version number, or null if not on this stage
      */
-    public static function get_versionnumber_by_stage($class, $stage, $id, $cache = true)
+    public function getVersionNumberByStage($class, string $stage, int $id, bool $cache = true): ?int
     {
         ReadingMode::validateStage($stage);
         $baseClass = DataObject::getSchema()->baseDataClass($class);
@@ -2476,6 +2566,21 @@ SQL
     }
 
     /**
+     * Gets the current version number of a specific record.
+     *
+     * @param string $class Class to search
+     * @param string $stage Stage name
+     * @param int $id ID of the record
+     * @param bool $cache Set to true to turn on cache
+     * @return int|null Return the version number, or null if not on this stage
+     * @deprecated 4..5 use Versioned::singleton()->getVersionNumberByStage($class, $stage, $id, $cache)
+     */
+    public static function get_versionnumber_by_stage($class, $stage, $id, $cache = true)
+    {
+        return Versioned::singleton()->getVersionNumberByStage($class, $stage, $id, $cache);
+    }
+
+    /**
      * Hook into {@link Hierarchy::prepopulateTreeDataCache}.
      *
      * @param DataList|array $recordList The list of records to prepopulate caches for. Null for all records.
@@ -2486,8 +2591,8 @@ SQL
     {
         $idList = is_array($recordList) ? $recordList :
             ($recordList instanceof DataList ? $recordList->column('ID') : null);
-        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
-        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
+        Versioned::singleton()->prePopulateVersionNumberCache($this->owner->baseClass(), Versioned::DRAFT, $idList);
+        Versioned::singleton()->prePopulateVersionNumberCache($this->owner->baseClass(), Versioned::LIVE, $idList);
     }
 
     /**
@@ -2499,7 +2604,7 @@ SQL
      * @param string $stage
      * @param array $idList
      */
-    public static function prepopulate_versionnumber_cache($class, $stage, $idList = null)
+    public function prePopulateVersionNumberCache($class, string $stage, ?array $idList = null): void
     {
         ReadingMode::validateStage($stage);
         if (!Config::inst()->get(static::class, 'prepopulate_versionnumber_cache')) {
@@ -2527,8 +2632,8 @@ SQL
             $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
             $parameters = $idList;
 
-        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
-        // no subsequent call is necessary
+            // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
+            // no subsequent call is necessary
         } else {
             self::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
         }
@@ -2538,6 +2643,21 @@ SQL
         foreach ($versions as $id => $version) {
             self::$cache_versionnumber[$baseClass][$stage][$id] = $version;
         }
+    }
+
+    /**
+     * Pre-populate the cache for Versioned::get_versionnumber_by_stage() for
+     * a list of record IDs, for more efficient database querying.  If $idList
+     * is null, then every record will be pre-cached.
+     *
+     * @param string $class
+     * @param string $stage
+     * @param array $idList
+     * @deprecated 4..5 use Versioned::singleton()->prePopulateVersionNumberCache($class, $stage, $idList)
+     */
+    public static function prepopulate_versionnumber_cache($class, $stage, $idList = null)
+    {
+       Versioned::singleton()->prePopulateVersionNumberCache($class, $stage, $idList);
     }
 
     /**
@@ -2553,7 +2673,7 @@ SQL
      *
      * @return DataList A modified DataList designated to the specified stage
      */
-    public static function get_by_stage(
+    public function getByStage(
         $class,
         $stage,
         $filter = '',
@@ -2571,6 +2691,32 @@ SQL
     }
 
     /**
+     * Get a set of class instances by the given stage.
+     *
+     * @param string $class The name of the class.
+     * @param string $stage The name of the stage.
+     * @param string $filter A filter to be inserted into the WHERE clause.
+     * @param string $sort A sort expression to be inserted into the ORDER BY clause.
+     * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
+     * @param int $limit A limit on the number of records returned from the database.
+     * @param string $containerClass The container class for the result set (default is DataList)
+     *
+     * @return DataList A modified DataList designated to the specified stage
+     * @deprecated 4..5 use Versioned::singleton()->getByStage($class, $stage, $filter, $sort, $join, $limit, $containerClass)
+     */
+    public static function get_by_stage(
+        $class,
+        $stage,
+        $filter = '',
+        $sort = '',
+        $join = '',
+        $limit = null,
+        $containerClass = DataList::class
+    ) {
+        return Versioned::singleton()->getByStage($class, $stage, $filter, $sort, $join, $limit, $containerClass);
+    }
+
+    /**
      * Delete this record from the given stage
      *
      * @param string $stage
@@ -2579,8 +2725,9 @@ SQL
     {
         ReadingMode::validateStage($stage);
         $owner = $this->owner;
+
         static::withVersionedMode(function () use ($stage, $owner) {
-            Versioned::set_stage($stage);
+            Versioned::singleton()->setStage($stage);
             $clone = clone $owner;
             $clone->delete();
         });
@@ -2710,7 +2857,7 @@ SQL
      * @param int $id
      * @return DataObject
      */
-    public static function get_latest_version($class, $id)
+    public function getLatestVersion(string $class, int $id): ?DataObject
     {
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $list = DataList::create($baseClass)
@@ -2719,6 +2866,19 @@ SQL
                 "Versioned.id" => $id
             ]);
         return $list->first();
+    }
+
+    /**
+     * Return the latest version of the given record.
+     *
+     * @param string $class
+     * @param int $id
+     * @return DataObject
+     * @deprecated 4..5 use Versioned::singleton()->getLatestVersion($class, $id)
+     */
+    public static function get_latest_version($class, $id)
+    {
+        return Versioned::singleton()->getLatestVersion($class, $id);
     }
 
     /**
@@ -2739,7 +2899,7 @@ SQL
         }
 
         /** @var Versioned|DataObject $version */
-        $version = static::get_latest_version(get_class($owner), $owner->ID);
+        $version = Versioned::singleton()->getLatestVersion(get_class($owner), $owner->ID);
         return ($version->Version == $owner->Version);
     }
 
@@ -2751,11 +2911,13 @@ SQL
     public function isLiveVersion()
     {
         $id = $this->owner->ID ?: $this->owner->OldID;
+
         if (!$id || !$this->isPublished()) {
             return false;
         }
 
-        $liveVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+        $liveVersionNumber = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::LIVE, $id);
+
         return $liveVersionNumber == $this->owner->Version;
     }
 
@@ -2767,11 +2929,13 @@ SQL
     public function isLatestDraftVersion()
     {
         $id = $this->owner->ID ?: $this->owner->OldID;
+
         if (!$id || !$this->isOnDraft()) {
             return false;
         }
 
-        $draftVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
+        $draftVersionNumber = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::DRAFT, $id);
+
         return $draftVersionNumber == $this->owner->Version;
     }
 
@@ -2792,7 +2956,7 @@ SQL
             return true;
         }
 
-        $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+        $liveVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::LIVE, $id);
         return (bool)$liveVersion;
     }
 
@@ -2822,7 +2986,7 @@ SQL
             return true;
         }
 
-        $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
+        $draftVersion = Versioned::singleton()->getVersionNumberByStage($this->owner, Versioned::DRAFT, $id);
         return (bool)$draftVersion;
     }
 
@@ -2866,18 +3030,33 @@ SQL
      * In particular, this will query deleted records as well as active ones.
      *
      * @param string $class
-     * @param string $filter
-     * @param string $sort
+     * @param string|array|SQLConditionGroup $filter
+     * @param string|array|string[] $sort
      * @return DataList
      */
-    public static function get_including_deleted($class, $filter = "", $sort = "")
+    public function getIncludingDeleted(string $class, $filter = "", $sort = "")
     {
-        $list = DataList::create($class)
+        return DataList::create($class)
             ->where($filter)
             ->sort($sort)
             ->setDataQueryParam("Versioned.mode", "latest_versions");
+    }
 
-        return $list;
+    /**
+     * Return the equivalent of a DataList::create() call, querying the latest
+     * version of each record stored in the (class)_Versions tables.
+     *
+     * In particular, this will query deleted records as well as active ones.
+     *
+     * @param string $class
+     * @param string $filter
+     * @param string $sort
+     * @return DataList
+     * @deprecated 4..5 use Versioned::singleton()->getIncludingDeleted($class, $filter, $sort);
+     */
+    public static function get_including_deleted($class, $filter = "", $sort = "")
+    {
+        return Versioned::singleton()->getIncludingDeleted($class, $filter, $sort);
     }
 
     /**
@@ -2893,7 +3072,7 @@ SQL
      *
      * @return DataObject
      */
-    public static function get_version($class, $id, $version)
+    public function getVersion(string $class, int $id, int $version): ?DataObject
     {
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $list = DataList::create($baseClass)
@@ -2906,6 +3085,40 @@ SQL
     }
 
     /**
+     * Return the specific version of the given id.
+     *
+     * Caution: The record is retrieved as a DataObject, but saving back
+     * modifications via write() will create a new version, rather than
+     * modifying the existing one.
+     *
+     * @param string $class
+     * @param int $id
+     * @param int $version
+     *
+     * @return DataObject
+     * @deprecated 4..5 use Versioned::singleton()->getVersion($class, $id, $version);
+     */
+    public static function get_version($class, $id, $version)
+    {
+        Versioned::singleton()->getVersion($class, (int) $id, (int) $version);
+    }
+
+    /**
+     * Return a list of all versions for a given id.
+     *
+     * @param string $class
+     * @param int $id
+     *
+     * @return DataList
+     */
+    public function getAllVersions(string $class, int $id): DataList
+    {
+        return DataList::create($class)
+            ->filter('ID', $id)
+            ->setDataQueryParam('Versioned.mode', 'all_versions');
+    }
+
+    /**
      * Return a list of all versions for a given id.
      *
      * @param string $class
@@ -2915,11 +3128,7 @@ SQL
      */
     public static function get_all_versions($class, $id)
     {
-        $list = DataList::create($class)
-            ->filter('ID', $id)
-            ->setDataQueryParam('Versioned.mode', 'all_versions');
-
-        return $list;
+        return Versioned::singleton()->getAllVersions($class, (int) $id);
     }
 
     /**
@@ -3009,11 +3218,11 @@ SQL
      */
     public static function withVersionedMode($callback)
     {
-        $origReadingMode = static::get_reading_mode();
+        $origReadingMode = ReadingModeState::singleton()->get();
         try {
             return $callback();
         } finally {
-            static::set_reading_mode($origReadingMode);
+            ReadingModeState::singleton()->set($origReadingMode);
         }
     }
 
