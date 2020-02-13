@@ -6,6 +6,8 @@ env:
   global:
     - COMPOSER_ROOT_VERSION=1.x-dev
 
+dist: trusty
+
 matrix:
   fast_finish: true
   include:

@@ -163,7 +163,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         "Version" => "Int",
         "WasPublished" => "Boolean",
         "WasDeleted" => "Boolean",
-        "WasDraft" => "Boolean",
+        "WasDraft" => "Boolean(1)",
         "AuthorID" => "Int",
         "PublisherID" => "Int"
     ];
