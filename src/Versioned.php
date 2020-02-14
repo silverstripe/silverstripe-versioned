@@ -2464,6 +2464,11 @@ SQL
      */
     public static function set_draft_site_secured($secured)
     {
+        // If secured is null then we will treat it as secure
+        $secured = $secured === null
+            ? true
+            : $secured;
+
         Versioned::singleton()->setDraftSiteSecured((bool) $secured);
     }
 
