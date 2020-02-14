@@ -356,7 +356,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // By version number
         if (is_numeric($from)) {
-            return Versioned::singleton()->getVersion($baseClass, $id, $from);
+            return Versioned::singleton()->getVersionOf($baseClass, $id, $from);
         }
 
         // By stage
@@ -2138,8 +2138,8 @@ SQL
     public function compareVersions($from, $to)
     {
         $owner = $this->owner;
-        $fromRecord = Versioned::singleton()->getVersion(get_class($owner), $owner->ID, $from);
-        $toRecord = Versioned::singleton()->getVersion(get_class($owner), $owner->ID, $to);
+        $fromRecord = Versioned::singleton()->getVersionOf(get_class($owner), $owner->ID, $from);
+        $toRecord = Versioned::singleton()->getVersionOf(get_class($owner), $owner->ID, $to);
 
         $diff = new DataDifferencer($fromRecord, $toRecord);
 
@@ -2276,7 +2276,7 @@ SQL
      */
     public static function set_reading_mode($readingMode)
     {
-        ReadingModeState::singleton()->set($readingMode, false);
+        ReadingModeState::singleton()->set($readingMode);
     }
 
     /**
@@ -2380,7 +2380,7 @@ SQL
     public function setStage(?string $stage): void
     {
         ReadingMode::validateStage($stage);
-        ReadingModeState::singleton()->set($stage);
+        ReadingModeState::singleton()->set('Stage.' . $stage);
     }
 
     /**
@@ -2577,7 +2577,7 @@ SQL
      */
     public static function get_versionnumber_by_stage($class, $stage, $id, $cache = true)
     {
-        return Versioned::singleton()->getVersionNumberByStage($class, $stage, $id, $cache);
+        return Versioned::singleton()->getVersionNumberByStage($class, (string) $stage, (int) $id, (bool) $cache);
     }
 
     /**
@@ -3096,11 +3096,11 @@ SQL
      * @param int $version
      *
      * @return DataObject
-     * @deprecated 4..5 use Versioned::singleton()->getVersion($class, $id, $version);
+     * @deprecated 4..5 use Versioned::singleton()->getVersionOf($class, $id, $version);
      */
     public static function get_version($class, $id, $version)
     {
-        Versioned::singleton()->getVersionOf($class, (int) $id, (int) $version);
+        return Versioned::singleton()->getVersionOf($class, (int) $id, (int) $version);
     }
 
     /**

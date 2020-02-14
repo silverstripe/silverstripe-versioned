@@ -34,13 +34,10 @@ class ReadingMode
 
     /**
      * @param string|null $readingMode
-     * @param bool $prependStage - Prepend 'Stage.', set to true by default
      */
-    public function set(?string $readingMode, bool $prependStage = true): void
+    public function set(?string $readingMode): void
     {
-        $this->readingMode = $prependStage && $readingMode !== null && $readingMode !== ''
-            ? 'Stage.' . $readingMode
-            : $readingMode;
+        $this->readingMode = $readingMode;
     }
 
     public function setWithArchiveDate(string $date, string $stage = Versioned::DRAFT): void
