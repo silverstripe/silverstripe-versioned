@@ -1,0 +1,17 @@
+SilverStripe\Versioned\Tests\VersionedTableTest\WoodenRoof:
+  roof-1:
+    Title: 'Roof1'
+
+SilverStripe\Versioned\Tests\VersionedTableTest\House:
+  house-1:
+    Title: 'House1'
+    Roof: =>SilverStripe\Versioned\Tests\VersionedTableTest\WoodenRoof.roof-1
+
+SilverStripe\Versioned\Tests\VersionedTableTest\Visitor:
+  visitor-1:
+    Title: 'Visitor1'
+
+SilverStripe\Versioned\Tests\VersionedTableTest\HouseVisit:
+  visit-1:
+    House: =>SilverStripe\Versioned\Tests\VersionedTableTest\House.house-1
+    Visitor: =>SilverStripe\Versioned\Tests\VersionedTableTest\Visitor.visitor-1
