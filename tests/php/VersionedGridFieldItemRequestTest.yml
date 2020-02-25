@@ -1,0 +1,3 @@
+SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedObject:
+  object-1:
+    Title: "My Object"
