@@ -1,12 +1,14 @@
 language: php
 
-dist: trusty
+dist: xenial
+
+services:
+  - mysql
+  - postgresql
 
 env:
   global:
     - COMPOSER_ROOT_VERSION=1.5.x-dev
-
-dist: trusty
 
 matrix:
   fast_finish: true
@@ -17,9 +19,7 @@ matrix:
       env: DB=MYSQL PHPUNIT_TEST=1
     - php: 7.3
       env: DB=MYSQL PDO=1 PHPUNIT_COVERAGE_TEST=1
-    - php: 7.2
-      env: DB=MYSQL PHPUNIT_TEST=1
-    - php: 7.3
+    - php: 7.4
       env: DB=MYSQL PHPUNIT_TEST=1
 
 before_script:
