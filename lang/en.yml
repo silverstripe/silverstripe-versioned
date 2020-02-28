@@ -60,10 +60,12 @@ en:
     BUTTONAPPLYCHANGES: 'Apply changes'
     BUTTONARCHIVEDESC: 'Unpublish and send to archive'
     BUTTONPUBLISH: Publish
+    BUTTONSAVEPUBLISH: Publish
     BUTTONUNPUBLISH: Unpublish
     BUTTONUNPUBLISHDESC: 'Remove this record from the published site'
     DRAFT: Draft
     MODIFIED: Modified
+    MoreOptions: 'More options'
     Published: 'Published {name} {link}'
     Unpublished: 'Unpublished {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
