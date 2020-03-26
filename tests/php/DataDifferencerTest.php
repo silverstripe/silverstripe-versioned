@@ -22,7 +22,7 @@ class DataDifferencerTest extends SapphireTest
         DataDifferencerTest\HasOneRelationObject::class
     ];
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class DataDifferencerTest extends SapphireTest
         }
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         TestAssetStore::reset();
         parent::tearDown();

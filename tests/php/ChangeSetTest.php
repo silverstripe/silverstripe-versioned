@@ -33,7 +33,7 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\UnstagedObject::class,
     ];
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // Reset overridden permissions
         foreach ($this->getExtraDataObjects() as $dataObjectClass) {
@@ -77,7 +77,8 @@ class ChangeSetTest extends SapphireTest
             $objectClass = DataObject::getSchema()->baseDataClass($class);
 
             foreach ($items as $i => $item) {
-                if ($item->ObjectClass == $objectClass
+                if (
+                    $item->ObjectClass == $objectClass
                     && $item->ObjectID == $objectID
                     && $item->Added == $mode
                 ) {

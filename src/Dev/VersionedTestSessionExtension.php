@@ -1,6 +1,5 @@
 <?php
 
-
 namespace SilverStripe\Versioned\Dev;
 
 use SilverStripe\Dev\TestSession;

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace SilverStripe\Versioned\Caching;
 
 use InvalidArgumentException;
