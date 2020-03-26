@@ -40,13 +40,13 @@ class ChangeSet extends DataObject
     private static $plural_name = 'Campaigns';
 
     /** An active changeset */
-    const STATE_OPEN = 'open';
+    public const STATE_OPEN = 'open';
 
     /** A changeset which is reverted and closed */
-    const STATE_REVERTED = 'reverted';
+    public const STATE_REVERTED = 'reverted';
 
     /** A changeset which is published and closed */
-    const STATE_PUBLISHED = 'published';
+    public const STATE_PUBLISHED = 'published';
 
     private static $table_name = 'ChangeSet';
 

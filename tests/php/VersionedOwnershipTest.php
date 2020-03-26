@@ -39,7 +39,7 @@ class VersionedOwnershipTest extends SapphireTest
 
     protected static $fixture_file = 'VersionedOwnershipTest.yml';
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -88,8 +88,10 @@ class RestoreAction
         $restoredID = $restoredItem->Title ?: $restoredItem->ID;
         $restoredType = strtolower($restoredItem->i18n_singular_name());
 
-        if (method_exists($restoredItem, 'CMSEditLink') &&
-        $restoredItem->CMSEditLink()) {
+        if (
+            method_exists($restoredItem, 'CMSEditLink') &&
+            $restoredItem->CMSEditLink()
+        ) {
             $restoredID = sprintf('<a href="%s">%s</a>', $restoredItem->CMSEditLink(), $restoredID);
         }
 

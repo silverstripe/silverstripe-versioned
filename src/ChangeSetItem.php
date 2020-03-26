@@ -35,18 +35,18 @@ use SilverStripe\Security\Security;
 class ChangeSetItem extends DataObject implements Thumbnail
 {
 
-    const EXPLICITLY = 'explicitly';
+    public const EXPLICITLY = 'explicitly';
 
-    const IMPLICITLY = 'implicitly';
+    public const IMPLICITLY = 'implicitly';
 
     /** Represents an object deleted */
-    const CHANGE_DELETED = 'deleted';
+    public const CHANGE_DELETED = 'deleted';
 
     /** Represents an object which was modified */
-    const CHANGE_MODIFIED = 'modified';
+    public const CHANGE_MODIFIED = 'modified';
 
     /** Represents an object added */
-    const CHANGE_CREATED = 'created';
+    public const CHANGE_CREATED = 'created';
 
     private static $table_name = 'ChangeSetItem';
 
@@ -55,7 +55,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      * should be included in this changeset as soon as any changes exist.
      * Also used for unversioned objects that have no non-recursive publish.
      */
-    const CHANGE_NONE = 'none';
+    public const CHANGE_NONE = 'none';
 
     private static $db = [
         'VersionBefore' => 'Int',

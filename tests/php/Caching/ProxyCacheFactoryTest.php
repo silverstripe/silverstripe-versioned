@@ -8,7 +8,7 @@ use Symfony\Component\Cache\Simple\PhpFilesCache;
 
 class ProxyCacheFactoryTest extends SapphireTest
 {
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
 

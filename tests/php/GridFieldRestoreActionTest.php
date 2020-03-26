@@ -46,7 +46,7 @@ class GridFieldRestoreActionTest extends SapphireTest
         VersionedTest\TestObject::class
     ];
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->list = new DataList(VersionedTest\TestObject::class);

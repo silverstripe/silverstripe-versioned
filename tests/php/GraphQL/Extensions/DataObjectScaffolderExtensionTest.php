@@ -1,4 +1,5 @@
 <?php
+
 namespace SilverStripe\Versioned\Tests\GraphQL\Extensions;
 
 use GraphQL\Type\Definition\IntType;

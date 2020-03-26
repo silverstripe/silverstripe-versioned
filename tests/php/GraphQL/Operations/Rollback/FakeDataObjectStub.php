@@ -1,4 +1,5 @@
 <?php
+
 namespace SilverStripe\Versioned\Tests\GraphQL\Operations\Rollback;
 
 use SilverStripe\Dev\TestOnly;

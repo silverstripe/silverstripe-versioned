@@ -20,13 +20,13 @@ class VersionedManyManyThroughListTest extends SapphireTest
         VersionedManyManyThroughListTest\VersionedObject::class,
     ];
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
         DataObject::reset();
     }
 
-    protected function tearDown() : void
+    protected function tearDown(): void
     {
         DataObject::reset();
         parent::tearDown();

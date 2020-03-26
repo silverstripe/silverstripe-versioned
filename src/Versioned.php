@@ -52,28 +52,28 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * The default reading mode
      */
-    const DEFAULT_MODE = 'Stage.Live';
+    public const DEFAULT_MODE = 'Stage.Live';
 
     /**
      * Constructor arg to specify that staging is active on this record.
      * 'Staging' implies that 'Versioning' is also enabled.
      */
-    const STAGEDVERSIONED = 'StagedVersioned';
+    public const STAGEDVERSIONED = 'StagedVersioned';
 
     /**
      * Constructor arg to specify that versioning only is active on this record.
      */
-    const VERSIONED = 'Versioned';
+    public const VERSIONED = 'Versioned';
 
     /**
      * The Public stage.
      */
-    const LIVE = 'Live';
+    public const LIVE = 'Live';
 
     /**
      * The draft (default) stage
      */
-    const DRAFT = 'Stage';
+    public const DRAFT = 'Stage';
 
     /**
      * A cache used by get_versionnumber_by_stage().
@@ -125,18 +125,18 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Field used to hold the migrating version
      */
-    const MIGRATING_VERSION = 'MigratingVersion';
+    public const MIGRATING_VERSION = 'MigratingVersion';
 
     /**
      * Field used to hold flag indicating the next write should be without a new version
      */
-    const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
+    public const NEXT_WRITE_WITHOUT_VERSIONED = 'NextWriteWithoutVersioned';
 
     /**
      * Prevents delete() from creating a _Versions record (in case this must be deferred)
      * Best used with suppressDeleteVersion()
      */
-    const DELETE_WRITES_VERSION_DISABLED = 'DeleteWritesVersionDisabled';
+    public const DELETE_WRITES_VERSION_DISABLED = 'DeleteWritesVersionDisabled';
 
     /**
      * Ensure versioned page doesn't attempt to virtualise these non-db fields
@@ -909,7 +909,8 @@ SQL
         // accidentally querying the *_Versions tables.
         $versionedMode = $dataObject->getSourceQueryParam('Versioned.mode');
         $modesToAllowVersioning = ['all_versions', 'latest_versions', 'archive', 'version'];
-        if (!empty($dataObject->Version) &&
+        if (
+            !empty($dataObject->Version) &&
             (!empty($versionedMode) && in_array($versionedMode, $modesToAllowVersioning))
         ) {
             // This will ensure that augmentSQL will select only the same version as the owner,
@@ -1659,7 +1660,8 @@ SQL
             ?: ReadingMode::toDataQueryParams(static::get_reading_mode());
 
         // If this is the live record we can view it
-        if (isset($readingParams["Versioned.mode"])
+        if (
+            isset($readingParams["Versioned.mode"])
             && $readingParams["Versioned.mode"] === 'stage'
             && $readingParams["Versioned.stage"] === static::LIVE
         ) {
@@ -2078,7 +2080,8 @@ SQL
     public static function can_choose_site_stage($request)
     {
         // Request is allowed if stage isn't being modified
-        if ((!$request->getVar('stage') || $request->getVar('stage') === static::LIVE)
+        if (
+            (!$request->getVar('stage') || $request->getVar('stage') === static::LIVE)
             && !$request->getVar('archiveDate')
         ) {
             return true;

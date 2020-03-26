@@ -1,4 +1,5 @@
 <?php
+
 namespace SilverStripe\Versioned\Tests\ChangeSetTest;
 
 use SilverStripe\Dev\TestOnly;

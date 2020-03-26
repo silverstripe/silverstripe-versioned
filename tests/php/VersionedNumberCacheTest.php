@@ -29,7 +29,7 @@ class VersionedNumberCacheTest extends SapphireTest
     private static $expectedVersions = [ ];
 
 
-    public static function setUpBeforeClass() : void
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
@@ -61,7 +61,7 @@ class VersionedNumberCacheTest extends SapphireTest
         ];
     }
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
         TestObject::singleton()->flushCache();
