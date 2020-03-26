@@ -33,7 +33,7 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\UnstagedObject::class,
     ];
 
-    protected function tearDown()
+    protected function tearDown() : void
     {
         // Reset overridden permissions
         foreach ($this->getExtraDataObjects() as $dataObjectClass) {

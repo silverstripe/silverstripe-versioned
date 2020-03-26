@@ -19,7 +19,7 @@ class VersionedCascadeDeletesTest extends SapphireTest
         VersionedCascadeDeletesTest\RelatedObject::class,
     ];
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         Versioned::set_stage(Versioned::DRAFT);
