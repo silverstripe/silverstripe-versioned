@@ -32,7 +32,7 @@ class ReadVersionsTest extends SapphireTest
         $readVersions = new ReadVersions(UnversionedWithField::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessageRegExp('/must have the Versioned extension/');
@@ -52,7 +52,7 @@ class ReadVersionsTest extends SapphireTest
         $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessageRegExp('/Cannot view versions/');
@@ -72,7 +72,7 @@ class ReadVersionsTest extends SapphireTest
         $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
         $scaffold = $readVersions->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
         $this->logInWithPermission('ADMIN');
         $member = Security::getCurrentUser();
 

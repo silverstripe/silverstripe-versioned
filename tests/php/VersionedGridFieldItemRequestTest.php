@@ -44,8 +44,8 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $actions = $form->Actions();
 
         // No publish action
-        $this->assertNull($actions->fieldByName('action_doPublish'));
-        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('action_doSave'));
+        $this->assertNull($actions->fieldByName('MajorActions.action_doPublish'));
+        $this->assertInstanceOf(FormAction::class, $actions->fieldByName('MajorActions.action_doSave'));
 
         // No warning for new items
         $this->assertNull($actions->fieldByName('warning'));

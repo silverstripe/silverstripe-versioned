@@ -57,7 +57,7 @@ class DataDifferencerTest extends SapphireTest
     {
         $needle = preg_replace('#\s+#', '', $needle);
         $haystack = preg_replace('#\s+#', '', $haystack);
-        return parent::assertContains($needle, $haystack, $message);
+        return parent::assertStringContainsString($needle, $haystack, $message);
     }
 
     public function testArrayValues()

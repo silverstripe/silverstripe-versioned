@@ -31,7 +31,7 @@ class UnpublishTest extends SapphireTest
 
         $publish = new Unpublish(Fake::class);
         $scaffold = $publish->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         $record = new Fake();
         $record->Name = 'First';
