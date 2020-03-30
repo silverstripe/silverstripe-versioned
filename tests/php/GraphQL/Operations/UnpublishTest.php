@@ -61,7 +61,7 @@ class UnpublishTest extends SapphireTest
 
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $scaffold['resolve'](
             null,
             [

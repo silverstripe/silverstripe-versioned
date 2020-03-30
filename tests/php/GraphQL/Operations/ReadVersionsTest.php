@@ -35,7 +35,7 @@ class ReadVersionsTest extends SapphireTest
         $this->assertIsCallable($scaffold['resolve']);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/must have the Versioned extension/');
+        $this->expectExceptionMessageMatches('/must have the Versioned extension/');
         $scaffold['resolve'](
             new UnversionedWithField(),
             [],
@@ -55,7 +55,7 @@ class ReadVersionsTest extends SapphireTest
         $this->assertIsCallable($scaffold['resolve']);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/Cannot view versions/');
+        $this->expectExceptionMessageMatches('/Cannot view versions/');
         $scaffold['resolve'](
             new Fake(),
             [],

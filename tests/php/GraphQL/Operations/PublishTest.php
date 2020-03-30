@@ -58,7 +58,7 @@ class PublishTest extends SapphireTest
         $this->assertEquals('First', $result->Name);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $scaffold['resolve'](
             null,
             [
