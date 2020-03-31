@@ -31,7 +31,7 @@ class UnpublishTest extends SapphireTest
 
         $publish = new Unpublish(Fake::class);
         $scaffold = $publish->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         $record = new Fake();
         $record->Name = 'First';
@@ -61,7 +61,7 @@ class UnpublishTest extends SapphireTest
 
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $scaffold['resolve'](
             null,
             [

@@ -41,7 +41,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     {
         $filter = new ApplyVersionFilters();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/ArchiveDate parameter/');
+        $this->expectExceptionMessageMatches('/ArchiveDate parameter/');
         $filter->applyToList($list, ['Mode' => 'archive']);
     }
 
@@ -49,7 +49,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     {
         $filter = new ApplyVersionFilters();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Invalid date/');
+        $this->expectExceptionMessageMatches('/Invalid date/');
         $filter->applyToList($list, ['Mode' => 'archive', 'ArchiveDate' => 'foo']);
     }
 
@@ -58,7 +58,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     {
         $filter = new ApplyVersionFilters();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Version parameter/');
+        $this->expectExceptionMessageMatches('/Version parameter/');
         $filter->applyToList($list, ['Mode' => 'version']);
     }
 
@@ -112,7 +112,7 @@ class ApplyVersionFiltersTest extends SapphireTest
     {
         $filter = new ApplyVersionFilters();
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Status parameter/');
+        $this->expectExceptionMessageMatches('/Status parameter/');
         $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'status']);
     }

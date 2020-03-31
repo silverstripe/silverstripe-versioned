@@ -32,7 +32,7 @@ class CopyToStageTest extends SapphireTest
         $manager->addType(new ObjectType(['name' => $typeName]));
         $copyToStage = new CopyToStage(Fake::class);
         $scaffold = $copyToStage->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         /* @var Fake|Versioned $record */
         $record = new Fake();
