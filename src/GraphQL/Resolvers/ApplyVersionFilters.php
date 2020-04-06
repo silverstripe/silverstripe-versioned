@@ -10,6 +10,49 @@ use DateTime;
 class ApplyVersionFilters
 {
     /**
+     * Use this as a fallback where resolver results aren't queried as a DataList,
+     * but rather use DataObject::get_one(). Example: SiteTree::get_by_link().
+     * Note that the 'status' and 'version' modes are not supported.
+     * Wrap this call in {@link Versioned::withVersionedMode()} in order to avoid side effects.
+     *
+     * @param $versioningArgs
+     */
+    public function applyToReadingState($versioningArgs)
+    {
+        if (!isset($versioningArgs['Mode'])) {
+            return;
+        }
+
+        $this->validateArgs($versioningArgs);
+
+        $mode = $versioningArgs['Mode'];
+        switch ($mode) {
+            case Versioned::LIVE:
+            case Versioned::DRAFT:
+            case 'latest_versions':
+                Versioned::set_stage($mode);
+                break;
+            case 'archive':
+                $date = $versioningArgs['ArchiveDate'];
+                Versioned::set_reading_mode($mode);
+                Versioned::reading_archived_date($date);
+                break;
+            case 'status':
+                throw new InvalidArgumentException(
+                    'The "status" mode is not supported for setting versioned reading stages'
+                );
+                break;
+            case 'version':
+                throw new InvalidArgumentException(
+                    'The "version" mode is not supported for setting versioned reading stages'
+                );
+                break;
+            default:
+                throw new InvalidArgumentException("Unsupported read mode {$mode}");
+        }
+    }
+
+    /**
      * @param DataList $list
      * @param array $versioningArgs
      */
@@ -18,6 +61,8 @@ class ApplyVersionFilters
         if (!isset($versioningArgs['Mode'])) {
             return;
         }
+
+        $this->validateArgs($versioningArgs);
 
         $mode = $versioningArgs['Mode'];
         switch ($mode) {
@@ -28,20 +73,7 @@ class ApplyVersionFilters
                     ->setDataQueryParam('Versioned.stage', $mode);
                 break;
             case 'archive':
-                if (empty($versioningArgs['ArchiveDate'])) {
-                    throw new InvalidArgumentException(sprintf(
-                        'You must provide an ArchiveDate parameter when using the "%s" mode',
-                        $mode
-                    ));
-                }
                 $date = $versioningArgs['ArchiveDate'];
-                if (!$this->isValidDate($date)) {
-                    throw new InvalidArgumentException(sprintf(
-                        'Invalid date: "%s". Must be YYYY-MM-DD format',
-                        $date
-                    ));
-                }
-
                 $list = $list
                     ->setDataQueryParam('Versioned.mode', 'archive')
                     ->setDataQueryParam('Versioned.date', $date);
@@ -50,13 +82,6 @@ class ApplyVersionFilters
                 $list = $list->setDataQueryParam('Versioned.mode', 'latest_versions');
                 break;
             case 'status':
-                if (empty($versioningArgs['Status'])) {
-                    throw new InvalidArgumentException(sprintf(
-                        'You must provide a Status parameter when using the "%s" mode',
-                        $mode
-                    ));
-                }
-
                 // When querying by Status we need to ensure both stage / live tables are present
                 $baseTable = singleton($list->dataClass())->baseTable();
                 $liveTable = $baseTable . '_Live';
@@ -121,15 +146,60 @@ class ApplyVersionFilters
                 break;
             case 'version':
                 // Note: Only valid for ReadOne
+                $list = $list->setDataQueryParam([
+                    "Versioned.mode" => 'version',
+                    "Versioned.version" => $versioningArgs['Version'],
+                ]);
+                break;
+            default:
+                throw new InvalidArgumentException("Unsupported read mode {$mode}");
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @param $versioningArgs
+     */
+    public function validateArgs($versioningArgs)
+    {
+        $mode = $versioningArgs['Mode'];
+
+        switch ($mode) {
+            case Versioned::LIVE:
+            case Versioned::DRAFT:
+                break;
+            case 'archive':
+                if (empty($versioningArgs['ArchiveDate'])) {
+                    throw new InvalidArgumentException(sprintf(
+                        'You must provide an ArchiveDate parameter when using the "%s" mode',
+                        $mode
+                    ));
+                }
+                $date = $versioningArgs['ArchiveDate'];
+                if (!$this->isValidDate($date)) {
+                    throw new InvalidArgumentException(sprintf(
+                        'Invalid date: "%s". Must be YYYY-MM-DD format',
+                        $date
+                    ));
+                }
+                break;
+            case 'latest_versions':
+                break;
+            case 'status':
+                if (empty($versioningArgs['Status'])) {
+                    throw new InvalidArgumentException(sprintf(
+                        'You must provide a Status parameter when using the "%s" mode',
+                        $mode
+                    ));
+                }
+                break;
+            case 'version':
+                // Note: Only valid for ReadOne
                 if (!isset($versioningArgs['Version'])) {
                     throw new InvalidArgumentException(
                         'When using the "version" mode, you must specify a Version parameter'
                     );
                 }
-                $list = $list->setDataQueryParam([
-                    "Versioned.mode" => 'version',
-                    "Versioned.version" => $versioningArgs['Version'],
-                ]);
                 break;
             default:
                 throw new InvalidArgumentException("Unsupported read mode {$mode}");

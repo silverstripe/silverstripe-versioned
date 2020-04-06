@@ -1,15 +1,79 @@
 de:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Archiv
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Seite bearbeiten'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: Versionsverlauf
   SilverStripe\Versioned\ChangeSet:
+    EMPTY: Leer
+    ITEMS_CHANGES:
+      one: '{total} (1 Änderung)'
+      other: '{total} ({count} Änderungen)'
+    ITEMS_TOTAL:
+      one: '1 insgesamt'
+      other: '{count} insgesamt'
     NAME: Name
     PLURALNAME: Kampagnen
     PLURALS:
       one: 'Eine Kampagne'
       other: '{count} Kampagnen'
+    PUBLISHED_DATE_BY: '{date} von {name}'
+    PUBLISHED_TODAY: 'Heute {time}'
+    PUBLISHED_TODAY_BY: 'Heute {time} von {name}'
+    PUBLISHER_NAME: 'Veröffentlicht von'
+    PUBLISH_DATE: Veröffentlichungsdatum
     SINGULARNAME: Kampagne
     STATE: Bundesland
+    STATE_OPEN: Aktiv
+    STATE_PUBLISHED: Veröffentlicht
+    STATE_REVERTED: 'Rückgängig gemacht'
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Änderungssatz Elemente'
+    PLURALS:
+      one: 'Ein Änderungssatz Element'
+      other: '{count} Änderungssatz Elemente'
+    SINGULARNAME: 'Änderungssatz Element'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Archiv
+    ArchivePermissionsFailure: 'Keine Berechtigung zum archivieren'
+    Delete: Löschen
+  SilverStripe\Versioned\GridFieldRestoreAction:
+    RESTORE: 'Als Entwurf wiederherstellen'
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Generiert durch Veröffentlichung von ''{title}'' am {created}'
+  SilverStripe\Versioned\RestoreAction:
+    RESTORE: 'Als Entwurf wiederherstellen'
+    RESTORE_CHANGEDLOCATION: '{model} "{id}" auf höchster Ebene wiederhergestellt da ursprünglicher Platz nicht gefunden werden konnte.'
+    RESTORE_DESC: 'Archivierte Version als Entwurf wiederherstellen'
+    RESTORE_FALIURE_PERMISSION: 'Unzureichende Berechtigungen um Element wiederherzustellen'
+    RESTORE_FALIURE_RECORD: 'Wiederherstellung nicht möglich'
+    RESTORE_FALIURE_STATE: 'Das Element existiert bereits und kann nicht wiederhergestellt werden'
+    RESTORE_SUCCESS: '{model} "{id}" erfolgreich wiederhergestellt'
+    RESTORE_TO_ROOT: 'Als Entwurf auf oberster Ebene wiederherstellen'
+    RESTORE_TO_ROOT_DESC: 'Archivierte Version als Entwurf auf oberster Ebene wiederherstellen'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versionen
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     ARCHIVE: Archiv
+    Archived: '{name} {title} archiviert'
+    BUTTONAPPLYCHANGES: 'Änderungen anwenden'
+    BUTTONARCHIVEDESC: 'Veröffentlichung zurücknehmen und archivieren'
     BUTTONPUBLISH: Veröffentlichen
+    BUTTONUNPUBLISH: 'Veröffentlichung zurücknehmen'
+    BUTTONUNPUBLISHDESC: 'Diesen Eintrag von der veröffentlichten Seite entfernen'
+    DRAFT: Entwurf
+    MODIFIED: Bearbeitet
     Published: '{name} {link} veröffentlicht'
+    Unpublished: 'Veröffentlichung von {name} {link} zurückgenommen'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Element wurde noch nicht veröffentlicht'
+    ADDEDTODRAFTSHORT: Entwurf
+    ARCHIVEDPAGEHELP: 'Element ist als Entwurf und Live entfernt'
+    ARCHIVEDPAGESHORT: Archiviert
+    MODIFIEDONDRAFTHELP: 'Element hat unveröffentlichte Änderungen'
+    MODIFIEDONDRAFTSHORT: Bearbeitet
+    ONLIVEONLYSHORT: 'Nur auf Live'
+    ONLIVEONLYSHORTHELP: 'Element wurde veröffentlicht, aber Entwurf wurde gelöscht'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Sie müssen sich mit Ihrem CMS Passwort anmelden um Entwürfe und Archivierten Inhalt anzusehen. <a href="{link}">Hier klicken um zurück zur Veröffentlichten Seite zu gelangen</a>'

@@ -31,7 +31,10 @@
     "extra": {
         "branch-alias": {
             "dev-master": "2.x-dev"
-        }
+        },
+        "expose": [
+            "client/dist"
+        ]
     },
     "autoload": {
         "psr-4": {

@@ -163,7 +163,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         "Version" => "Int",
         "WasPublished" => "Boolean",
         "WasDeleted" => "Boolean",
-        "WasDraft" => "Boolean",
+        "WasDraft" => "Boolean(1)",
         "AuthorID" => "Int",
         "PublisherID" => "Int"
     ];
@@ -1262,6 +1262,8 @@ SQL
         unset($manipulation[$baseTable]);
         $this->owner->extend('augmentWriteDeletedVersion', $manipulation, $stages);
         DB::manipulate($manipulation);
+        $this->owner->Version = $manipulation["{$baseTable}_Versions"]['fields']['Version'];
+        $this->owner->extend('onAfterVersionDelete');
     }
 
     public function augmentWrite(&$manipulation)
