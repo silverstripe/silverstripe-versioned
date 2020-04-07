@@ -59,7 +59,7 @@
     "babel-polyfill": "6.7.4",
     "bootstrap": "4.1.2",
     "classnames": "^2.2.5",
-    "jquery": "^3.1.1"
+    "jquery": "^3.4.0"
   },
   "babel": {
     "presets": [
