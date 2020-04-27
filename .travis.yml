@@ -46,7 +46,6 @@ before_script:
 script:
   - if [[ $PHPUNIT_TEST ]]; then vendor/bin/phpunit tests/php; fi
   - if [[ $PHPCS_TEST ]]; then composer run-script lint; fi
-  - if [[ $PHPCS_TEST ]]; then composer validate; fi
   - if [[ $PHPUNIT_COVERAGE_TEST ]]; then phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage.xml; fi
 
 after_success:
