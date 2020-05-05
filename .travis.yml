@@ -1,16 +1,22 @@
 language: php
 
+os: linux
+
 dist: xenial
 
 services:
   - mysql
   - postgresql
 
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
 env:
   global:
     - COMPOSER_ROOT_VERSION=2.x-dev
 
-matrix:
+jobs:
   fast_finish: true
   include:
     - php: 7.2
