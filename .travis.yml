@@ -1,6 +1,16 @@
 language: php
 
-dist: trusty
+os: linux
+
+dist: xenial
+
+services:
+  - mysql
+  - postgresql
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
 
 env:
   global:
@@ -8,7 +18,7 @@ env:
 
 dist: trusty
 
-matrix:
+jobs:
   fast_finish: true
   include:
     - php: 5.6
@@ -31,15 +41,13 @@ before_script:
 
 # Install composer
   - composer validate
-  - composer install --prefer-dist
-  - composer require silverstripe/recipe-core:4.4.x-dev silverstripe/admin:1.4.x-dev silverstripe/graphql:2.0.x-dev --prefer-dist --no-update
-  - composer update
-  - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:2.1.x-dev --prefer-dist; fi
+  - composer require silverstripe/recipe-core:4.4.x-dev silverstripe/admin:1.4.x-dev silverstripe/graphql:2.0.x-dev --no-update
+  - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:2.1.x-dev --no-update; fi
+  - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
 
 script:
   - if [[ $PHPUNIT_TEST ]]; then vendor/bin/phpunit tests/php; fi
   - if [[ $PHPCS_TEST ]]; then composer run-script lint; fi
-  - if [[ $PHPCS_TEST ]]; then composer validate; fi
   - if [[ $PHPUNIT_COVERAGE_TEST ]]; then phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage.xml; fi
 
 after_success:
