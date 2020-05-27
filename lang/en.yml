@@ -55,11 +55,11 @@ en:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archive
     Archived: 'Archived {name} {title}'
     BUTTONAPPLYCHANGES: 'Apply changes'
     BUTTONARCHIVEDESC: 'Unpublish and send to archive'
-    BUTTONPUBLISH: Publish
+    BUTTONPUBLISHED: Published
+    BUTTONSAVED: Saved
     BUTTONSAVEPUBLISH: Publish
     BUTTONUNPUBLISH: Unpublish
     BUTTONUNPUBLISHDESC: 'Remove this record from the published site'
