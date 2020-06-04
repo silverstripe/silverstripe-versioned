@@ -14,7 +14,7 @@ cache:
 
 env:
   global:
-    - COMPOSER_ROOT_VERSION=1.6.x-dev
+    - COMPOSER_ROOT_VERSION=1.x-dev
 
 jobs:
   fast_finish: true
@@ -37,7 +37,7 @@ before_script:
 
 # Install composer
   - composer validate
-  - composer require silverstripe/recipe-core:4.6.x-dev silverstripe/admin:1.6.x-dev silverstripe/graphql:3.3.x-dev --no-update
+  - composer require silverstripe/recipe-core:4.x-dev silverstripe/admin:1.x-dev silverstripe/graphql:3.x-dev --no-update
   - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:2.x-dev --no-update; fi
   - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
 
