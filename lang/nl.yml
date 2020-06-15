@@ -11,9 +11,7 @@ nl:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archiveren
     BUTTONARCHIVEDESC: 'Publicatie intrekken en archiveren'
-    BUTTONPUBLISH: Publiceren
     BUTTONUNPUBLISH: 'Publicatie intrekken'
     BUTTONUNPUBLISHDESC: 'Dit record van de gepubliceerde site verwijderen'
     Published: 'Gepubliceerd: {name} {link}'

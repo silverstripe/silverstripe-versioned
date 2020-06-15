@@ -55,11 +55,9 @@ de:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versionen
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archiv
     Archived: '{name} {title} archiviert'
     BUTTONAPPLYCHANGES: 'Änderungen anwenden'
     BUTTONARCHIVEDESC: 'Veröffentlichung zurücknehmen und archivieren'
-    BUTTONPUBLISH: Veröffentlichen
     BUTTONUNPUBLISH: 'Veröffentlichung zurücknehmen'
     BUTTONUNPUBLISHDESC: 'Diesen Eintrag von der veröffentlichten Seite entfernen'
     DRAFT: Entwurf

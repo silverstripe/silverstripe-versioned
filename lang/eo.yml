@@ -33,11 +33,9 @@ eo:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Enarkivigi
     Archived: 'Enarkivigita {name} {titolo}'
     BUTTONAPPLYCHANGES: 'Apliki ŝanĝojn'
     BUTTONARCHIVEDESC: 'Malpublikigi kaj enarkivigi'
-    BUTTONPUBLISH: Publikigi
     BUTTONUNPUBLISH: Malpublikigi
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
     DRAFT: Malneto

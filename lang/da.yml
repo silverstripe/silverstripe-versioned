@@ -31,10 +31,8 @@ da:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Arkiver
     Archived: 'Arkiverede {name} {title}'
     BUTTONARCHIVEDESC: 'Fjern udgivelse og læg i arkiv'
-    BUTTONPUBLISH: Udgiv
     BUTTONUNPUBLISH: 'Fjern udgivelse'
     BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
     Published: 'Udgiv {name} {link}'
