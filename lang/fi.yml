@@ -55,11 +55,9 @@ fi:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versiot
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Arkisto
     Archived: 'Arkistoitiin {name} {title}'
     BUTTONAPPLYCHANGES: 'Hyväksy muutokset'
     BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
-    BUTTONPUBLISH: Julkaise
     BUTTONUNPUBLISH: 'Poista julkaisusta'
     BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
     DRAFT: Vedos

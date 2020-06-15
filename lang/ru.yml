@@ -20,9 +20,7 @@ ru:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Версии
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Архив
     BUTTONARCHIVEDESC: 'Отменить публикацию и добавить в архив'
-    BUTTONPUBLISH: Опубликовать
     BUTTONUNPUBLISH: 'Отменить публикацию'
     BUTTONUNPUBLISHDESC: 'Удалить эту запись с сайта'
     Published: 'Опубликовано {name} {link}'

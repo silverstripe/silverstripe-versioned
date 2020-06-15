@@ -33,11 +33,9 @@ it:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archivia
     Archived: 'Pubblicato {name} {title}'
     BUTTONAPPLYCHANGES: 'Applica i cambiamenti'
     BUTTONARCHIVEDESC: 'Nascondi e archivia'
-    BUTTONPUBLISH: Pubblica
     BUTTONUNPUBLISH: Nascondi
     BUTTONUNPUBLISHDESC: 'Rimuovere questa voce dal sito pubblicato'
     DRAFT: Bozza

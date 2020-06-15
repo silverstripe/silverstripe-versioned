@@ -61,11 +61,9 @@ pl:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Wersje
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archiwum
     Archived: 'Zarchiwizowano {name} {title}'
     BUTTONAPPLYCHANGES: 'Zastosowano zmiany'
     BUTTONARCHIVEDESC: 'Cofnij publikację i wyślij do archiwum'
-    BUTTONPUBLISH: Publikuj
     BUTTONUNPUBLISH: 'Cofnij publikację'
     BUTTONUNPUBLISHDESC: 'Usuń rekord z opublikowanych stron'
     DRAFT: Szkic

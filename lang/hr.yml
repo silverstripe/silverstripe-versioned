@@ -16,9 +16,7 @@ hr:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Verzije
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Arhiviraj
     BUTTONARCHIVEDESC: 'Poništi objavljivanje i pošalji u arhivu'
-    BUTTONPUBLISH: Objavi
     BUTTONUNPUBLISH: 'Poništi objavljivanje'
     BUTTONUNPUBLISHDESC: 'Ukloni ovaj zapis s objavljene strancie'
   SilverStripe\Versioned\VersionedHTTPMiddleware:

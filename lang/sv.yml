@@ -24,10 +24,8 @@ sv:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Arkiv
     Archived: 'Arkiverade {name} {title}'
     BUTTONARCHIVEDESC: 'Avpublicera och arkivera'
-    BUTTONPUBLISH: Publicera
     BUTTONUNPUBLISH: Avpublicera
     BUTTONUNPUBLISHDESC: 'Ta bort detta object från den publicerade webbplatsen'
     Published: 'Publicerade {name} {link}'

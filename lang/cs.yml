@@ -10,9 +10,7 @@ cs:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Verze
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archiv
     BUTTONARCHIVEDESC: 'Nezveřejnit a poslat do archivu'
-    BUTTONPUBLISH: Zveřejnit
     BUTTONUNPUBLISH: Nezveřejnit
     BUTTONUNPUBLISHDESC: 'Odstranit tento záznam ze zveřejněného webu'
     Published: 'Zveřejněno {name} {link}'

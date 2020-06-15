@@ -25,10 +25,8 @@ fr:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    ARCHIVE: Archive
     Archived: '{name} {title} archivé'
     BUTTONARCHIVEDESC: 'Dépublier et envoyer en archive'
-    BUTTONPUBLISH: Publier
     BUTTONUNPUBLISH: Dépublier
     BUTTONUNPUBLISHDESC: 'Retirer cette entrée du site publié'
     Published: '{name} {link} publié'
