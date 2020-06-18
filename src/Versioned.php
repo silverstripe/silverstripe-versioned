@@ -2619,11 +2619,11 @@ SQL
                 $owner->setSourceQueryParam('Versioned.stage', $stage);
 
                 // Write
-                $owner->invokeWithExtensions('onBeforeWriteToStage', $toStage, $forceInsert);
+                $owner->invokeWithExtensions('onBeforeWriteToStage', $stage, $forceInsert);
                 return $owner->write(false, $forceInsert);
             } finally {
                 // Revert global state
-                $owner->invokeWithExtensions('onAfterWriteToStage', $toStage, $forceInsert);
+                $owner->invokeWithExtensions('onAfterWriteToStage', $stage, $forceInsert);
                 $owner->setSourceQueryParams($oldParams);
             }
         });
