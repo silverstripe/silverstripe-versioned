@@ -20,6 +20,7 @@ use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
@@ -1587,6 +1588,27 @@ class VersionedTest extends SapphireTest
             ],
             $versions
         );
+    }
+
+    public function testArchivedEntries()
+    {
+        // create a new record and save it
+        $record = new VersionedTest\TestObject();
+        $record->Title = 'My record';
+        $record->write();
+
+        // then archive it
+        $record->doArchive();
+
+        // ensure we can retrieve the archived entry when retrieving versioned entries
+        $versions = $record->VersionsList()->toArray();
+        $this->assertCount(2, $versions, 'All versions are retrieved');
+        /** @var TestObject $archivedVersion */
+        $archivedVersion = $versions[1];
+        $this->assertEquals(true, $archivedVersion->isArchived(), 'Archived entry is included in version list');
+
+        // ensure our fields are preserved for the archived version entry
+        $this->assertEquals('My record', $archivedVersion->Title, 'Archived entry fields are populated');
     }
 
     public function testLiveObjectDeletedOnUnpublish()

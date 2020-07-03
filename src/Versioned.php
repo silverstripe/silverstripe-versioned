@@ -615,9 +615,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             "count(DISTINCT \"{$baseTable}_Versions\".\"RecordID\")",
             "count(DISTINCT \"{$baseTable}_Versions\".\"ID\")"
         );
-
-        // Filter deleted versions, which are all unqueryable
-        $query->addWhere(["\"{$baseTable}_Versions\".\"WasDeleted\"" => 0]);
     }
 
     /**
@@ -809,8 +806,6 @@ SQL
         // Join and select only latest version
         $baseTable = $this->baseTable();
         $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
-
-        $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
 
         if ($this->shouldApplySubSelectAsCondition($query)) {
             $subSelect->addWhere(
@@ -1153,18 +1148,16 @@ SQL
         ];
 
         // Add any extra, unchanged fields to the version record.
-        if (!$isDelete) {
-            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
-            if ($data) {
-                $fields = $schema->databaseFields($class, false);
-                if (is_array($fields)) {
-                    $data = array_intersect_key($data, $fields);
+        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        if ($data) {
+            $fields = $schema->databaseFields($class, false);
+            if (is_array($fields)) {
+                $data = array_intersect_key($data, $fields);
 
-                    foreach ($data as $k => $v) {
-                        // If the value is not set at all in the manipulation currently, use the existing value from the database
-                        if (!array_key_exists($k, $newManipulation['fields'])) {
-                            $newManipulation['fields'][$k] = $v;
-                        }
+                foreach ($data as $k => $v) {
+                    // If the value is not set at all in the manipulation currently, use the existing value from the database
+                    if (!array_key_exists($k, $newManipulation['fields'])) {
+                        $newManipulation['fields'][$k] = $v;
                     }
                 }
             }
@@ -1856,13 +1849,15 @@ SQL
         // Unpublish without creating deleted version
         $this->suppressDeletedVersion(function () use ($owner) {
             $owner->doUnpublish();
-            $owner->deleteFromStage(static::DRAFT);
         });
         // Create deleted version in both stages
         $this->createDeletedVersion([
             static::LIVE,
             static::DRAFT,
         ]);
+        $this->suppressDeletedVersion(function () use ($owner) {
+            $owner->deleteFromStage(static::DRAFT);
+        });
         $owner->invokeWithExtensions('onAfterArchive', $this);
         return true;
     }
