@@ -23,7 +23,8 @@ class VersionedTableDataQueryExtension extends Extension
      */
     public function updateJoinTableName($class, $table, &$updated)
     {
-        if (!Extensible::has_extension($class, Versioned::class)) {
+        $inst = Injector::inst()->get($class);
+        if (!$inst->hasExtension(Versioned::class) || !$inst->hasStages()) {
             return;
         }
 
