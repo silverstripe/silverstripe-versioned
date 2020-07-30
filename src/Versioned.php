@@ -2438,6 +2438,23 @@ SQL
      */
     public static function get_versionnumber_by_stage($class, $stage, $id, $cache = true)
     {
+        $version = static::determineVersionNumberByStage($class, $stage, $id, $cache);
+        $className = $class instanceof DataObject ? $class->ClassName : $class;
+        $object = DataObject::singleton($className);
+        $object->invokeWithExtensions('updateGetVersionNumberByStage', $version, $class, $stage, $id, $cache);
+
+        return $version;
+    }
+
+    /**
+     * @param DataObject|string $class
+     * @param string $stage
+     * @param int $id
+     * @param bool $cache
+     * @return int|null
+     */
+    private static function determineVersionNumberByStage($class, $stage, $id, $cache)
+    {
         ReadingMode::validateStage($stage);
         $baseClass = DataObject::getSchema()->baseDataClass($class);
         $stageTable = DataObject::getSchema()->tableName($baseClass);
@@ -2542,6 +2559,10 @@ SQL
         foreach ($versions as $id => $version) {
             self::$cache_versionnumber[$baseClass][$stage][$id] = $version;
         }
+
+        $className = $class instanceof DataObject ? $class->ClassName : $class;
+        $object = DataObject::singleton($className);
+        $object->invokeWithExtensions('updatePrePopulateVersionNumberCache', $versions, $class, $stage, $idList);
     }
 
     /**
@@ -2807,8 +2828,13 @@ SQL
      */
     public function isArchived()
     {
-        $id = $this->owner->ID ?: $this->owner->OldID;
-        return $id && !$this->isOnDraft() && !$this->isPublished();
+        $owner = $this->owner;
+        $id = $owner->ID ?: $owner->OldID;
+        $isArchived = $id && !$this->isOnDraft() && !$this->isPublished();
+
+        $owner->invokeWithExtensions('updateIsArchived', $isArchived);
+
+        return $isArchived;
     }
 
     /**
