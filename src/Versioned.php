@@ -1433,6 +1433,24 @@ SQL
     }
 
     /**
+     * Helper method to safely suppress delete callback on a separate DataObject
+     *
+     * @param DataObject $dataObject
+     * @param callable $callback
+     * @return mixed Result of $callback()
+     */
+    private function suppressDeletedVersionOnDataObject($dataObject, $callback)
+    {
+        $original = $dataObject->getField(self::DELETE_WRITES_VERSION_DISABLED);
+        try {
+            $dataObject->setField(self::DELETE_WRITES_VERSION_DISABLED, true);
+            return $callback();
+        } finally {
+            $dataObject->setField(self::DELETE_WRITES_VERSION_DISABLED, $original);
+        }
+    }
+
+    /**
      * If a write was skipped, then we need to ensure that we don't leave a
      * migrateVersion() value lying around for the next write.
      */
@@ -1853,11 +1871,31 @@ SQL
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeArchive', $this);
         $owner->deleteFromChangeSets();
-        // Unpublish without creating deleted version
-        $this->suppressDeletedVersion(function () use ($owner) {
-            $owner->doUnpublish();
-            $owner->deleteFromStage(static::DRAFT);
-        });
+
+        $isLiveVersion = $owner->isLiveVersion();
+        $class = get_class($this->owner);
+        $id = $this->owner->ID;
+
+        // Unpublish (including delete) from live stage, without creating deleted record on version table
+        // Explicitly use the live record instead of just using $owner which may be the draft record
+        // to handle cases where the record is in a modified state and an extension somewhere needs to
+        // use a value specifically from the live record, for example \Silverstripe\Assets\File::Hash
+        $liveRecord = $isLiveVersion ? $owner : static::get_by_stage($class, Versioned::LIVE)->byID($id);
+        if ($liveRecord) {
+            $this->suppressDeletedVersionOnDataObject($liveRecord, function () use ($liveRecord) {
+                $liveRecord->doUnpublish();
+            });
+        }
+
+        // Delete from draft stage, without creating deleted record on version table
+        // Explicitly use the draft record for the same reasons as above
+        $draftRecord = !$isLiveVersion ? $owner : static::get_by_stage($class, Versioned::DRAFT)->byID($id);
+        if ($draftRecord) {
+            $this->suppressDeletedVersionOnDataObject($draftRecord, function () use ($draftRecord) {
+                $draftRecord->deleteFromStage(static::DRAFT);
+            });
+        }
+
         // Create deleted version in both stages
         $this->createDeletedVersion([
             static::LIVE,
@@ -1893,8 +1931,15 @@ SQL
         static::withVersionedMode(function () use ($owner) {
             static::set_stage(static::LIVE);
 
-            // This way our ID won't be unset
-            $clone = clone $owner;
+            if (!$owner->isLiveVersion()) {
+                // Re-fetch the current DataObject to ensure we have data from the LIVE stage
+                // This is particularly relevant for DataObject's in a modified state so that
+                // any delete extensions have the correct database record values
+                $clone = $owner::get()->byID($owner->ID);
+            } else {
+                // This way our ID won't be unset
+                $clone = clone $owner;
+            }
             $clone->delete();
         });
 
