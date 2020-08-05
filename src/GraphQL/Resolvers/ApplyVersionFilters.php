@@ -17,15 +17,15 @@ class ApplyVersionFilters
      *
      * @param $versioningArgs
      */
-    public function applyToReadingState($versioningArgs)
+    public function applyToReadingState(array $versioningArgs)
     {
-        if (!isset($versioningArgs['Mode'])) {
+        if (!isset($versioningArgs['mode'])) {
             return;
         }
 
         $this->validateArgs($versioningArgs);
 
-        $mode = $versioningArgs['Mode'];
+        $mode = $versioningArgs['mode'];
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
@@ -34,7 +34,7 @@ class ApplyVersionFilters
                 Versioned::set_stage($mode);
                 break;
             case 'archive':
-                $date = $versioningArgs['ArchiveDate'];
+                $date = $versioningArgs['archiveDate'];
                 Versioned::set_reading_mode($mode);
                 Versioned::reading_archived_date($date);
                 break;
@@ -56,16 +56,18 @@ class ApplyVersionFilters
     /**
      * @param DataList $list
      * @param array $versioningArgs
+     * @throws InvalidArgumentException
+     * @return DataList
      */
-    public function applyToList(&$list, $versioningArgs)
+    public function applyToList(DataList $list, array $versioningArgs): DataList
     {
-        if (!isset($versioningArgs['Mode'])) {
+        if (!isset($versioningArgs['mode'])) {
             return;
         }
 
         $this->validateArgs($versioningArgs);
 
-        $mode = $versioningArgs['Mode'];
+        $mode = $versioningArgs['mode'];
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
@@ -74,7 +76,7 @@ class ApplyVersionFilters
                     ->setDataQueryParam('Versioned.stage', $mode);
                 break;
             case 'archive':
-                $date = $versioningArgs['ArchiveDate'];
+                $date = $versioningArgs['archiveDate'];
                 $list = $list
                     ->setDataQueryParam('Versioned.mode', 'archive')
                     ->setDataQueryParam('Versioned.date', $date);
@@ -89,7 +91,7 @@ class ApplyVersionFilters
                 // When querying by Status we need to ensure both stage / live tables are present
                 $baseTable = singleton($list->dataClass())->baseTable();
                 $liveTable = $baseTable . '_Live';
-                $statuses = $versioningArgs['Status'];
+                $statuses = $versioningArgs['status'];
 
                 // If we need to search archived records, we need to manually join draft table
                 if (in_array('archived', $statuses)) {
@@ -152,34 +154,36 @@ class ApplyVersionFilters
                 // Note: Only valid for ReadOne
                 $list = $list->setDataQueryParam([
                     "Versioned.mode" => 'version',
-                    "Versioned.version" => $versioningArgs['Version'],
+                    "Versioned.version" => $versioningArgs['version'],
                 ]);
                 break;
             default:
                 throw new InvalidArgumentException("Unsupported read mode {$mode}");
         }
+
+        return $list;
     }
 
     /**
      * @throws InvalidArgumentException
      * @param $versioningArgs
      */
-    public function validateArgs($versioningArgs)
+    public function validateArgs(array $versioningArgs)
     {
-        $mode = $versioningArgs['Mode'];
+        $mode = $versioningArgs['mode'];
 
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
                 break;
             case 'archive':
-                if (empty($versioningArgs['ArchiveDate'])) {
+                if (empty($versioningArgs['archiveDate'])) {
                     throw new InvalidArgumentException(sprintf(
                         'You must provide an ArchiveDate parameter when using the "%s" mode',
                         $mode
                     ));
                 }
-                $date = $versioningArgs['ArchiveDate'];
+                $date = $versioningArgs['archiveDate'];
                 if (!$this->isValidDate($date)) {
                     throw new InvalidArgumentException(sprintf(
                         'Invalid date: "%s". Must be YYYY-MM-DD format',
@@ -192,7 +196,7 @@ class ApplyVersionFilters
             case 'latest_versions':
                 break;
             case 'status':
-                if (empty($versioningArgs['Status'])) {
+                if (empty($versioningArgs['status'])) {
                     throw new InvalidArgumentException(sprintf(
                         'You must provide a Status parameter when using the "%s" mode',
                         $mode
@@ -201,7 +205,7 @@ class ApplyVersionFilters
                 break;
             case 'version':
                 // Note: Only valid for ReadOne
-                if (!isset($versioningArgs['Version'])) {
+                if (!isset($versioningArgs['version'])) {
                     throw new InvalidArgumentException(
                         'When using the "version" mode, you must specify a Version parameter'
                     );

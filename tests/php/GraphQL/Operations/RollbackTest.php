@@ -10,7 +10,7 @@ use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
-use SilverStripe\Versioned\GraphQL\Operations\Rollback;
+use SilverStripe\Versioned\GraphQL\Operations\RollbackCreator;
 use SilverStripe\Versioned\Tests\GraphQL\Operations\Rollback\FakeDataObjectStub;
 
 class RollbackTest extends SapphireTest
@@ -59,7 +59,7 @@ class RollbackTest extends SapphireTest
         $manager = new Manager();
         $manager->addType(new ObjectType(['name' => $typeName]));
 
-        $mutation = new Rollback($stubClass);
+        $mutation = new RollbackCreator($stubClass);
         $scaffold = $mutation->scaffold($manager);
         $this->assertInternalType('callable', $scaffold['resolve'], 'Resolve function is scaffolded correctly');
 
