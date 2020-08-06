@@ -1588,4 +1588,21 @@ class VersionedTest extends SapphireTest
             $versions
         );
     }
+
+    public function testLiveObjectDeletedOnUnpublish()
+    {
+        /** @var VersionedTest\TestObject|Versioned $obj */
+        $obj = new VersionedTest\TestObject();
+
+        // publish
+        $obj->Name = 'First name';
+        $obj->publishSingle();
+
+        // put into a modified state
+        $obj->Name = 'Second name';
+        $obj->write();
+
+        $obj->doUnpublish();
+        $this->assertEquals('First name', VersionedTest\TestObject::$nameValueOfObjectJustDeleted);
+    }
 }

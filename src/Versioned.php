@@ -1876,6 +1876,7 @@ SQL
      */
     public function doUnpublish()
     {
+        /** @var DataObject|Versioned $owner */
         $owner = $this->owner;
         // Skip if this record isn't saved
         if (!$owner->isInDB()) {
@@ -1893,9 +1894,16 @@ SQL
         static::withVersionedMode(function () use ($owner) {
             static::set_stage(static::LIVE);
 
-            // This way our ID won't be unset
-            $clone = clone $owner;
-            $clone->delete();
+            // Re-fetch the current DataObject to ensure we have data from the LIVE stage
+            // This is particularly relevant for DataObject's in a modified state so that
+            // any delete extensions have the correct database record values
+            /** @var DataObject|Versioned $obj */
+            $obj = $owner::get()->byID($owner->ID);
+            if (!$obj) {
+                return;
+            }
+            $obj->setDeleteWritesVersion($owner->getDeleteWritesVersion());
+            $obj->delete();
         });
 
         $owner->invokeWithExtensions('onAfterUnpublish');
