@@ -4,7 +4,7 @@ namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use SilverStripe\GraphQL\Schema\Interfaces\OperationCreator;
 
-if (!class_exists(OperationCreator::class)) {
+if (!interface_exists(OperationCreator::class)) {
     return;
 }
 

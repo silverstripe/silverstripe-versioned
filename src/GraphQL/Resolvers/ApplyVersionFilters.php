@@ -20,7 +20,7 @@ class ApplyVersionFilters
     public function applyToReadingState(array $versioningArgs)
     {
         if (!isset($versioningArgs['mode'])) {
-            return;
+            return null;
         }
 
         $this->validateArgs($versioningArgs);
@@ -62,7 +62,7 @@ class ApplyVersionFilters
     public function applyToList(DataList $list, array $versioningArgs): DataList
     {
         if (!isset($versioningArgs['mode'])) {
-            return;
+            $list;
         }
 
         $this->validateArgs($versioningArgs);

@@ -24,7 +24,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
-if (!class_exists(OperationCreator::class)) {
+if (!interface_exists(OperationCreator::class)) {
     return;
 }
 
@@ -65,7 +65,7 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
         $defaultPlugins = $this->config()->get('default_plugins');
         $configPlugins = $config['plugins'] ?? [];
         $plugins = array_merge($defaultPlugins, $configPlugins);
-        return ModelMutation::create($this->createOperationName($typeName))
+        return ModelMutation::create($model, $this->createOperationName($typeName))
             ->setPlugins($plugins)
             ->setType($typeName)
             ->setResolver([VersionedResolver::class, 'resolvePublishOperation'])

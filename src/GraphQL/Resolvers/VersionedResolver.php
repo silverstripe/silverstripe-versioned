@@ -39,7 +39,7 @@ class VersionedResolver extends DefaultResolverProvider
      * @return mixed|null
      * @see VersionedDataObject
      */
-    public static function resolveDataObjectVersion(DataObject $obj, array $args, array $context, ResolveInfo $info)
+    public static function resolveVersionFields(DataObject $obj, array $args, array $context, ResolveInfo $info)
     {
         /* @var DataObject&Versioned $obj */
         switch($info->fieldName) {

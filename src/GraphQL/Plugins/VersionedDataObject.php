@@ -17,13 +17,13 @@ use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
-if (!class_exists(ModelTypePlugin::class)) {
+if (!interface_exists(ModelTypePlugin::class)) {
     return;
 }
 
 class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
 {
-    const IDENTIFIER = 'versionedDataObject';
+    const IDENTIFIER = 'versioning';
 
     /**
      * @return string

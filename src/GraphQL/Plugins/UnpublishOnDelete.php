@@ -16,7 +16,7 @@ use SilverStripe\Versioned\Versioned;
 use Exception;
 use Closure;
 
-if (!class_exists(ModelMutationPlugin::class)) {
+if (!interface_exists(ModelMutationPlugin::class)) {
     return;
 }
 

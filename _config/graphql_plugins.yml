@@ -13,11 +13,12 @@ SilverStripe\Core\Injector\Injector:
 # Ensure all dataobject types get the versioned plugin
 SilverStripe\GraphQL\Schema\DataObject\DataObjectModel:
   default_plugins:
-    versionedDataObject: true
+    versioning: true
 
 SilverStripe\GraphQL\Schema\DataObject\ReadCreator:
   default_plugins:
-    readVersionedDataObject: true
+    readVersion:
+      before: paginate
 
 SilverStripe\GraphQL\Schema\DataObject\DeleteCreator:
   default_plugins:

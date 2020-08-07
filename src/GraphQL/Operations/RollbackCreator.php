@@ -13,7 +13,7 @@ use SilverStripe\GraphQL\Schema\Interfaces\SchemaModelInterface;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
-if (!class_exists(OperationCreator::class)) {
+if (!interface_exists(OperationCreator::class)) {
     return;
 }
 
@@ -37,14 +37,14 @@ class RollbackCreator implements OperationCreator
      * @param SchemaModelInterface $model
      * @param string $typeName
      * @param array $config
-     * @return ModelOperation
+     * @return ModelOperation|null
      * @throws SchemaBuilderException
      */
     public function createOperation(
         SchemaModelInterface $model,
         string $typeName,
         array $config = []
-    ): ModelOperation {
+    ): ?ModelOperation {
         if (!Extensible::has_extension($model->getSourceClass(), Versioned::class)) {
             return null;
         }

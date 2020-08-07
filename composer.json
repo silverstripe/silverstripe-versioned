@@ -25,10 +25,18 @@
     },
     "require-dev": {
         "sminnee/phpunit": "^5.7",
-        "squizlabs/php_codesniffer": "^3",
-        "silverstripe/graphql": "^3"
+        "silverstripe/graphql": "4.x-dev",
+        "silverstripe/admin": "^1",
+        "squizlabs/php_codesniffer": "^3"
     },
-    "extra": [],
+    "conflict": {
+        "silverstripe/graphql": "< 4.0"
+    },
+    "extra": {
+        "expose": [
+            "client/dist"
+        ]
+    },
     "autoload": {
         "psr-4": {
             "SilverStripe\\Versioned\\": "src/",

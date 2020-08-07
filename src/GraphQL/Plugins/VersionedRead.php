@@ -11,13 +11,13 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
-if (!class_exists(ModelQueryPlugin::class)) {
+if (!interface_exists(ModelQueryPlugin::class)) {
     return;
 }
 
 class VersionedRead implements ModelQueryPlugin
 {
-    const IDENTIFIER = 'readVersionedDataObject';
+    const IDENTIFIER = 'readVersion';
 
     /**
      * @return string
