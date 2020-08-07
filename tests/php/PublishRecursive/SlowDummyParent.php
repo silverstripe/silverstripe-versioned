@@ -2,22 +2,30 @@
 
 namespace SilverStripe\Versioned\Tests\PublishRecursive;
 
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\TestOnly;
+use SilverStripe\ORM\DataObject;
 
 /**
- * Class SlowDummyPage
+ * Class SlowDummyParent
  *
+ * @property string $Title
  * @property int $NestedObjectID
  * @method SlowDummyObject NestedObject()
  * @package SilverStripe\Versioned\Tests\PublishRecursive
  */
-class SlowDummyPage extends SiteTree implements TestOnly
+class SlowDummyParent extends DataObject implements TestOnly
 {
     /**
      * @var string
      */
-    private static $table_name = 'SlowDummyPage';
+    private static $table_name = 'SlowDummyParent';
+
+    /**
+     * @var array
+     */
+    private static $db = [
+        'Title' => 'Varchar(255)',
+    ];
 
     /**
      * @var array

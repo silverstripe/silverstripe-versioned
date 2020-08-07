@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests\PublishRecursive;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\Versioned\RecursivePublishable;
 use SilverStripe\Versioned\Versioned;
 
 class PublishRecursiveTest extends SapphireTest
@@ -18,7 +19,7 @@ class PublishRecursiveTest extends SapphireTest
      * @var array
      */
     protected static $extra_dataobjects = [
-        SlowDummyPage::class,
+        SlowDummyParent::class,
         SlowDummyObject::class,
     ];
 
@@ -26,6 +27,10 @@ class PublishRecursiveTest extends SapphireTest
      * @var array
      */
     protected static $required_extensions = [
+        SlowDummyParent::class => [
+            Versioned::class,
+            RecursivePublishable::class,
+        ],
         SlowDummyObject::class => [
             Versioned::class,
         ],
@@ -41,24 +46,23 @@ class PublishRecursiveTest extends SapphireTest
     public function testPublishRecursiveVersionTiming()
     {
         $object = SlowDummyObject::create();
-        $object->Title = 'Slow object';
+        $object->Title = 'Slow Object';
         $object->write();
 
-        $page = SlowDummyPage::create();
-        $page->Title = 'Slow Page';
-        $page->URLSegment = 'slow-page';
-        $page->NestedObjectID = (int) $object->ID;
-        $page->write();
+        $parent = SlowDummyParent::create();
+        $parent->Title = 'Slow Parent';
+        $parent->NestedObjectID = (int) $object->ID;
+        $parent->write();
 
-        $page->publishRecursive();
+        $parent->publishRecursive();
 
         $versionsSufix = '_Versions';
-        $pageTable = SiteTree::config()->get('table_name');
-        $pageVersionedTable = $pageTable . $versionsSufix;
+        $parentTable = SlowDummyParent::config()->get('table_name');
+        $parentVersionedTable = $parentTable . $versionsSufix;
         $objectTable = SlowDummyObject::config()->get('table_name');
         $objectVersionedTable = $objectTable . $versionsSufix;
         $tables = [
-            $pageVersionedTable => $page->ID,
+            $parentVersionedTable => $parent->ID,
             $objectVersionedTable => $object->ID,
         ];
 
@@ -78,11 +82,11 @@ class PublishRecursiveTest extends SapphireTest
             $results[] = $query->execute()->value();
         }
 
-        $pageEdit = array_shift($results);
+        $parentEdit = array_shift($results);
         $objectEdit = array_shift($results);
 
-        $this->assertNotEmpty($pageEdit);
+        $this->assertNotEmpty($parentEdit);
         $this->assertNotEmpty($objectEdit);
-        $this->assertEquals($pageEdit, $objectEdit);
+        $this->assertEquals($parentEdit, $objectEdit);
     }
 }

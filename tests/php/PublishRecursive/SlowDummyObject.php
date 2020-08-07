@@ -8,7 +8,7 @@ use SilverStripe\ORM\DataObject;
 /**
  * Class SlowDummyObject
  *
- * @method SlowDummyPage Parent()
+ * @method SlowDummyParent Parent()
  * @package SilverStripe\Versioned\Tests\PublishRecursive
  */
 class SlowDummyObject extends DataObject implements TestOnly
@@ -29,7 +29,7 @@ class SlowDummyObject extends DataObject implements TestOnly
      * @var array
      */
     private static $belongs_to = [
-        'Parent' => SlowDummyPage::class . '.NestedObject',
+        'Parent' => SlowDummyParent::class . '.NestedObject',
     ];
 
     /**
