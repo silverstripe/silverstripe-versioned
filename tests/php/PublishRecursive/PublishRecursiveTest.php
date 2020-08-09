@@ -2,7 +2,6 @@
 
 namespace SilverStripe\Versioned\Tests\PublishRecursive;
 
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Versioned\RecursivePublishable;
@@ -45,10 +44,12 @@ class PublishRecursiveTest extends SapphireTest
      */
     public function testPublishRecursiveVersionTiming()
     {
+        /** @var SlowDummyObject|Versioned $object */
         $object = SlowDummyObject::create();
         $object->Title = 'Slow Object';
         $object->write();
 
+        /** @var SlowDummyParent|Versioned|RecursivePublishable $parent */
         $parent = SlowDummyParent::create();
         $parent->Title = 'Slow Parent';
         $parent->NestedObjectID = (int) $object->ID;

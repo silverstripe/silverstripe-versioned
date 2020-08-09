@@ -2,8 +2,13 @@
 
 namespace SilverStripe\Versioned\Tests\PublishRecursive;
 
+use Exception;
+use ReflectionProperty;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\Versioned\Versioned;
 
 /**
  * Class SlowDummyObject
@@ -41,7 +46,40 @@ class SlowDummyObject extends DataObject implements TestOnly
 
     protected function onBeforeWrite()
     {
-        sleep(2);
+        $this->emulateSleep(2);
         parent::onBeforeWrite();
+    }
+
+    /**
+     * @param int $seconds
+     * @throws Exception
+     */
+    private function emulateSleep($seconds)
+    {
+        if (Versioned::get_stage() !== Versioned::LIVE) {
+            return;
+        }
+
+        if ($this->getMockNow() !== null) {
+            return;
+        }
+
+        $now = DBDatetime::now();
+
+        /** @var DBDatetime $now */
+        $now = DBField::create_field('Datetime', $now->getTimestamp() + $seconds);
+        DBDatetime::set_mock_now($now);
+    }
+
+    /**
+     * @return DBDatetime|null
+     * @throws ReflectionException
+     */
+    private function getMockNow()
+    {
+        $propertyMockNow = new ReflectionProperty(DBDatetime::class, 'mock_now');
+        $propertyMockNow->setAccessible(true);
+
+        return $propertyMockNow->getValue();
     }
 }
