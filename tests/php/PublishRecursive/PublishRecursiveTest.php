@@ -54,14 +54,13 @@ class PublishRecursiveTest extends SapphireTest
         $parent->Title = 'Slow Parent';
         $parent->NestedObjectID = (int) $object->ID;
         $parent->write();
-
         $parent->publishRecursive();
 
-        $versionsSufix = '_Versions';
+        $versionsSuffix = '_Versions';
         $parentTable = SlowDummyParent::config()->get('table_name');
-        $parentVersionedTable = $parentTable . $versionsSufix;
+        $parentVersionedTable = $parentTable . $versionsSuffix;
         $objectTable = SlowDummyObject::config()->get('table_name');
-        $objectVersionedTable = $objectTable . $versionsSufix;
+        $objectVersionedTable = $objectTable . $versionsSuffix;
         $tables = [
             $parentVersionedTable => $parent->ID,
             $objectVersionedTable => $object->ID,
@@ -71,10 +70,10 @@ class PublishRecursiveTest extends SapphireTest
 
         foreach ($tables as $table => $id) {
             $query = SQLSelect::create(
-                'LastEdited',
-                $table,
-                ['RecordID' => $id],
-                ['Version' => 'DESC'],
+                '"LastEdited"',
+                sprintf('"%s"', $table),
+                ['"RecordID"' => $id],
+                ['"Version"' => 'DESC'],
                 [],
                 [],
                 1
