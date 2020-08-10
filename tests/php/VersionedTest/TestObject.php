@@ -58,6 +58,11 @@ class TestObject extends DataObject implements TestOnly
      */
     public static $setNameWithoutVersionAfterPublish = null;
 
+    /**
+     * Used to record the $obj->Name value of the last object deleted
+     */
+    public static $nameValueOfObjectJustDeleted = '';
+
     public function canView($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -73,5 +78,11 @@ class TestObject extends DataObject implements TestOnly
             $this->Name = self::$setNameWithoutVersionAfterPublish;
             $this->writeWithoutVersion();
         }
+    }
+
+    public function onAfterDelete()
+    {
+        parent::onAfterDelete();
+        self::$nameValueOfObjectJustDeleted = $this->Name;
     }
 }

@@ -50,4 +50,17 @@ class UnstagedStagedRelationTest extends SapphireTest
     {
         DBDatetime::set_mock_now(DBDatetime::now()->getTimestamp() + $seconds);
     }
+
+    public function testJoin()
+    {
+        Versioned::withVersionedMode(function () {
+            Versioned::set_reading_mode('Stage.Live');
+            $count = UnstagedObject::get()->filter('StagedObjects.ID:GreaterThan', 0)->count();
+            $this->assertEquals(
+                0,
+                $count,
+                'Queries with joins on stageless versioned table don\'t target the live table'
+            );
+        });
+    }
 }
