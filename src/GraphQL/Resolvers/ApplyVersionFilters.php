@@ -30,6 +30,7 @@ class ApplyVersionFilters
             case Versioned::LIVE:
             case Versioned::DRAFT:
             case 'latest_versions':
+            case 'all_versions':
                 Versioned::set_stage($mode);
                 break;
             case 'archive':
@@ -77,6 +78,9 @@ class ApplyVersionFilters
                 $list = $list
                     ->setDataQueryParam('Versioned.mode', 'archive')
                     ->setDataQueryParam('Versioned.date', $date);
+                break;
+            case 'all_versions':
+                $list = $list->setDataQueryParam('Versioned.mode', 'all_versions');
                 break;
             case 'latest_versions':
                 $list = $list->setDataQueryParam('Versioned.mode', 'latest_versions');
@@ -182,6 +186,8 @@ class ApplyVersionFilters
                         $date
                     ));
                 }
+                break;
+            case 'all_versions':
                 break;
             case 'latest_versions':
                 break;

@@ -20,7 +20,6 @@ use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest

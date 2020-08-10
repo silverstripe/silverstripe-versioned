@@ -576,8 +576,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * Augment SQL to select from `_Versions` table instead.
      *
      * @param SQLSelect $query
+     * @param bool $filterDeleted Whether to exclude deleted entries or not
      */
-    protected function augmentSQLVersioned(SQLSelect $query)
+    protected function augmentSQLVersioned(SQLSelect $query, bool $filterDeleted = true)
     {
         $baseTable = $this->baseTable();
         foreach ($query->getFrom() as $alias => $join) {
@@ -615,6 +616,11 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
             "count(DISTINCT \"{$baseTable}_Versions\".\"RecordID\")",
             "count(DISTINCT \"{$baseTable}_Versions\".\"ID\")"
         );
+
+        // Filter deleted versions, which are all unqueryable
+        if ($filterDeleted) {
+            $query->addWhere(["\"{$baseTable}_Versions\".\"WasDeleted\"" => 0]);
+        }
     }
 
     /**
@@ -807,6 +813,8 @@ SQL
         $baseTable = $this->baseTable();
         $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
 
+        $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
+
         if ($this->shouldApplySubSelectAsCondition($query)) {
             $subSelect->addWhere(
                 "\"{$baseTable}_Versions_Latest\".\"RecordID\" = \"{$baseTable}_Versions\".\"RecordID\""
@@ -867,7 +875,7 @@ SQL
     protected function augmentSQLVersionedAll(SQLSelect $query)
     {
         // Query against _Versions table first
-        $this->augmentSQLVersioned($query);
+        $this->augmentSQLVersioned($query, false);
 
         $baseTable = $this->baseTable();
         $query->addOrderBy("\"{$baseTable}_Versions\".\"Version\"");
@@ -1148,7 +1156,7 @@ SQL
         ];
 
         // Add any extra, unchanged fields to the version record.
-        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
         if ($data) {
             $fields = $schema->databaseFields($class, false);
             if (is_array($fields)) {
