@@ -1156,7 +1156,7 @@ SQL
         ];
 
         // Add any extra, unchanged fields to the version record.
-            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
         if ($data) {
             $fields = $schema->databaseFields($class, false);
             if (is_array($fields)) {
