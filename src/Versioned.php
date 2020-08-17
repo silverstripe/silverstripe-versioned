@@ -2810,6 +2810,7 @@ SQL
 
     /**
      * Check if this record exists on live
+     * On objects with only 1 stage, check if the record exists on that stage.
      *
      * @return bool
      */
@@ -2822,7 +2823,7 @@ SQL
 
         // Non-staged objects are considered "published" if saved
         if (!$this->hasStages()) {
-            return true;
+            return $this->isOnDraft();
         }
 
         $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
@@ -2846,7 +2847,8 @@ SQL
     }
 
     /**
-     * Check if this record exists on the draft stage
+     * Check if this record exists on the draft stage.
+     * On objects with only 1 stage, check if the record exists on that stage.
      *
      * @return bool
      */
@@ -2855,9 +2857,6 @@ SQL
         $id = $this->owner->ID ?: $this->owner->OldID;
         if (!$id) {
             return false;
-        }
-        if (!$this->hasStages()) {
-            return true;
         }
 
         $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);

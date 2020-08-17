@@ -954,6 +954,27 @@ class VersionedTest extends SapphireTest
         );
     }
 
+    public function testSingleStageDraftPublished()
+    {
+
+        $obj = new VersionedTest\SingleStage(['Name' => 'MyObj']);
+        $this->assertFalse($obj->isOnDraft());
+        $this->assertFalse($obj->isPublished());
+
+        $obj->write();
+        $this->assertTrue($obj->isOnDraft());
+        $this->assertTrue($obj->isPublished());
+
+        $id = $obj->ID;
+        $obj->delete();
+        $this->assertFalse($obj->isOnDraft());
+        $this->assertFalse($obj->isPublished());
+
+        $recoveredObj = Versioned::get_latest_version(VersionedTest\SingleStage::class, $id);
+        $this->assertFalse($recoveredObj->isOnDraft());
+        $this->assertFalse($recoveredObj->isPublished());
+    }
+
     /**
      * Test that publishing processes respects lazy loaded fields
      */
