@@ -65,6 +65,11 @@ class VersionedStateExtensionTest extends SapphireTest
 
     public function testDontUpdateLeftAndMainLinks()
     {
+        if (!class_exists(LeftAndMain::class)) {
+            $this->markTestSkipped('silverstripe/cms not installed');
+            return;
+        }
+
         $controller = new LeftAndMain();
 
         $liveClientConfig = $controller->getClientConfig();
