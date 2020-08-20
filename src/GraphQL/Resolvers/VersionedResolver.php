@@ -7,7 +7,7 @@ namespace SilverStripe\Versioned\GraphQL\Resolvers;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
-use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
+use SilverStripe\GraphQL\Resolvers\VersionFilters;
 use SilverStripe\GraphQL\Schema\Resolver\DefaultResolverProvider;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -101,7 +101,7 @@ class VersionedResolver extends DefaultResolverProvider
             return $list;
         }
 
-        return Injector::inst()->get(ApplyVersionFilters::class)
+        return Injector::inst()->get(VersionFilters::class)
             ->applyToList($list, $args['versioning']);
 
     }

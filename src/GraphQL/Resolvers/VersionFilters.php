@@ -7,7 +7,7 @@ use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
 
-class ApplyVersionFilters
+class VersionFilters
 {
     /**
      * Use this as a fallback where resolver results aren't queried as a DataList,
@@ -16,6 +16,7 @@ class ApplyVersionFilters
      * Wrap this call in {@link Versioned::withVersionedMode()} in order to avoid side effects.
      *
      * @param $versioningArgs
+     * @return null|void
      */
     public function applyToReadingState(array $versioningArgs)
     {
