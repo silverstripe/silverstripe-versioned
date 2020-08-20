@@ -38,6 +38,10 @@ class VersionedQueryMode extends TypeCreator
                 'value' => 'latest_versions',
                 'description' => 'Read the latest version',
             ],
+            'ALL_VERSIONS' => [
+                'value' => 'all_versions',
+                'description' => 'Reads all versions',
+            ],
             'DRAFT' => [
                 'value' => Versioned::DRAFT,
                 'description' => 'Read from the draft stage',

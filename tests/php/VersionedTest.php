@@ -1610,6 +1610,39 @@ class VersionedTest extends SapphireTest
         );
     }
 
+    public function testArchivedEntries()
+    {
+        // create a new record and save it
+        $record = new VersionedTest\TestObject();
+        $record->Title = 'My record';
+        $record->write();
+
+        // publish it
+        $record->publishSingle();
+
+        // then archive it
+        $record->doArchive();
+
+        // ensure the version entries are correct
+        $versions = $record->VersionsList()->toArray();
+        $this->assertCount(3, $versions, 'All versions should be retrieved');
+
+        /** @var TestObject $createdVersion */
+        $createdVersion = $versions[0];
+        $this->assertEquals(1, $createdVersion->WasDraft, 'Created version should be draft');
+        $this->assertEquals(0, $createdVersion->WasPublished, 'Created version should not be published');
+        $this->assertEquals(0, $createdVersion->WasDeleted, 'Created version should not be deleted');
+
+        /** @var TestObject $publishedVersion */
+        $publishedVersion = $versions[1];
+        $this->assertEquals(1, $publishedVersion->WasPublished, 'Published version should be published');
+
+        /** @var TestObject $archivedVersion */
+        $archivedVersion = $versions[2];
+        $this->assertEquals(true, $archivedVersion->isArchived(), 'Archived entry should be included in version list');
+        $this->assertEquals('My record', $archivedVersion->Title, 'Archived entry fields should be preserved');
+    }
+
     public function testLiveObjectDeletedOnUnpublish()
     {
         /** @var VersionedTest\TestObject|Versioned $obj */

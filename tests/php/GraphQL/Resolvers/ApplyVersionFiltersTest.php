@@ -161,6 +161,20 @@ class ApplyVersionFiltersTest extends SapphireTest
         $this->assertEquals('latest_versions', $list->dataQuery()->getQueryParam('Versioned.mode'));
     }
 
+    public function testItSetsAllVersionsQueryParamsOnApplyToList()
+    {
+        $filter = new ApplyVersionFilters();
+        $list = Fake::get();
+        $filter->applyToList(
+            $list,
+            [
+                'Mode' => 'all_versions',
+            ]
+        );
+
+        $this->assertEquals('all_versions', $list->dataQuery()->getQueryParam('Versioned.mode'));
+    }
+
     public function testItThrowsOnNoStatusOnApplyToList()
     {
         $filter = new ApplyVersionFilters();
