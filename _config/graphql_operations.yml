@@ -1,5 +1,8 @@
 ---
 Name: versioned-graphql-dataobject
+Only:
+  moduleexists: 'silverstripe/graphql'
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
 ---
 SilverStripe\GraphQL\Schema\DataObject\DataObjectModel:
   operations:

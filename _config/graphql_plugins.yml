@@ -2,6 +2,7 @@
 Name: versioned-graphql-plugins
 Only:
   moduleexists: 'silverstripe/graphql'
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
 ---
 SilverStripe\Core\Injector\Injector:
   SilverStripe\GraphQL\Schema\Registry\PluginRegistry:
