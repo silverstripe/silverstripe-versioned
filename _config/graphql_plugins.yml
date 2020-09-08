@@ -19,7 +19,7 @@ SilverStripe\GraphQL\Schema\DataObject\DataObjectModel:
 SilverStripe\GraphQL\Schema\DataObject\ReadCreator:
   default_plugins:
     readVersion:
-      before: paginate
+      before: paginateList
 
 SilverStripe\GraphQL\Schema\DataObject\DeleteCreator:
   default_plugins:
