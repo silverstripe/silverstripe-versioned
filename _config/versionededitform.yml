@@ -1,6 +1,0 @@
----
-Name: versionededitform
----
-SilverStripe\Admin\LeftAndMain:
-  extra_requirements_javascript:
-    - silverstripe/versioned:client/dist/js/bundle.js
