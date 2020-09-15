@@ -1,0 +1,27 @@
+CopyToStageInputType:
+  input: true
+  fields:
+    id:
+      type: ID!
+      description: The ID of the record to copy
+    fromVersion:
+      type: Int
+      description: The source version number to copy
+    fromStage:
+      type: VersionedStage
+      description: The source stage to copy
+    toStage:
+      type: VersionedStage
+      description: The destination state to copy to
+
+VersionedInputType:
+  input: true
+  fields:
+    mode: VersionedQueryMode = Stage
+    archiveDate:
+      type: String
+      description: The date to use for archive
+    status:
+      type: '[VersionedStatus]'
+      description: If mode is STATUS, specify which versioned statuses
+    version: Int
