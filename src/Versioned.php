@@ -2051,7 +2051,11 @@ SQL
 
         $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
         $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
-        return $draftVersion !== $liveVersion;
+        $stagesDiffer = $draftVersion !== $liveVersion;
+
+        $this->owner->extend('updateStagesDiffer', $stagesDiffer);
+
+        return (bool) $stagesDiffer;
     }
 
     /**
@@ -2830,7 +2834,11 @@ SQL
         }
 
         $liveVersion = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
-        return (bool)$liveVersion;
+        $isPublished = (bool) $liveVersion;
+
+        $this->owner->extend('updateIsPublished', $isPublished);
+
+        return (bool) $isPublished;
     }
 
     /**
@@ -2846,7 +2854,7 @@ SQL
 
         $owner->invokeWithExtensions('updateIsArchived', $isArchived);
 
-        return $isArchived;
+        return (bool) $isArchived;
     }
 
     /**
@@ -2863,7 +2871,11 @@ SQL
         }
 
         $draftVersion = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
-        return (bool)$draftVersion;
+        $isOnDraft = (bool) $draftVersion;
+
+        $this->owner->extend('updateIsOnDraft', $isOnDraft);
+
+        return (bool) $isOnDraft;
     }
 
     /**
