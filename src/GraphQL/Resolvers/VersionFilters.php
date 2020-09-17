@@ -3,6 +3,7 @@
 namespace SilverStripe\GraphQL\Resolvers;
 
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\RelationList;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
@@ -62,6 +63,12 @@ class VersionFilters
      */
     public function applyToList(DataList $list, array $versioningArgs): DataList
     {
+        if ($list instanceof RelationList) {
+            throw new InvalidArgumentException(sprintf(
+                'Version filtering cannot be applied to instances of %s. Are you using the plugin on a nested query?',
+                get_class($list)
+            ));
+        }
         if (!isset($versioningArgs['mode'])) {
             $list;
         }
