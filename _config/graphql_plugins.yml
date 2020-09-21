@@ -21,6 +21,12 @@ SilverStripe\GraphQL\Schema\DataObject\ReadCreator:
     readVersion:
       before: paginateList
 
+SilverStripe\GraphQL\Schema\DataObject\ReadOneCreator:
+  default_plugins:
+    readVersion:
+      before: firstResult
+
+
 SilverStripe\GraphQL\Schema\DataObject\DeleteCreator:
   default_plugins:
     unpublishOnDelete: true
