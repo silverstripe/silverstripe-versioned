@@ -40,12 +40,6 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
     const ACTION_UNPUBLISH = 'unpublish';
 
     /**
-     * @var array
-     * @config
-     */
-    private static $default_plugins = [];
-
-    /**
      * @param SchemaModelInterface $model
      * @param string $typeName
      * @param array $config
@@ -62,10 +56,12 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
             return null;
         }
 
-        $defaultPlugins = $this->config()->get('default_plugins');
-        $configPlugins = $config['plugins'] ?? [];
-        $plugins = array_merge($defaultPlugins, $configPlugins);
-        return ModelMutation::create($model, $this->createOperationName($typeName))
+        $plugins = $config['plugins'] ?? [];
+        $name = $config['name'] ?? null;
+        if (!$name) {
+            $name = $this->createOperationName($typeName);
+        }
+        return ModelMutation::create($model, $name)
             ->setPlugins($plugins)
             ->setType($typeName)
             ->setResolver([VersionedResolver::class, 'resolvePublishOperation'])

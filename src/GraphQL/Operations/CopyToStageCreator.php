@@ -51,10 +51,11 @@ class CopyToStageCreator implements OperationCreator
             return null;
         }
 
-        $defaultPlugins = $this->config()->get('default_plugins');
-        $configPlugins = $config['plugins'] ?? [];
-        $plugins = array_merge($defaultPlugins, $configPlugins);
-        $mutationName = 'copy' . ucfirst($typeName) . 'ToStage';
+        $plugins = $config['plugins'] ?? [];
+        $mutationName = $config['name'] ?? null;
+        if (!$mutationName) {
+            $mutationName = 'copy' . ucfirst($typeName) . 'ToStage';
+        }
 
         return ModelMutation::create($model, $mutationName)
             ->setType($typeName)

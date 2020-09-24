@@ -10,23 +10,3 @@ SilverStripe\Core\Injector\Injector:
       versionedDataobject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedDataObject'
       unpublishOnDelete: '%$SilverStripe\Versioned\GraphQL\Plugins\UnpublishOnDelete'
       readVersionedDataObject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedRead'
-
-# Ensure all dataobject types get the versioned plugin
-SilverStripe\GraphQL\Schema\DataObject\DataObjectModel:
-  default_plugins:
-    versioning: true
-
-SilverStripe\GraphQL\Schema\DataObject\ReadCreator:
-  default_plugins:
-    readVersion:
-      before: paginateList
-
-SilverStripe\GraphQL\Schema\DataObject\ReadOneCreator:
-  default_plugins:
-    readVersion:
-      before: firstResult
-
-
-SilverStripe\GraphQL\Schema\DataObject\DeleteCreator:
-  default_plugins:
-    unpublishOnDelete: true
