@@ -1312,7 +1312,9 @@ SQL
                 ? $manipulation[$table]['id']
                 : $manipulation[$table]['fields']['ID'];
             if (!$id) {
-                user_error("Couldn't find ID in " . var_export($manipulation[$table], true), E_USER_ERROR);
+                throw new InvalidArgumentException(
+                    "Couldn't find ID in " . var_export($manipulation[$table], true)
+                );
             }
 
             if ($version < 0 || $this->getNextWriteWithoutVersion()) {
@@ -2554,9 +2556,8 @@ SQL
             // Validate the ID list
             foreach ($idList as $id) {
                 if (!is_numeric($id)) {
-                    user_error(
-                        "Bad ID passed to Versioned::prepopulate_versionnumber_cache() in \$idList: " . $id,
-                        E_USER_ERROR
+                    throw new InvalidArgumentException(
+                        "Bad ID passed to Versioned::prepopulate_versionnumber_cache() in \$idList: " . $id
                     );
                 }
             }

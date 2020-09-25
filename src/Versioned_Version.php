@@ -135,7 +135,7 @@ class Versioned_Version extends ViewableData
                     // Select db object
                     $component = $dbObject;
                 } else {
-                    user_error("$relation is not a relation/field on " . get_class($component), E_USER_ERROR);
+                    throw new \RuntimeException("$relation is not a relation/field on " . get_class($component));
                 }
             }
         }
