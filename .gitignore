@@ -1,6 +1,0 @@
-node_modules/
-/**/*.js.map
-vendor/
-resources/
-composer.lock
-assets/
