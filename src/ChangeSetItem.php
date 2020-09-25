@@ -338,7 +338,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     /** Reverts this item, then close it. **/
     public function revert()
     {
-        throw new \Exception('Not implemented');
+        throw new \RuntimeException('Not implemented');
     }
 
     public function canView($member = null)
