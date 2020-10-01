@@ -347,7 +347,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
 
         // "unpublish" action
-        if ($isPublished && $canPublish && $isOnDraft && $canUnpublish) {
+        if ($isPublished && $isOnDraft && $canUnpublish) {
             $actionUnpublish = FormAction::create(
                 'doUnpublish',
                 _t(self::class . '.BUTTONUNPUBLISH', 'Unpublish')
