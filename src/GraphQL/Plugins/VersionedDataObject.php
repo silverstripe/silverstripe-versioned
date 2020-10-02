@@ -63,7 +63,15 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         }
 
         $versionName = $type->getModel()->getTypeName() . 'Version';
-        $memberTypeName = DataObjectModel::create(Member::class)->getTypeName();
+        $memberType = $schema->getModelByClassName(Member::class);
+        Schema::invariant(
+            $memberType,
+            'The %s class was not added as a model. Should have been done in %s::%s?',
+            Member::class,
+            __CLASS__,
+            'updateSchema'
+        );
+        $memberTypeName = $memberType->getModel()->getTypeName();
         $resolver = ['resolver' => [VersionedResolver::class, 'resolveVersionFields']];
 
         $versionType = Type::create($versionName)
