@@ -29,11 +29,6 @@
         "silverstripe/admin": "^1",
         "squizlabs/php_codesniffer": "^3"
     },
-    "extra": {
-        "expose": [
-            "client/dist"
-        ]
-    },
     "autoload": {
         "psr-4": {
             "SilverStripe\\Versioned\\": "src/",
