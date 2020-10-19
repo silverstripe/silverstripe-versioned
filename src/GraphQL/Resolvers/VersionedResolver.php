@@ -192,7 +192,7 @@ class VersionedResolver extends DefaultResolverProvider
                 ));
             }
             $permissionMethod = $isPublish ? 'canPublish' : 'canUnpublish';
-            if (!$this->$permissionMethod($obj, $context[QueryHandler::CURRENT_USER])) {
+            if (!$obj->$permissionMethod($context[QueryHandler::CURRENT_USER])) {
                 throw new Exception(sprintf(
                     'Not allowed to change published state of this %s',
                     $dataClass

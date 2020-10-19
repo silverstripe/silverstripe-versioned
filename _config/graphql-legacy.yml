@@ -2,7 +2,8 @@
 Name: versioned-graphql
 Only:
   moduleexists: 'silverstripe/graphql'
-  classexists: 'SilverStripe\GraphQL\Manager'
+Except:
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
 ---
 SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
   extensions:
