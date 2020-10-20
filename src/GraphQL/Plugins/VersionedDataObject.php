@@ -3,19 +3,21 @@
 namespace SilverStripe\Versioned\GraphQL\Plugins;
 
 use SilverStripe\Core\Extensible;
-use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
-use SilverStripe\GraphQL\Schema\DataObject\Plugin\QuerySort;
+use SilverStripe\GraphQL\Schema\DataObject\Plugin\Paginator;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\Field;
 use SilverStripe\GraphQL\Schema\Interfaces\ModelTypePlugin;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
+use SilverStripe\GraphQL\Schema\Plugin\SortPlugin;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Sortable;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
+use Closure;
 
 if (!interface_exists(ModelTypePlugin::class)) {
     return;
@@ -83,13 +85,37 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
             ->addField('latestDraftVersion', ['type' => 'Boolean'] + $resolver);
 
         $schema->addType($versionType);
-        $type->addField('version', 'Int')
-            ->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type) {
+        $type->addField('version', 'Int');
+        $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type) {
                 $field->setResolver([VersionedResolver::class, 'resolveVersionList'])
                     ->addResolverContext('sourceClass', $type->getModel()->getSourceClass())
-                    ->addPlugin(QuerySort::IDENTIFIER, [
-                        'fields' => ['Version'],
+                    ->addPlugin(SortPlugin::IDENTIFIER, [
+                        'fields' => [
+                            'version' => true
+                        ],
+                        'input' => $type->getName() . 'VersionSort',
+                        'resolver' => [static::class, 'sortVersions'],
+                    ])
+                    ->addPlugin(Paginator::IDENTIFIER, [
+                        'connection' => $type->getName() . 'Versions',
                     ]);
             });
+    }
+
+    /**
+     * @param array $config
+     * @return Closure
+     */
+    public static function sortVersions(array $config): Closure
+    {
+        $fieldName = $config['fieldName'];
+        return function (Sortable $list, array $args) use($fieldName) {
+            $versionSort = $args[$fieldName]['version'] ?? null;
+            if ($versionSort) {
+                $list = $list->sort('Version', $versionSort);
+            }
+
+            return $list;
+        };
     }
 }
