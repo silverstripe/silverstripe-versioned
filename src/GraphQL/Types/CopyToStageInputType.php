@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\Type;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 
 if (!class_exists(TypeCreator::class)) {
@@ -31,20 +32,24 @@ class CopyToStageInputType extends TypeCreator
      */
     public function fields()
     {
+        $id = StaticSchema::inst()->formatField('ID');
+        $fromVersion = StaticSchema::inst()->formatField('FromVersion');
+        $fromStage = StaticSchema::inst()->formatField('FromStage');
+        $toStage = StaticSchema::inst()->formatField('ToStage');
         return [
-            'ID' => [
+            $id => [
                 'type' => Type::nonNull(Type::id()),
                 'description' => 'The ID of the record to copy',
             ],
-            'FromVersion' => [
+            $fromVersion => [
                 'type' => Type::int(),
                 'description' => 'The source version number to copy.'
             ],
-            'FromStage' => [
+            $fromStage => [
                 'type' => $this->manager->getType('VersionedStage'),
                 'description' => 'The source stage to copy',
             ],
-            'ToStage' => [
+            $toStage => [
                 'type' => Type::nonNull($this->manager->getType('VersionedStage')),
                 'description' => 'The destination stage to copy to',
             ],

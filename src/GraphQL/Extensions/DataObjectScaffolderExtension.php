@@ -35,6 +35,7 @@ class DataObjectScaffolderExtension extends Extension
         $coreFieldsFn = $rawType->config['fields'];
         // Create the "version" type for this dataobject. Takes the original fields
         // and augments them with the Versioned_Version specific fields
+
         $versionType = new ObjectType([
             'name' => $versionName,
             'fields' => function () use ($coreFieldsFn, $manager, $memberType) {
@@ -84,7 +85,9 @@ class DataObjectScaffolderExtension extends Extension
                     ],
                 ];
                 // Remove this recursive madness.
-                unset($coreFields['Versions']);
+                unset($coreFields[StaticSchema::inst()->formatField('Versions')]);
+
+                $versionFields = StaticSchema::inst()->formatKeys($versionFields);
 
                 return array_merge($coreFields, $versionFields);
             }
@@ -92,10 +95,11 @@ class DataObjectScaffolderExtension extends Extension
 
         $manager->addType($versionType, $versionName);
 
+        list ($version, $versions) = StaticSchema::inst()->formatFields(['Version', 'Versions']);
         // With the version type in the manager now, add the versioning fields to the dataobject type
         $owner
-            ->addFields(['Version'])
-            ->nestedQuery('Versions', new ReadVersions($class, $versionName));
+            ->addFields([$version])
+            ->nestedQuery($versions, new ReadVersions($class, $versionName));
     }
 
     /**

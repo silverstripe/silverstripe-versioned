@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
@@ -53,7 +54,7 @@ class Rollback extends MutationScaffolder implements OperationResolver
      */
     public function createDefaultArgs(Manager $manager)
     {
-        return [
+        return StaticSchema::inst()->formatKeys([
             'ID' => [
                 'type' => Type::nonNull(Type::id()),
                 'description' => 'The object ID that needs to be rolled back'
@@ -62,7 +63,7 @@ class Rollback extends MutationScaffolder implements OperationResolver
                 'type' => Type::nonNull(Type::int()),
                 'description' => 'The version of the object that should be rolled back to'
             ],
-        ];
+        ]);
     }
 
     /**
@@ -77,10 +78,10 @@ class Rollback extends MutationScaffolder implements OperationResolver
      */
     public function resolve($object, array $args, $context, ResolveInfo $info)
     {
-        // Get the args
-        $id = $args['ID'];
-        $rollbackVersion = $args['ToVersion'];
-
+        list ($id, $rollbackVersion) = StaticSchema::inst()->extractKeys(
+            ['ID', 'ToVersion'],
+            $args
+        );
         // Pull the latest version of the record
         /** @var Versioned|DataObject $record */
         $record = Versioned::get_latest_version($this->getDataObjectClass(), $id);
