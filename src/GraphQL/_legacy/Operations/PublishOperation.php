@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\ValidationException;
@@ -47,13 +48,14 @@ abstract class PublishOperation extends MutationScaffolder implements OperationR
 
     public function resolve($object, array $args, $context, ResolveInfo $info)
     {
+        $id = $this->argName();
         $obj = Versioned::get_by_stage($this->getDataObjectClass(), $this->getReadingStage())
-            ->byID($args['ID']);
+            ->byID($args[$id]);
         if (!$obj) {
             throw new Exception(sprintf(
                 '%s with ID %s not found',
                 $this->getDataObjectClass(),
-                $args['ID']
+                $args[$id]
             ));
         }
 
@@ -92,8 +94,9 @@ abstract class PublishOperation extends MutationScaffolder implements OperationR
      */
     protected function createDefaultArgs(Manager $manager)
     {
+        $id = $this->argName();
         return [
-            'ID' => [
+            $id => [
                 'type' => Type::nonNull(Type::id())
             ],
         ];
@@ -106,4 +109,12 @@ abstract class PublishOperation extends MutationScaffolder implements OperationR
     abstract protected function createOperationName();
 
     abstract protected function getReadingStage();
+
+    /**
+     * @return string
+     */
+    private function argName()
+    {
+        return StaticSchema::inst()->formatField('ID');
+    }
 }

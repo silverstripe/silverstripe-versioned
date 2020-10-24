@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned\GraphQL\Types;
 
 use GraphQL\Type\Definition\Type;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\Versioned\Versioned;
 
@@ -32,7 +33,7 @@ class VersionedInputType extends TypeCreator
      */
     public function fields()
     {
-        return [
+        return StaticSchema::inst()->formatKeys([
             'Mode' => [
                 'type' => $this->manager->getType('VersionedQueryMode'),
                 'defaultValue' => Versioned::DRAFT,
@@ -48,6 +49,6 @@ class VersionedInputType extends TypeCreator
             'Version' => [
                 'type' => Type::int(),
             ],
-        ];
+        ]);
     }
 }

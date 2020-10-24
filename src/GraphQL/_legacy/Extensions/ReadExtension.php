@@ -7,6 +7,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataList;
 use SilverStripe\GraphQL\Manager;
 
@@ -19,12 +20,12 @@ class ReadExtension extends Extension
 {
     public function updateList(DataList &$list, $args)
     {
-        if (!isset($args['Versioning'])) {
+        if (!isset($args[$this->argName()])) {
             return;
         }
 
         Injector::inst()->get(ApplyVersionFilters::class)
-            ->applyToList($list, $args['Versioning']);
+            ->applyToList($list, $args[$this->argName()]);
     }
 
     /**
@@ -33,8 +34,16 @@ class ReadExtension extends Extension
      */
     public function updateArgs(&$args, Manager $manager)
     {
-        $args['Versioning'] = [
+        $args[$this->argName()] = [
             'type' => $manager->getType('VersionedInputType'),
         ];
+    }
+
+    /**
+     * @return string
+     */
+    private function argName()
+    {
+        return StaticSchema::inst()->formatField('Versioning');
     }
 }

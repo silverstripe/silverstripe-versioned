@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\MutationScaffolder;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 
@@ -51,23 +52,26 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
 
     protected function createDefaultArgs(Manager $manager)
     {
+        $input = $this->argName();
         return [
-            'Input' => Type::nonNull($manager->getType('CopyToStageInputType')),
+            $input => Type::nonNull($manager->getType('CopyToStageInputType')),
         ];
     }
 
     public function resolve($object, array $args, $context, ResolveInfo $info)
     {
-        $input = $args['Input'];
-        $id = $input['ID'];
-        $to = $input['ToStage'];
+        list($input, $id, $to, $fromVersion, $fromStage) = StaticSchema::inst()->extractKeys(
+            ['Input', 'ID', 'ToStage', 'FromVersion', 'FromStage'],
+            $args
+        );
         /** @var Versioned|DataObject $record */
         $record = null;
-        if (isset($input['FromVersion'])) {
-            $from = $input['FromVersion'];
+        $from = null;
+        if ($fromVersion) {
+            $from = $fromVersion;
             $record = Versioned::get_version($this->getDataObjectClass(), $id, $from);
-        } elseif (isset($input['FromStage'])) {
-            $from = $input['FromStage'];
+        } elseif ($fromStage) {
+            $from = $fromStage;
             $record = Versioned::get_by_stage($this->getDataObjectClass(), $from)->byID($id);
         } else {
             throw new InvalidArgumentException('You must provide either a FromStage or FromVersion argument');
@@ -92,5 +96,13 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
         /** @var DataObject|Versioned $record */
         $record->copyVersionToStage($from, $to);
         return $record;
+    }
+
+    /**
+     * @return string
+     */
+    private function argName()
+    {
+        return StaticSchema::inst()->formatField('Input');
     }
 }
