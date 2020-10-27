@@ -8,6 +8,7 @@ use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\GraphQL\Types\VersionedQueryMode;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStatus;
+use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 
 class ManagerExtension extends Extension
 {
@@ -27,5 +28,6 @@ class ManagerExtension extends Extension
         $config['types']['VersionedQueryMode'] = VersionedQueryMode::class;
         $config['types']['VersionedInputType'] = VersionedInputType::class;
         $config['types']['CopyToStageInputType'] = CopyToStageInputType::class;
+        $config['types']['VersionSortType'] = VersionSortType::class;
     }
 }
