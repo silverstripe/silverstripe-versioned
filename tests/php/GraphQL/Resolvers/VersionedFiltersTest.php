@@ -1,14 +1,15 @@
 <?php
 
-namespace SilverStripe\Versioned\Tests\GraphQL\Resolvers;
+namespace SilverStripe\Versioned\GraphQL\Resolvers;
 
-use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
+use SilverStripe\GraphQL\Resolvers\VersionFilters;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
+use InvalidArgumentException;
 
-class ApplyVersionFiltersTest extends SapphireTest
+class VersionedFiltersTest extends SapphireTest
 {
     protected $usesDatabase = true;
 
@@ -16,43 +17,51 @@ class ApplyVersionFiltersTest extends SapphireTest
         Fake::class,
     ];
 
+    protected function setUp()
+    {
+        parent::setUp();
+        if (!class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 4 test ' . __CLASS__);
+        }
+    }
+
     public function testItValidatesArchiveDate()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/ArchiveDate parameter/');
-        $filter->validateArgs(['Mode' => 'archive']);
+        $filter->validateArgs(['mode' => 'archive']);
     }
 
     public function testItValidatesArchiveDateFormat()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Invalid date/');
-        $filter->validateArgs(['Mode' => 'archive', 'ArchiveDate' => '01/12/2018']);
+        $filter->validateArgs(['mode' => 'archive', 'archiveDate' => '01/12/2018']);
     }
 
     public function testItValidatesStatusParameter()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Status parameter/');
-        $filter->validateArgs(['Mode' => 'status']);
+        $filter->validateArgs(['mode' => 'status']);
     }
 
     public function testItValidatesVersionParameter()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Version parameter/');
-        $filter->validateArgs(['Mode' => 'version']);
+        $filter->validateArgs(['mode' => 'version']);
     }
 
     public function testItSetsReadingStateByMode()
     {
         Versioned::withVersionedMode(function () {
-            $filter = new ApplyVersionFilters();
-            $filter->applyToReadingState(['Mode' => Versioned::DRAFT]);
+            $filter = new VersionFilters();
+            $filter->applyToReadingState(['mode' => Versioned::DRAFT]);
             $this->assertEquals(Versioned::DRAFT, Versioned::get_stage());
         });
     }
@@ -60,15 +69,15 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItSetsReadingStateByArchiveDate()
     {
         Versioned::withVersionedMode(function () {
-            $filter = new ApplyVersionFilters();
-            $filter->applyToReadingState(['Mode' => 'archive', 'ArchiveDate' => '2018-01-01']);
+            $filter = new VersionFilters();
+            $filter->applyToReadingState(['mode' => 'archive', 'archiveDate' => '2018-01-01']);
             $this->assertEquals('2018-01-01', Versioned::current_archived_date());
         });
     }
 
     public function testItFiltersByStageOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $record1 = new Fake();
         $record1->Name = 'First version draft';
         $record1->write();
@@ -79,51 +88,51 @@ class ApplyVersionFiltersTest extends SapphireTest
         $record2->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
 
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => Versioned::DRAFT]);
+        $list = $filter->applyToList($list, ['mode' => Versioned::DRAFT]);
         $this->assertCount(2, $list);
 
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => Versioned::LIVE]);
+        $list = $filter->applyToList($list, ['mode' => Versioned::LIVE]);
         $this->assertCount(1, $list);
     }
 
     public function testItThrowsIfArchiveAndNoDateOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/ArchiveDate parameter/');
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => 'archive']);
+        $filter->applyToList($list, ['mode' => 'archive']);
     }
 
     public function testItThrowsIfArchiveAndInvalidDateOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Invalid date/');
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => 'archive', 'ArchiveDate' => 'foo']);
+        $filter->applyToList($list, ['mode' => 'archive', 'archiveDate' => 'foo']);
     }
 
 
     public function testItThrowsIfVersionAndNoVersionOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Version parameter/');
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => 'version']);
+        $filter->applyToList($list, ['mode' => 'version']);
     }
 
     public function testItSetsArchiveQueryParamsOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'archive',
-                'ArchiveDate' => '2016-11-08',
+                'mode' => 'archive',
+                'archiveDate' => '2016-11-08',
             ]
         );
 
@@ -133,13 +142,13 @@ class ApplyVersionFiltersTest extends SapphireTest
 
     public function testItSetsVersionQueryParamsOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'version',
-                'Version' => '5',
+                'mode' => 'version',
+                'version' => '5',
             ]
         );
 
@@ -149,12 +158,12 @@ class ApplyVersionFiltersTest extends SapphireTest
 
     public function testItSetsLatestVersionQueryParamsOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'latest_versions',
+                'mode' => 'latest_versions',
             ]
         );
 
@@ -163,12 +172,12 @@ class ApplyVersionFiltersTest extends SapphireTest
 
     public function testItSetsAllVersionsQueryParamsOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'all_versions',
+                'mode' => 'all_versions',
             ]
         );
 
@@ -177,16 +186,16 @@ class ApplyVersionFiltersTest extends SapphireTest
 
     public function testItThrowsOnNoStatusOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageRegExp('/Status parameter/');
         $list = Fake::get();
-        $filter->applyToList($list, ['Mode' => 'status']);
+        $filter->applyToList($list, ['mode' => 'status']);
     }
 
     public function testStatusOnApplyToList()
     {
-        $filter = new ApplyVersionFilters();
+        $filter = new VersionFilters();
         $record1 = new Fake();
         $record1->Name = 'Only on draft';
         $record1->write();
@@ -210,32 +219,32 @@ class ApplyVersionFiltersTest extends SapphireTest
         $oldID = $record4->ID;
         $record4->delete();
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'status',
-                'Status' => ['modified']
+                'mode' => 'status',
+                'status' => ['modified']
             ]
         );
         $this->assertListEquals([['ID' => $record3->ID]], $list);
 
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'status',
-                'Status' => ['archived']
+                'mode' => 'status',
+                'status' => ['archived']
             ]
         );
         $this->assertCount(1, $list);
         $this->assertEquals($oldID, $list->first()->ID);
 
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'status',
-                'Status' => ['draft']
+                'mode' => 'status',
+                'status' => ['draft']
             ]
         );
 
@@ -245,11 +254,11 @@ class ApplyVersionFiltersTest extends SapphireTest
 
 
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'status',
-                'Status' => ['draft', 'modified']
+                'mode' => 'status',
+                'status' => ['draft', 'modified']
             ]
         );
 
@@ -260,11 +269,11 @@ class ApplyVersionFiltersTest extends SapphireTest
         $this->assertContains($record1->ID, $ids);
 
         $list = Fake::get();
-        $filter->applyToList(
+        $list = $filter->applyToList(
             $list,
             [
-                'Mode' => 'status',
-                'Status' => ['archived', 'modified']
+                'mode' => 'status',
+                'status' => ['archived', 'modified']
             ]
         );
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\Versioned\Tests\GraphQL\Operations;
+namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -8,10 +8,11 @@ use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\RollbackCreator;
-use SilverStripe\Versioned\Tests\GraphQL\Operations\Rollback\FakeDataObjectStub;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeDataObjectStub;
 
 class RollbackTest extends SapphireTest
 {
@@ -20,6 +21,14 @@ class RollbackTest extends SapphireTest
     public static $extra_dataobjects = [
         FakeDataObjectStub::class,
     ];
+
+    protected function setUp()
+    {
+        parent::setUp();
+        if (class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
+        }
+    }
 
     /**
      * @expectedException InvalidArgumentException

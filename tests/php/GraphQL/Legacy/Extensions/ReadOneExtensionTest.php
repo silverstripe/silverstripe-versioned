@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\Versioned\Tests\GraphQL\Extensions;
+namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Extensions;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -9,6 +9,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
@@ -21,6 +22,15 @@ class ReadOneExtensionTest extends SapphireTest
     public static $extra_dataobjects = [
         Fake::class,
     ];
+
+    protected function setUp()
+    {
+        parent::setUp();
+        if (class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
+        }
+
+    }
 
     public function testReadOneExtensionAppliesFilters()
     {

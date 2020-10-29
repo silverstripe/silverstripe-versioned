@@ -1,11 +1,12 @@
 <?php
-namespace SilverStripe\Versioned\Tests\GraphQL\Extensions;
+namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Extensions;
 
 use GraphQL\Type\Definition\IntType;
 use GraphQL\Type\Definition\ObjectType;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
@@ -16,6 +17,15 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
     public static $extra_dataobjects = [
         Fake::class,
     ];
+
+    protected function setUp()
+    {
+        parent::setUp();
+        if (class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
+        }
+
+    }
 
     public function testDataObjectScaffolderAddsVersionedFields()
     {

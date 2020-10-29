@@ -41,7 +41,7 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
      */
     public static function updateSchema(Schema $schema): void
     {
-        $schema->addModel(ModelType::create(Member::class));
+        $schema->addModelbyClassName(Member::class);
     }
 
     /**

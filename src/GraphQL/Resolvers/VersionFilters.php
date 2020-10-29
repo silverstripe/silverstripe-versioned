@@ -70,7 +70,7 @@ class VersionFilters
             ));
         }
         if (!isset($versioningArgs['mode'])) {
-            $list;
+            return $list;
         }
 
         $this->validateArgs($versioningArgs);

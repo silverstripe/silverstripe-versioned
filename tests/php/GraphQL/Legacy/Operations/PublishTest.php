@@ -1,12 +1,13 @@
 <?php
 
-namespace SilverStripe\Versioned\Tests\GraphQL\Operations;
+namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\Publish;
@@ -21,6 +22,15 @@ class PublishTest extends SapphireTest
     public static $extra_dataobjects = [
         Fake::class,
     ];
+
+    protected function setUp()
+    {
+        parent::setUp();
+        if (class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
+        }
+
+    }
 
     public function testPublish()
     {
