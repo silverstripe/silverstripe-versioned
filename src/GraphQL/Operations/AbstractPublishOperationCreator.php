@@ -49,9 +49,8 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
     public function createOperation(
         SchemaModelInterface $model,
         string $typeName,
-        array $config = [])
-    : ?ModelOperation
-    {
+        array $config = []
+    ): ?ModelOperation {
         if (!Extensible::has_extension($model->getSourceClass(), Versioned::class)) {
             return null;
         }
@@ -68,7 +67,6 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
             ->addResolverContext('action', $this->getAction())
             ->addResolverContext('dataClass', $model->getSourceClass())
             ->addArg('id', 'ID!');
-
     }
 
     abstract protected function createOperationName(string $typeName): string;

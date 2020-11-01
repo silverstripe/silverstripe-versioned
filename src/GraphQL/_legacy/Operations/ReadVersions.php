@@ -33,7 +33,6 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
 
         // Allow clients to sort the versions list by Version ID
         $this->addArg('sort', 'VersionSortType');
-
     }
 
     public function resolve($object, array $args, $context, ResolveInfo $info)

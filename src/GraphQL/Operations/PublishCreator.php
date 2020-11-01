@@ -30,5 +30,4 @@ class PublishCreator extends AbstractPublishOperationCreator
     {
         return AbstractPublishOperationCreator::ACTION_PUBLISH;
     }
-
 }

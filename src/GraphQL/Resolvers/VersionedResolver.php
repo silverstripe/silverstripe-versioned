@@ -3,7 +3,6 @@
 
 namespace SilverStripe\Versioned\GraphQL\Resolvers;
 
-
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
@@ -42,7 +41,7 @@ class VersionedResolver extends DefaultResolverProvider
     public static function resolveVersionFields(DataObject $obj, array $args, array $context, ResolveInfo $info)
     {
         /* @var DataObject&Versioned $obj */
-        switch($info->fieldName) {
+        switch ($info->fieldName) {
             case 'author':
                 return $obj->Author();
             case 'publisher':
@@ -103,7 +102,6 @@ class VersionedResolver extends DefaultResolverProvider
 
         return Injector::inst()->get(VersionFilters::class)
             ->applyToList($list, $args['versioning']);
-
     }
 
     /**

@@ -31,7 +31,6 @@ class ReadVersionsTest extends SapphireTest
         if (class_exists(Schema::class)) {
             $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
         }
-
     }
 
 

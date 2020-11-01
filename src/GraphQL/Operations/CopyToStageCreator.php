@@ -13,7 +13,6 @@ use SilverStripe\GraphQL\Schema\Interfaces\SchemaModelInterface;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
-
 if (!interface_exists(OperationCreator::class)) {
     return;
 }

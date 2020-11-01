@@ -3,7 +3,6 @@
 
 namespace SilverStripe\Versioned\GraphQL\Plugins;
 
-
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
 use SilverStripe\GraphQL\Schema\Field\ModelMutation;
@@ -78,5 +77,4 @@ class UnpublishOnDelete implements ModelMutationPlugin
             });
         };
     }
-
 }

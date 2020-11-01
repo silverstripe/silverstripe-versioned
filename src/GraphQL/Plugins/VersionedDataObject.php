@@ -99,7 +99,7 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
                     ->addPlugin(Paginator::IDENTIFIER, [
                         'connection' => $type->getName() . 'Versions',
                     ]);
-            });
+        });
     }
 
     /**
@@ -109,7 +109,7 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
     public static function sortVersions(array $config): Closure
     {
         $fieldName = $config['fieldName'];
-        return function (Sortable $list, array $args) use($fieldName) {
+        return function (Sortable $list, array $args) use ($fieldName) {
             $versionSort = $args[$fieldName]['version'] ?? null;
             if ($versionSort) {
                 $list = $list->sort('Version', $versionSort);

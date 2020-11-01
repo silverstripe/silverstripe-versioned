@@ -29,5 +29,4 @@ class UnpublishCreator extends AbstractPublishOperationCreator
     {
         return AbstractPublishOperationCreator::ACTION_UNPUBLISH;
     }
-
 }

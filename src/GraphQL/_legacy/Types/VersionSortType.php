@@ -3,7 +3,6 @@
 
 namespace SilverStripe\Versioned\GraphQL\Types;
 
-
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Pagination\SortDirectionTypeCreator;
 use SilverStripe\GraphQL\TypeCreator;

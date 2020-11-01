@@ -24,7 +24,6 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
         if (class_exists(Schema::class)) {
             $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
         }
-
     }
 
     public function testDataObjectScaffolderAddsVersionedFields()

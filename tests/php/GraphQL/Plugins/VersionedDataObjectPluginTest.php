@@ -121,6 +121,4 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $this->assertEquals(1, $result->first()->Version);
         $this->assertEquals(3, $result->last()->Version);
     }
-
-
 }

@@ -3,7 +3,6 @@
 
 namespace SilverStripe\Versioned\GraphQL\Plugins;
 
-
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Schema\Field\ModelQuery;
 use SilverStripe\GraphQL\Schema\Interfaces\ModelQueryPlugin;
