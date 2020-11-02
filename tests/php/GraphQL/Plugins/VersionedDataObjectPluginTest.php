@@ -93,32 +93,4 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $this->assertNull($type);
     }
 
-    public function testItReadsVersions()
-    {
-        $this->logInWithPermission('ADMIN');
-        $member = Security::getCurrentUser();
-
-        $record = new Fake();
-        $record->Name = 'First';
-        $record->write();
-
-        $record->Name = 'Second';
-        $record->write();
-
-        $record->Name = 'Third';
-        $record->write();
-        $resolve =
-        $result = $scaffold['resolve'](
-            $record,
-            [],
-            ['currentUser' => $member],
-            new ResolveInfo([])
-        );
-
-        $this->assertInstanceOf(SS_List::class, $result);
-        $this->assertCount(3, $result);
-        $this->assertInstanceOf(Fake::class, $result->first());
-        $this->assertEquals(1, $result->first()->Version);
-        $this->assertEquals(3, $result->last()->Version);
-    }
 }

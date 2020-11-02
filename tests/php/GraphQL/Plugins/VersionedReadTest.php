@@ -34,7 +34,7 @@ class VersionedReadTest extends SapphireTest
         }
     }
 
-    public function testReadOneExtensionAppliesFilters()
+    public function testVersionedRead()
     {
         $model = DataObjectModel::create(Fake::class);
         $query = ModelQuery::create($model, 'testQuery');
@@ -44,7 +44,7 @@ class VersionedReadTest extends SapphireTest
         $this->assertCount(1, $query->getResolverAfterwares());
         $this->assertEquals(
             VersionedResolver::class . '::resolveVersionedRead',
-            $query->getResolverAfterwares()[0]->toString()
+            $query->getResolverAfterwares()[0]->getRef()->toString()
         );
         $this->assertCount(1, $query->getArgs());
         $this->assertEquals('versioning', $query->getArgs()[0]);
