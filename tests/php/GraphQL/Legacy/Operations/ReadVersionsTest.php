@@ -13,6 +13,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
+use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 
@@ -38,6 +39,7 @@ class ReadVersionsTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
+        $manager->addType((new VersionSortType())->toType());
         $manager->addType(new ObjectType(['name' => 'Test']));
         $readVersions = new ReadVersions(UnversionedWithField::class, 'Test');
         $readVersions->setUsePagination(false);
@@ -58,6 +60,7 @@ class ReadVersionsTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
+        $manager->addType((new VersionSortType())->toType());
         $manager->addType(new ObjectType(['name' => 'Test']));
         $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
@@ -78,6 +81,7 @@ class ReadVersionsTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
+        $manager->addType((new VersionSortType())->toType());
         $manager->addType(new ObjectType(['name' => 'Test']));
         $readVersions = new ReadVersions(Fake::class, 'Test');
         $readVersions->setUsePagination(false);
@@ -118,7 +122,7 @@ class ReadVersionsTest extends SapphireTest
         if (!method_exists($operation, 'getSortableFields')) {
             $this->markTestSkipped('getSortableFields API is missing');
         }
-
-        $this->assertContains('Version', $operation->getSortableFields());
+        $args = $operation->getArgs()->filter('argName', 'sort');
+        $this->assertCount(1, $args);
     }
 }

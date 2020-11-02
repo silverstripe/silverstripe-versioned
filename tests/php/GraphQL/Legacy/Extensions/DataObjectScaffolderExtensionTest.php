@@ -8,6 +8,7 @@ use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
+use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 use SilverStripe\Versioned\Versioned;
@@ -30,6 +31,7 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
+        $manager->addType((new VersionSortType())->toType());
         $scaffolder = new DataObjectScaffolder(Fake::class);
         $scaffolder->addFields(['Name', 'Title']);
         $scaffolder->addToManager($manager);

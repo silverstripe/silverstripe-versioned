@@ -60,9 +60,10 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
 
     public function resolve($object, array $args, $context, ResolveInfo $info)
     {
-        list($input, $id, $to, $fromVersion, $fromStage) = StaticSchema::inst()->extractKeys(
-            ['Input', 'ID', 'ToStage', 'FromVersion', 'FromStage'],
-            $args
+        list($input) = StaticSchema::inst()->extractKeys(['Input'], $args);
+        list($id, $to, $fromVersion, $fromStage) = StaticSchema::inst()->extractKeys(
+            ['ID', 'ToStage', 'FromVersion', 'FromStage'],
+            $input
         );
         /** @var Versioned|DataObject $record */
         $record = null;

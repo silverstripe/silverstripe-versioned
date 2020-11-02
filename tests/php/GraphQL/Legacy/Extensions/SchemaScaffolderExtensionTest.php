@@ -10,6 +10,7 @@ use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
+use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 use SilverStripe\Versioned\Tests\VersionedTest\ChangeSetFake;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
@@ -33,6 +34,7 @@ class SchemaScaffolderExtensionTest extends SapphireTest
     {
         $manager = new Manager();
         $manager->addType((new VersionedStage())->toType());
+        $manager->addType((new VersionSortType())->toType());
         $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);
         $this->assertFalse($manager->hasType($memberType));
 

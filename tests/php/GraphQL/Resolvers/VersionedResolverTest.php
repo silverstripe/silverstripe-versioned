@@ -3,7 +3,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Resolvers;
 
-use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -24,6 +24,14 @@ class VersionedResolverTest extends SapphireTest
         Fake::class,
         FakeDataObjectStub::class,
     ];
+
+    protected function setUp()
+    {
+        parent::setUp();
+        if (!class_exists(Schema::class)) {
+            $this->markTestSkipped('Skipped GraphQL 4 test ' . __CLASS__);
+        }
+    }
 
     public function testCopyToStage()
     {
