@@ -1,4 +1,10 @@
 eo:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Arkivoj
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Redakti paĝon'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: SilverStripe\VersionedAdmin\Controllers\HistoryViewerController
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Vaka
     ITEMS_CHANGES:
@@ -28,18 +34,38 @@ eo:
       one: 'Unu ŝanĝara ero'
       other: '{count} ŝanĝaraj eroj'
     SINGULARNAME: 'Ŝangi agordon'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arkivo
+    ArchivePermissionsFailure: 'Mankas arkivaj permesoj'
+    Delete: Forigi
+  SilverStripe\Versioned\GridFieldRestoreAction:
+    RESTORE: 'Restaŭri al malneto'
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: 'Generita pro publikigo de ''{title}'' je {created}'
+  SilverStripe\Versioned\RestoreAction:
+    RESTORE: 'Restaŭri al malneto'
+    RESTORE_CHANGEDLOCATION: 'Restaŭris je la {model} "{id}" al la supra nivelo ĉar la origina loko ne estas trovebla.'
+    RESTORE_DESC: 'Restaŭri la enarkivigitan version al malneto'
+    RESTORE_FALIURE_PERMISSION: 'Nesufiĉa permeso por restaŭri eron'
+    RESTORE_FALIURE_RECORD: 'Ne povas restaŭri eron'
+    RESTORE_FALIURE_STATE: 'Ĉi tiu ero jam ekzistas, do ne eblas restaŭri ĝin'
+    RESTORE_SUCCESS: 'Sukcese restaŭris je la {model} "{id}"'
+    RESTORE_TO_ROOT: 'Restaŭri al malneto ĉe la supra nivelo'
+    RESTORE_TO_ROOT_DESC: 'Restaŭri la enarkivigitan version al malneto kiel la supranivela ero'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Enarkivigita {name} {titolo}'
     BUTTONAPPLYCHANGES: 'Apliki ŝanĝojn'
     BUTTONARCHIVEDESC: 'Malpublikigi kaj enarkivigi'
+    BUTTONPUBLISHED: Publikigita
+    BUTTONSAVED: Konservita
+    BUTTONSAVEPUBLISH: Publikigi
     BUTTONUNPUBLISH: Malpublikigi
     BUTTONUNPUBLISHDESC: 'Forigi ĉi tiun rikordon el la publika retejo'
     DRAFT: Malneto
     MODIFIED: Ŝanĝita
+    MoreOptions: 'Pliaj agordoj'
     Published: 'Pubikigita {name} {link}'
     Unpublished: 'Nepublikigita {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:

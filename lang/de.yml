@@ -58,10 +58,14 @@ de:
     Archived: '{name} {title} archiviert'
     BUTTONAPPLYCHANGES: 'Änderungen anwenden'
     BUTTONARCHIVEDESC: 'Veröffentlichung zurücknehmen und archivieren'
+    BUTTONPUBLISHED: Veröffentlicht
+    BUTTONSAVED: Gespeichert
+    BUTTONSAVEPUBLISH: Veröffentlichen
     BUTTONUNPUBLISH: 'Veröffentlichung zurücknehmen'
     BUTTONUNPUBLISHDESC: 'Diesen Eintrag von der veröffentlichten Seite entfernen'
     DRAFT: Entwurf
     MODIFIED: Bearbeitet
+    MoreOptions: 'Weitere Optionen'
     Published: '{name} {link} veröffentlicht'
     Unpublished: 'Veröffentlichung von {name} {link} zurückgenommen'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:

@@ -1,0 +1,89 @@
+sl:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Arhiv
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Uredi stran'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: Zgodovina
+  SilverStripe\Versioned\ChangeSet:
+    EMPTY: Prazno
+    ITEMS_CHANGES:
+      one: '{total} (1 sprememba)'
+      two: '{total} ({count} spremembi)'
+      few: '{total} ({count} sprememb)'
+      other: '{total} ({count} sprememb)'
+    ITEMS_TOTAL:
+      one: '1 skupaj'
+      two: '{count} skupaj'
+      few: '{count} skupaj'
+      other: '{count} skupaj'
+    NAME: Naziv
+    PLURALNAME: Kampanje
+    PLURALS:
+      one: Kampanja
+      two: '{count} kampanji'
+      few: '{count} kampanj'
+      other: '{count} kampanj'
+    PUBLISHED_DATE_BY: 'Objavil {name}, {date}'
+    PUBLISHED_TODAY: 'Danes {time}'
+    PUBLISHED_TODAY_BY: 'Objavil {name} danes, {time}'
+    PUBLISHER_NAME: Objavil
+    PUBLISH_DATE: 'Datum objave'
+    SINGULARNAME: Kampanja
+    STATE: Stanje
+    STATE_OPEN: Aktivno
+    STATE_PUBLISHED: Objavljeno
+    STATE_REVERTED: Povrnjeno
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Nizi sprememb'
+    PLURALS:
+      one: 'Niz sprememb'
+      two: '{count} niza sprememb'
+      few: '{count} nizov sprememb'
+      other: '{count} nizov sprememb'
+    SINGULARNAME: 'Preoblikuj niz sprememb'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arhiviraj
+    ArchivePermissionsFailure: 'Nimate pravic za arhiviranje'
+    Delete: Izbriši
+  SilverStripe\Versioned\GridFieldRestoreAction:
+    RESTORE: 'Obnovi v osnutek'
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Ustvarjeno z objavo ''{title}'', {created}'
+  SilverStripe\Versioned\RestoreAction:
+    RESTORE: 'Obnovi v osnutek'
+    RESTORE_CHANGEDLOCATION: '{model} "{id}" smo obnovili na prvem nivoju, ker izvorna lokacija ni znana.'
+    RESTORE_DESC: 'Obnovi arhivirano različico v osnutek'
+    RESTORE_FALIURE_PERMISSION: 'Za obnovitev elementa nimate ustreznih pravic'
+    RESTORE_FALIURE_RECORD: 'Elementa nismo uspeli obnoviti'
+    RESTORE_FALIURE_STATE: 'Ta element že obstaja in ga ni mogoče ponovno obnoviti'
+    RESTORE_SUCCESS: 'Uspešno obnovljen {model} "{id}"'
+    RESTORE_TO_ROOT: 'Obnovi v osnutek na prvem nivoju'
+    RESTORE_TO_ROOT_DESC: 'Obnovi arhivirano različico v obliki osnutka na prvem nivoju'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Različice
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    Archived: 'Arhivirano {name} {title}'
+    BUTTONAPPLYCHANGES: 'Izvedi spremembe'
+    BUTTONARCHIVEDESC: 'Umakni iz objave in arhiviraj'
+    BUTTONPUBLISHED: Objavljeno
+    BUTTONSAVED: Shranjeno
+    BUTTONSAVEPUBLISH: Objavi
+    BUTTONUNPUBLISH: 'Umakni iz objave'
+    BUTTONUNPUBLISHDESC: 'Zapis odstrani iz objavljenega stanja'
+    DRAFT: Osnutek
+    MODIFIED: Spremenjeno
+    MoreOptions: 'Druge možnosti'
+    Published: 'Objavljeno {name} {link}'
+    Unpublished: 'Umaknjeno iz objave {name} {title}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Element še ni bilo objavljen'
+    ADDEDTODRAFTSHORT: Osnutek
+    ARCHIVEDPAGEHELP: 'Element smo odstranili iz objave in osnutkov'
+    ARCHIVEDPAGESHORT: Arhivirano
+    MODIFIEDONDRAFTHELP: 'Spremembe še niso bile objavljene'
+    MODIFIEDONDRAFTSHORT: Spremenjeno
+    ONLIVEONLYSHORT: 'Samo objavljeno'
+    ONLIVEONLYSHORTHELP: 'Element je objavljen, vendar nima osnutka'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Da bi si lahko ogledali arhivirano različico ali osnutek strani, morate biti prijavljeni. <a href="{link}">Za ogled objavljene različice kliknite tukaj.</a>'
