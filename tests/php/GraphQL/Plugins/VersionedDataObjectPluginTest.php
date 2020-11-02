@@ -91,6 +91,8 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $plugin->apply($type, $schema);
         $type = $schema->getType('FakeVersion');
         $this->assertNull($type);
+
+        Fake::add_extension(Versioned::class);
     }
 
 }

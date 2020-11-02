@@ -47,6 +47,6 @@ class VersionedReadTest extends SapphireTest
             $query->getResolverAfterwares()[0]->getRef()->toString()
         );
         $this->assertCount(1, $query->getArgs());
-        $this->assertEquals('versioning', $query->getArgs()[0]);
+        $this->assertArrayHasKey('versioning', $query->getArgs());
     }
 }
