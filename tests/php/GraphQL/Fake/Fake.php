@@ -30,6 +30,6 @@ class Fake extends DataObject implements TestOnly
         if ($extended !== null) {
             return $extended;
         }
-        return true;    
+        return true;
     }
 }

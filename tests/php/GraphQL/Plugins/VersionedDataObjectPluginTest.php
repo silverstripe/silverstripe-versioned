@@ -94,5 +94,4 @@ class VersionedDataObjectPluginTest extends SapphireTest
 
         Fake::add_extension(Versioned::class);
     }
-
 }
