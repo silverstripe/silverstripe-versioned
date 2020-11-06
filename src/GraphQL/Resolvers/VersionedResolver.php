@@ -56,7 +56,6 @@ class VersionedResolver extends DefaultResolverProvider
                 return $obj->isLiveVersion();
             case 'latestDraftVersion':
                 return $obj->isLatestDraftVersion();
-
         }
 
         return null;
