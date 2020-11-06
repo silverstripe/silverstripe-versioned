@@ -76,16 +76,19 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         $memberTypeName = $memberType->getModel()->getTypeName();
         $resolver = ['resolver' => [VersionedResolver::class, 'resolveVersionFields']];
 
+        $type->addField('version', 'Int');
+
         $versionType = Type::create($versionName)
             ->mergeWith($type)
             ->addField('author', ['type' => $memberTypeName] + $resolver)
             ->addField('publisher', ['type' => $memberTypeName] + $resolver)
             ->addField('published', ['type' => 'Boolean'] + $resolver)
             ->addField('liveVersion', ['type' => 'Boolean'] + $resolver)
+            ->addField('deleted', ['type' => 'Boolean'] + $resolver)
+            ->addField('draft', ['type' => 'Boolean'] + $resolver)
             ->addField('latestDraftVersion', ['type' => 'Boolean'] + $resolver);
 
         $schema->addType($versionType);
-        $type->addField('version', 'Int');
         $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type) {
                 $field->setResolver([VersionedResolver::class, 'resolveVersionList'])
                     ->addResolverContext('sourceClass', $type->getModel()->getSourceClass())

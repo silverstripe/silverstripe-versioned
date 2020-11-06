@@ -48,10 +48,15 @@ class VersionedResolver extends DefaultResolverProvider
                 return $obj->Publisher();
             case 'published':
                 return $obj->isPublished();
+            case 'draft':
+                return $obj->WasDraft;
+            case 'deleted':
+                return $obj->WasDeleted;
             case 'liveVersion':
                 return $obj->isLiveVersion();
             case 'latestDraftVersion':
                 return $obj->isLatestDraftVersion();
+
         }
 
         return null;
