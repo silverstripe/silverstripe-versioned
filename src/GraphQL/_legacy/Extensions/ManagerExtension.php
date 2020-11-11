@@ -10,6 +10,9 @@ use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStatus;
 use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 
+/**
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ */
 class ManagerExtension extends Extension
 {
     /**

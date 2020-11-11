@@ -15,6 +15,7 @@ use SilverStripe\GraphQL\Manager;
  * Decorator for either a Read or ReadOne query scaffolder
  *
  * @property Read|ReadOne $owner
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
  */
 class ReadExtension extends Extension
 {

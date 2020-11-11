@@ -9,6 +9,9 @@ use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\Versioned;
 
+/**
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ */
 class SchemaScaffolderExtension extends Extension
 {
     /**

@@ -11,6 +11,8 @@ use SilverStripe\Versioned\Versioned;
 
 /**
  * Extends the @see Delete CRUD scaffolder to unpublish any items first
+ *
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
  */
 class DeleteExtension extends Extension
 {

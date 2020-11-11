@@ -8,6 +8,9 @@ use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
 
+/**
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ */
 class ApplyVersionFilters
 {
     /**

@@ -20,6 +20,8 @@ if (!class_exists(MutationScaffolder::class)) {
  * Scaffolds a "rollback recursive" operation for DataObjects.
  *
  * rollback[TypeName](ID!, ToVersion!)
+ *
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
  */
 class Rollback extends MutationScaffolder implements OperationResolver
 {

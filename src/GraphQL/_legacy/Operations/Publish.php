@@ -13,6 +13,8 @@ if (!class_exists(PublishOperation::class)) {
 
 /**
  * Scaffolds a generic update operation for DataObjects.
+ *
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
  */
 class Publish extends PublishOperation
 {

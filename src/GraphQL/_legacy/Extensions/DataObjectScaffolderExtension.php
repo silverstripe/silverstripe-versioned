@@ -15,6 +15,10 @@ use SilverStripe\Versioned\Versioned;
 if (!class_exists(Manager::class)) {
     return;
 }
+
+/**
+ * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ */
 class DataObjectScaffolderExtension extends Extension
 {
     /**
