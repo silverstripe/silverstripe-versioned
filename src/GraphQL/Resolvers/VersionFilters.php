@@ -110,7 +110,7 @@ class VersionFilters
                         ->setDataQueryParam('Versioned.mode', 'latest_versions');
                     // Join a temporary alias BaseTable_Draft, renaming this on execution to BaseTable
                     // See Versioned::augmentSQL() For reference on this alias
-                    $draftTable = $sng->stageTable($baseTable, Versioned::DRAFT);
+                    $draftTable = $sng->stageTable($baseTable, Versioned::DRAFT) . '_Draft';
                     $list = $list
                         ->leftJoin(
                             $draftTable,
