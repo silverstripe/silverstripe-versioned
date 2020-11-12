@@ -3,6 +3,7 @@
 namespace SilverStripe\GraphQL\Resolvers;
 
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\RelationList;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
@@ -97,8 +98,10 @@ class VersionFilters
                 break;
             case 'status':
                 // When querying by Status we need to ensure both stage / live tables are present
-                $baseTable = singleton($list->dataClass())->baseTable();
-                $liveTable = $baseTable . '_Live';
+                /* @var DataObject&Versioned $sng */
+                $sng = singleton($list->dataClass());
+                $baseTable = $sng->baseTable();
+                $liveTable = $sng->stageTable($baseTable, Versioned::LIVE);
                 $statuses = $versioningArgs['status'];
 
                 // If we need to search archived records, we need to manually join draft table
@@ -107,7 +110,7 @@ class VersionFilters
                         ->setDataQueryParam('Versioned.mode', 'latest_versions');
                     // Join a temporary alias BaseTable_Draft, renaming this on execution to BaseTable
                     // See Versioned::augmentSQL() For reference on this alias
-                    $draftTable = $baseTable . '_Draft';
+                    $draftTable = $sng->stageTable($baseTable, Versioned::DRAFT);
                     $list = $list
                         ->leftJoin(
                             $draftTable,
