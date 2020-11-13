@@ -1,0 +1,33 @@
+---
+Name: versioned-graphql
+Only:
+  moduleexists: 'silverstripe/graphql'
+Except:
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
+---
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Read:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\DeleteExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ReadExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\SchemaScaffolderExtension
+SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\DataObjectScaffolderExtension
+
+# Register the versioned operations
+SilverStripe\GraphQL\Scaffolding\Scaffolders\OperationScaffolder:
+  operations:
+    copyToStage: SilverStripe\Versioned\GraphQL\Operations\CopyToStage
+    publish: SilverStripe\Versioned\GraphQL\Operations\Publish
+    unpublish: SilverStripe\Versioned\GraphQL\Operations\Unpublish
+    rollback: SilverStripe\Versioned\GraphQL\Operations\Rollback
+SilverStripe\GraphQL\Manager:
+  extensions:
+    - SilverStripe\Versioned\GraphQL\Extensions\ManagerExtension

@@ -1,0 +1,15 @@
+DataObject:
+  plugins:
+    versioning: true
+  operations:
+    read:
+      plugins:
+        readVersion:
+          before: paginateList
+    readOne:
+      plugins:
+        readVersion:
+          before: firstResult
+    delete:
+      plugins:
+        unpublishOnDelete: true

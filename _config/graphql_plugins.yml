@@ -1,0 +1,12 @@
+---
+Name: versioned-graphql-plugins
+Only:
+  moduleexists: 'silverstripe/graphql'
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\GraphQL\Schema\Registry\PluginRegistry:
+    constructor:
+      versionedDataobject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedDataObject'
+      unpublishOnDelete: '%$SilverStripe\Versioned\GraphQL\Plugins\UnpublishOnDelete'
+      readVersionedDataObject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedRead'

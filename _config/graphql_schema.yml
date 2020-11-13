@@ -1,0 +1,11 @@
+---
+Name: versioned-graphql-schema
+Only:
+  moduleexists: 'silverstripe/graphql'
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
+---
+SilverStripe\GraphQL\Schema\Schema:
+  schemas:
+    '*':
+      src:
+        versionedSrc: 'silverstripe/versioned: _graphql'

@@ -1,0 +1,12 @@
+---
+Name: versioned-graphql-dataobject
+Only:
+  moduleexists: 'silverstripe/graphql'
+  classexists: 'SilverStripe\GraphQL\Schema\Schema'
+---
+SilverStripe\GraphQL\Schema\DataObject\DataObjectModel:
+  operations:
+    copyToStage: 'SilverStripe\Versioned\GraphQL\Operations\CopyToStageCreator'
+    publish: 'SilverStripe\Versioned\GraphQL\Operations\PublishCreator'
+    unpublish: 'SilverStripe\Versioned\GraphQL\Operations\UnpublishCreator'
+    rollback: 'SilverStripe\Versioned\GraphQL\Operations\RollbackCreator'
