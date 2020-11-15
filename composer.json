@@ -32,8 +32,7 @@
         "psr-4": {
             "SilverStripe\\Versioned\\": ["src/", "_legacy/"],
             "SilverStripe\\Versioned\\Tests\\": "tests/php/"
-        },
-        "classmap": ["src/GraphQL/_legacy"]
+        }
     },
     "scripts": {
         "lint": "vendor/bin/phpcs src/ tests/php/",
