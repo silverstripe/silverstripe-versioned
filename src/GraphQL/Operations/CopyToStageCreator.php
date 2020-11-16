@@ -13,6 +13,8 @@ use SilverStripe\GraphQL\Schema\Interfaces\SchemaModelInterface;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 
+// GraphQL dependency is optional in versioned,
+// and the following implementation relies on existence of this class (in GraphQL v4)
 if (!interface_exists(OperationCreator::class)) {
     return;
 }

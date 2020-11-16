@@ -16,6 +16,12 @@ use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class CopyToStageTest extends SapphireTest
 {
 

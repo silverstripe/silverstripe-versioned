@@ -14,6 +14,12 @@ use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\Rollback;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeDataObjectStub;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class RollbackTest extends SapphireTest
 {
     protected $usesDatabase = true;

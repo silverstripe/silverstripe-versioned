@@ -22,6 +22,8 @@ use Exception;
 use Closure;
 use InvalidArgumentException;
 
+// GraphQL dependency is optional in versioned,
+// and the following implementation relies on existence of this class (in GraphQL v4)
 if (!class_exists(DefaultResolverProvider::class)) {
     return;
 }

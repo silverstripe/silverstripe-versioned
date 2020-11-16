@@ -9,6 +9,12 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class ApplyVersionFiltersTest extends SapphireTest
 {
     protected $usesDatabase = true;

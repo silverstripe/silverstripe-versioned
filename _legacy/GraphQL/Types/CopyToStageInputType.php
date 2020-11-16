@@ -6,6 +6,8 @@ use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 
+// GraphQL dependency is optional in versioned,
+// and legacy implementation relies on existence of this class (in GraphQL v3)
 if (!class_exists(TypeCreator::class)) {
     return;
 }

@@ -9,6 +9,12 @@ use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
+// GraphQL dependency is optional in versioned,
+// and the following implementation relies on existence of this class (in GraphQL v4)
+if (!class_exists(Schema::class)) {
+    return;
+}
+
 class VersionedFiltersTest extends SapphireTest
 {
     protected $usesDatabase = true;

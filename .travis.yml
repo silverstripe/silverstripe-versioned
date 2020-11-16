@@ -43,7 +43,7 @@ before_script:
   # Fix for running phpunit 5 on php 7.4+
   - composer require --no-update sminnee/phpunit-mock-objects:^3
 
-  - 'if [[ ! $BACKWARD_COMPAT ]]; then composer require silverstripe/graphql:4.x-dev --no-update; fi'
+  - 'if [[ $BACKWARD_COMPAT ]]; then composer require silverstripe/graphql:3.x-dev --no-update; fi'
 
   - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:^2 --no-update; fi
   - composer update --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile $COMPOSER_ARG

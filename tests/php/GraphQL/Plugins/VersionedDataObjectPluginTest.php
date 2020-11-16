@@ -26,6 +26,12 @@ use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 use SilverStripe\Versioned\Versioned;
 
+// GraphQL dependency is optional in versioned,
+// and the following implementation relies on existence of this class (in GraphQL v4)
+if (!class_exists(Schema::class)) {
+    return;
+}
+
 class VersionedDataObjectPluginTest extends SapphireTest
 {
     protected static $extra_dataobjects = [
