@@ -15,6 +15,12 @@ use SilverStripe\Versioned\Tests\VersionedTest\ChangeSetFake;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class SchemaScaffolderExtensionTest extends SapphireTest
 {
 

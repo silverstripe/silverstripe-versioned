@@ -15,6 +15,12 @@ use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Core\Injector\Injector;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class ReadExtensionTest extends SapphireTest
 {
 
@@ -25,7 +31,7 @@ class ReadExtensionTest extends SapphireTest
     protected function setUp()
     {
         parent::setUp();
-        if (class_exists(Schema::class)) {
+        if (!class_exists(Manager::class)) {
             $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
         }
     }

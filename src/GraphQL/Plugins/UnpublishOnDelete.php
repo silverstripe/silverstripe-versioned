@@ -15,6 +15,8 @@ use SilverStripe\Versioned\Versioned;
 use Exception;
 use Closure;
 
+// GraphQL dependency is optional in versioned,
+// and the following implementation relies on existence of this class (in GraphQL v4)
 if (!interface_exists(ModelMutationPlugin::class)) {
     return;
 }

@@ -15,6 +15,12 @@ use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Versioned;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class ReadOneExtensionTest extends SapphireTest
 {
     protected $usesDatabase = true;

@@ -11,6 +11,12 @@ use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataList;
 use SilverStripe\GraphQL\Manager;
 
+// GraphQL dependency is optional in versioned,
+// and legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 /**
  * Decorator for either a Read or ReadOne query scaffolder
  *

@@ -13,6 +13,12 @@ use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 use SilverStripe\Versioned\Versioned;
 
+// GraphQL dependency is optional in versioned,
+// and this legacy implementation relies on existence of this class (in GraphQL v3)
+if (!class_exists(Manager::class)) {
+    return;
+}
+
 class DataObjectScaffolderExtensionTest extends SapphireTest
 {
     public static $extra_dataobjects = [
@@ -22,7 +28,7 @@ class DataObjectScaffolderExtensionTest extends SapphireTest
     protected function setUp()
     {
         parent::setUp();
-        if (class_exists(Schema::class)) {
+        if (!class_exists(Manager::class)) {
             $this->markTestSkipped('Skipped GraphQL 3 test ' . __CLASS__);
         }
     }
