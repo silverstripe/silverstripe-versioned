@@ -1,0 +1,11 @@
+modelConfig:
+  DataObject:
+    operations:
+      copyToStage:
+        class: SilverStripe\Versioned\GraphQL\Operations\CopyToStageCreator
+      publish:
+        class: SilverStripe\Versioned\GraphQL\Operations\PublishCreator
+      unpublish:
+        class: SilverStripe\Versioned\GraphQL\Operations\UnpublishCreator
+      rollback:
+        class: SilverStripe\Versioned\GraphQL\Operations\RollbackCreator
