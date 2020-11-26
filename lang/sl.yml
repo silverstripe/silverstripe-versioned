@@ -1,4 +1,10 @@
 sl:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Arhiv
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Uredi stran'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: Zgodovina
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Prazno
     ITEMS_CHANGES:
