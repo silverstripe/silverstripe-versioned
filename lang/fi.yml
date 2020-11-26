@@ -1,4 +1,10 @@
 fi:
+  SilverStripe\VersionedAdmin\ArchiveAdmin:
+    MENUTITLE: Arkistot
+  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
+    MENUTITLE: 'Muokkaa sivua'
+  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
+    MENUTITLE: SilverStripe\VersionedAdmin\Controllers\HistoryViewerController
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Tyhjä
     ITEMS_CHANGES:
