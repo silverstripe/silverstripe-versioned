@@ -7,6 +7,6 @@ Only:
 SilverStripe\Core\Injector\Injector:
   SilverStripe\GraphQL\Schema\Registry\PluginRegistry:
     constructor:
-      versionedDataobject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedDataObject'
-      unpublishOnDelete: '%$SilverStripe\Versioned\GraphQL\Plugins\UnpublishOnDelete'
-      readVersionedDataObject: '%$SilverStripe\Versioned\GraphQL\Plugins\VersionedRead'
+      - 'SilverStripe\Versioned\GraphQL\Plugins\VersionedDataObject'
+      - 'SilverStripe\Versioned\GraphQL\Plugins\UnpublishOnDelete'
+      - 'SilverStripe\Versioned\GraphQL\Plugins\VersionedRead'
