@@ -2,6 +2,9 @@
 <ruleset name="SilverStripe">
 	<description>CodeSniffer ruleset for SilverStripe coding conventions.</description>
 
+	<file>src</file>
+	<file>tests</file>
+
     <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
 
 	<!-- base rules are PSR-2 -->

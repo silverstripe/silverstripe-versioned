@@ -1,58 +1,9 @@
-language: php
+version: ~> 1.0
 
-dist: xenial
-
-services:
-  - mysql
-  - postgresql
-
-cache:
-  directories:
-    - $HOME/.composer/cache/files
+import:
+  - silverstripe/silverstripe-travis-shared:config/provision/standard-jobs-fixed.yml
 
 env:
   global:
-    - COMPOSER_ROOT_VERSION=1.x-dev
-
-jobs:
-  fast_finish: true
-  include:
-    - php: 7.1
-      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1 PHPCS_TEST=1 PDO=1
-    - php: 7.2
-      env: DB=PGSQL RECIPE_VERSION=4.x-dev PHPUNIT_COVERAGE_TEST=1
-    - php: 7.3
-      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1
-    - php: 7.4
-      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1
-    - php: 7.4
-      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1 BACKWARD_COMPAT=1
-    - php: nightly
-      env: DB=MYSQL RECIPE_VERSION=4.x-dev PHPUNIT_TEST=1 COMPOSER_ARG=--ignore-platform-reqs
-
-before_script:
-# Init PHP
-  - if [ "$COMPOSER_ARG" != "--ignore-platform-reqs"]; then printf "\n" | pecl install imagick; fi
-  - phpenv rehash
-  - phpenv config-rm xdebug.ini || true
-  - echo 'memory_limit = 2048M' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-
-# Install composer
-  - composer validate
-  - composer require silverstripe/recipe-cms:$RECIPE_VERSION --no-update --prefer-dist
-  # Fix for running phpunit 5 on php 7.4+
-  - composer require --no-update sminnee/phpunit-mock-objects:^3
-
-  - 'if [[ $BACKWARD_COMPAT ]]; then composer require silverstripe/graphql:3.x-dev --no-update; fi'
-
-  - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:^2 --no-update; fi
-  - composer update --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile $COMPOSER_ARG
-
-
-script:
-  - if [[ $PHPUNIT_TEST ]]; then vendor/bin/phpunit tests/php; fi
-  - if [[ $PHPCS_TEST ]]; then composer run-script lint; fi
-  - if [[ $PHPUNIT_COVERAGE_TEST ]]; then phpdbg -qrr vendor/bin/phpunit --coverage-clover=coverage.xml; fi
-
-after_success:
-  - if [[ $PHPUNIT_COVERAGE_TEST ]]; then bash <(curl -s https://codecov.io/bash) -f coverage.xml; fi
+    - COMPOSER_ROOT_VERSION="1.x-dev"
+    - REQUIRE_RECIPE="4.x-dev"
