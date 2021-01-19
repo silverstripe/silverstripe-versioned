@@ -6,6 +6,7 @@ namespace SilverStripe\Versioned\GraphQL\Resolvers;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
+use SilverStripe\GraphQL\QueryHandler\UserContextProvider;
 use SilverStripe\GraphQL\Resolvers\VersionFilters;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
@@ -73,7 +74,8 @@ class VersionedResolver
                     $sourceClass
                 ));
             }
-            if (!$object->canViewStage(Versioned::DRAFT, $context[QueryHandler::CURRENT_USER])) {
+            $member = UserContextProvider::get($context);
+            if (!$object->canViewStage(Versioned::DRAFT, $member)) {
                 throw new Exception(sprintf(
                     'Cannot view versions on %s',
                     $this->getDataObjectClass()
@@ -134,10 +136,11 @@ class VersionedResolver
                 throw new InvalidArgumentException("Record {$id} not found");
             }
 
+            $member = UserContextProvider::get($context);
             // Permission check object
             $can = $to === Versioned::LIVE
-                ? $record->canPublish($context[QueryHandler::CURRENT_USER])
-                : $record->canEdit($context[QueryHandler::CURRENT_USER]);
+                ? $record->canPublish($member)
+                : $record->canEdit($member);
             if (!$can) {
                 throw new InvalidArgumentException(sprintf(
                     'Copying %s from %s to %s is not allowed',
@@ -189,7 +192,8 @@ class VersionedResolver
                 ));
             }
             $permissionMethod = $isPublish ? 'canPublish' : 'canUnpublish';
-            if (!$obj->$permissionMethod($context[QueryHandler::CURRENT_USER])) {
+            $member = UserContextProvider::get($context);
+            if (!$obj->$permissionMethod($member)) {
                 throw new Exception(sprintf(
                     'Not allowed to change published state of this %s',
                     $dataClass
@@ -236,7 +240,7 @@ class VersionedResolver
             $record = Versioned::get_latest_version($dataClass, $id);
 
             // Assert permission
-            $user = $context[QueryHandler::CURRENT_USER];
+            $user = UserContextProvider::get($context);
             if (!$record->canEdit($user)) {
                 throw new InvalidArgumentException('Current user does not have permission to roll back this resource');
             }
