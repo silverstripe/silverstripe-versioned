@@ -61,7 +61,7 @@ class CopyToStageCreator implements OperationCreator
         return ModelMutation::create($model, $mutationName)
             ->setType($typeName)
             ->setPlugins($plugins)
-            ->setDefaultResolver([VersionedResolver::class, 'resolveCopyToStage'])
+            ->setResolver([VersionedResolver::class, 'resolveCopyToStage'])
             ->addResolverContext('dataClass', $model->getSourceClass())
             ->addArg('input', 'CopyToStageInputType!');
     }
