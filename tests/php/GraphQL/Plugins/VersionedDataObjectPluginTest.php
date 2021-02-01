@@ -13,6 +13,7 @@ use SilverStripe\GraphQL\Schema\DataObject\Resolver;
 use SilverStripe\GraphQL\Schema\Field\Field;
 use SilverStripe\GraphQL\Schema\Plugin\SortPlugin;
 use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\SchemaFactory;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\SS_List;
@@ -52,7 +53,7 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $type = ModelType::create($model);
         $type->addField('name');
 
-        $schema = new Schema('test');
+        $schema = SchemaFactory::create()->boot('test');
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
         $plugin->updateSchema($schema);
@@ -90,7 +91,7 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $type = ModelType::create(DataObjectModel::create(Fake::class, new ModelConfiguration()));
         $type->addField('Name');
 
-        $schema = new Schema('test');
+        $schema = SchemaFactory::create()->boot('test');
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
         $plugin->updateSchema($schema);
