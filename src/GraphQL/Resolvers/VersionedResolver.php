@@ -101,8 +101,10 @@ class VersionedResolver
             return $list;
         }
 
-        return Injector::inst()->get(VersionFilters::class)
-            ->applyToList($list, $args['versioning']);
+        Injector::inst()->get(VersionFilters::class)
+            ->applyToReadingState($args['versioning']);
+
+        return $list;
     }
 
     /**

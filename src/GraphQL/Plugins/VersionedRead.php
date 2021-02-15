@@ -40,6 +40,13 @@ class VersionedRead implements ModelQueryPlugin
             return;
         }
 
+        // The versioned argument only affects global reading state. Should not
+        // apply to nested queries.
+        $rootQuery = $schema->getQueryType()->getFieldByName($query->getName());
+        if (!$rootQuery) {
+            return;
+        }
+
         $query->addResolverAfterware([VersionedResolver::class, 'resolveVersionedRead']);
         $query->addArg('versioning', 'VersionedInputType');
     }
