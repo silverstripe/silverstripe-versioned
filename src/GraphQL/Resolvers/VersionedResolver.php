@@ -101,8 +101,13 @@ class VersionedResolver
             return $list;
         }
 
+        // Set the reading state globally, we don't support mixing versioned states in the same query
         Injector::inst()->get(VersionFilters::class)
             ->applyToReadingState($args['versioning']);
+
+        // Also set on the specific list
+        $list = Injector::inst()->get(VersionFilters::class)
+            ->applyToList($list, $args['versioning']);
 
         return $list;
     }
