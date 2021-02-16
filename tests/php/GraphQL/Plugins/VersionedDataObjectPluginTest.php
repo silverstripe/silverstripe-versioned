@@ -9,10 +9,12 @@ use SilverStripe\GraphQL\Config\ModelConfiguration;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\DataObjectScaffolder;
 use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
+use SilverStripe\GraphQL\Schema\DataObject\ModelCreator;
 use SilverStripe\GraphQL\Schema\DataObject\Resolver;
 use SilverStripe\GraphQL\Schema\Field\Field;
 use SilverStripe\GraphQL\Schema\Plugin\SortPlugin;
 use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\SchemaConfig;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\SS_List;
@@ -48,18 +50,22 @@ class VersionedDataObjectPluginTest extends SapphireTest
 
     public function testPluginAddsVersionedFields()
     {
-        $model = DataObjectModel::create(Fake::class, new ModelConfiguration());
+        $config = $this->createSchemaConfig();
+        $model = DataObjectModel::create(Fake::class, $config);
         $type = ModelType::create($model);
         $type->addField('name');
 
-        $schema = new Schema('test');
+        $schema = new Schema('test', $config);
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
         $plugin->updateSchema($schema);
         $this->assertInstanceOf(ModelType::class, $schema->getModelByClassName(Member::class));
 
         $plugin->apply($type, $schema);
-        $versionType = $schema->getType('FakeVersion');
+        $storableSchema = $schema->getStoreableSchema();
+        $types = $storableSchema->getTypes();
+        $this->assertArrayHasKey('FakeVersion', $types);
+        $versionType = $types['FakeVersion'];
         $this->assertInstanceOf(Type::class, $versionType);
 
         $fields = ['author', 'publisher', 'published', 'liveVersion', 'latestDraftVersion'];
@@ -87,10 +93,11 @@ class VersionedDataObjectPluginTest extends SapphireTest
     public function testPluginDoesntAddVersionedFieldsToUnversionedObjects()
     {
         Fake::remove_extension(Versioned::class);
-        $type = ModelType::create(DataObjectModel::create(Fake::class, new ModelConfiguration()));
+        $config = $this->createSchemaConfig();
+        $type = ModelType::create(DataObjectModel::create(Fake::class, $config));
         $type->addField('Name');
 
-        $schema = new Schema('test');
+        $schema = new Schema('test', $config);
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
         $plugin->updateSchema($schema);
@@ -100,5 +107,15 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $this->assertNull($type);
 
         Fake::add_extension(Versioned::class);
+    }
+
+    /**
+     * @return SchemaConfig
+     */
+    private function createSchemaConfig(): SchemaConfig
+    {
+        return new SchemaConfig([
+            'modelCreators' => [ModelCreator::class],
+        ]);
     }
 }
