@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\GraphQL\Plugins;
 
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
+use SilverStripe\GraphQL\QueryHandler\UserContextProvider;
 use SilverStripe\GraphQL\Schema\Field\ModelMutation;
 use SilverStripe\GraphQL\Schema\Interfaces\ModelMutationPlugin;
 use SilverStripe\GraphQL\Schema\Schema;
@@ -65,8 +66,8 @@ class UnpublishOnDelete implements ModelMutationPlugin
                     if (!$object->hasExtension(Versioned::class) || !$object->isPublished()) {
                         continue;
                     }
-
-                    if (!$object->canUnpublish($context[QueryHandler::CURRENT_USER])) {
+                    $member = UserContextProvider::get($context);
+                    if (!$object->canUnpublish($member)) {
                         throw new Exception(sprintf(
                             'Cannot unpublish %s with ID %s',
                             get_class($object),

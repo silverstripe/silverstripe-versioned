@@ -12,8 +12,10 @@ use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\ReadOne;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
+use SilverStripe\GraphQL\Schema\DataObject\ModelCreator;
 use SilverStripe\GraphQL\Schema\Field\ModelQuery;
 use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\SchemaConfig;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
@@ -42,9 +44,11 @@ class VersionedReadTest extends SapphireTest
 
     public function testVersionedRead()
     {
-        $model = DataObjectModel::create(Fake::class);
+        $config = $this->createSchemaConfig();
+        $model = DataObjectModel::create(Fake::class, $config);
         $query = ModelQuery::create($model, 'testQuery');
-        $schema = new Schema('test');
+        $schema = new Schema('test', $config);
+        $schema->addQuery($query);
         $plugin = new VersionedRead();
         $plugin->apply($query, $schema);
         $this->assertCount(1, $query->getResolverAfterwares());
@@ -54,5 +58,15 @@ class VersionedReadTest extends SapphireTest
         );
         $this->assertCount(1, $query->getArgs());
         $this->assertArrayHasKey('versioning', $query->getArgs());
+    }
+
+    /**
+     * @return SchemaConfig
+     */
+    private function createSchemaConfig(): SchemaConfig
+    {
+        return new SchemaConfig([
+            'modelCreators' => [ModelCreator::class],
+        ]);
     }
 }

@@ -81,7 +81,6 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         $type->addField('version', 'Int');
 
         $versionType = Type::create($versionName)
-            ->mergeWith($type)
             ->addField('author', ['type' => $memberTypeName] + $resolver)
             ->addField('publisher', ['type' => $memberTypeName] + $resolver)
             ->addField('published', ['type' => 'Boolean'] + $resolver)
@@ -89,6 +88,14 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
             ->addField('deleted', ['type' => 'Boolean'] + $resolver)
             ->addField('draft', ['type' => 'Boolean'] + $resolver)
             ->addField('latestDraftVersion', ['type' => 'Boolean'] + $resolver);
+
+        foreach ($type->getFields() as $field) {
+            $clone = clone $field;
+            $versionType->addField($clone->getName(), $clone);
+        }
+        foreach ($type->getInterfaces() as $interface) {
+            $versionType->addInterface($interface);
+        }
 
         $schema->addType($versionType);
         $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type) {

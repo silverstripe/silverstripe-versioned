@@ -3,18 +3,20 @@
 
 namespace SilverStripe\Versioned\GraphQL\Resolvers;
 
-use SilverStripe\GraphQL\Schema\Schema;
-use SilverStripe\Dev\SapphireTest;
+use Exception;
+use InvalidArgumentException;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
+use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Security\Security;
-use SilverStripe\Versioned\GraphQL\Operations\AbstractPublishOperationCreator;
-use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
-use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeDataObjectStub;
-use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Versioned\Versioned;
-use InvalidArgumentException;
-use Exception;
+use SilverStripe\GraphQL\Schema\Schema;
+use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
+use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeDataObjectStub;
+use SilverStripe\Versioned\GraphQL\Operations\AbstractPublishOperationCreator;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -37,6 +39,54 @@ class VersionedResolverTest extends SapphireTest
         if (!class_exists(Schema::class)) {
             $this->markTestSkipped('Skipped GraphQL 4 test ' . __CLASS__);
         }
+    }
+
+    public function testVersionedRead()
+    {
+        /* @var Fake|Versioned $record */
+        $record = new Fake();
+        $record->Name = 'First';
+        $record->write();
+
+        $this->logInWithPermission('ADMIN');
+        $member = Security::getCurrentUser();
+
+        $list = Fake::get();
+        $resolvedList = VersionedResolver::resolveVersionedRead(
+            $list,
+            ['versioning' => [
+                'mode' => Versioned::LIVE
+            ]],
+            ['currentUser' => $member],
+            new FakeResolveInfo()
+        );
+        $this->assertEquals(
+            $resolvedList->Count(),
+            0,
+            'Excludes draft records records in live mode'
+        );
+
+        $record->publishSingle();
+
+        $list = Fake::get();
+        $resolvedList = VersionedResolver::resolveVersionedRead(
+            $list,
+            ['versioning' => [
+                'mode' => Versioned::LIVE
+            ]],
+            ['currentUser' => $member],
+            new FakeResolveInfo()
+        );
+        $this->assertEquals(
+            $resolvedList->Count(),
+            1,
+            'Includes live records records in live mode'
+        );
+        $this->assertEquals(
+            $resolvedList->First()->ID,
+            $record->ID,
+            'Includes live records records in live mode'
+        );
     }
 
     public function testCopyToStage()
