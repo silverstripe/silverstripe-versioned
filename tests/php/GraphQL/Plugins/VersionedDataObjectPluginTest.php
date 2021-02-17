@@ -62,7 +62,7 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $this->assertInstanceOf(ModelType::class, $schema->getModelByClassName(Member::class));
 
         $plugin->apply($type, $schema);
-        $storableSchema = $schema->getStoreableSchema();
+        $storableSchema = $schema->createStoreableSchema();
         $types = $storableSchema->getTypes();
         $this->assertArrayHasKey('FakeVersion', $types);
         $versionType = $types['FakeVersion'];
