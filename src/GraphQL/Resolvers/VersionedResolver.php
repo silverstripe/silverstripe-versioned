@@ -5,7 +5,6 @@ namespace SilverStripe\Versioned\GraphQL\Resolvers;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\GraphQL\QueryHandler\QueryHandler;
 use SilverStripe\GraphQL\QueryHandler\UserContextProvider;
 use SilverStripe\GraphQL\Resolvers\VersionFilters;
 use SilverStripe\ORM\DataList;
@@ -101,11 +100,18 @@ class VersionedResolver
             return $list;
         }
 
-        // Set the reading state globally, we don't support mixing versioned states in the same query
-        Injector::inst()->get(VersionFilters::class)
-            ->applyToReadingState($args['versioning']);
+        // Set the reading state globally, we don't support mixing versioned
+        // states in the same query
+        try {
+            Injector::inst()->get(VersionFilters::class)
+                ->applyToReadingState($args['versioning']);
+        } catch (InvalidArgumentException $e) {
+            // We don't really care if the args don't apply to the global state,
+            // because if they don't work there, they'll work on the list in the next,
+            // call, unless it's something totally unexpected, which will throw.
+        }
 
-        // Also set on the specific list
+        // Set on the specific list
         $list = Injector::inst()->get(VersionFilters::class)
             ->applyToList($list, $args['versioning']);
 
