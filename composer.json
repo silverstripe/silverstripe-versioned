@@ -20,8 +20,8 @@
     ],
     "require": {
         "silverstripe/framework": "^4.7",
-        "silverstripe/vendor-plugin": "^1",
-        "symfony/cache": "^3.4"
+        "symfony/cache": "^3.4 || ^4",
+        "silverstripe/vendor-plugin": "^1"
     },
     "require-dev": {
         "sminnee/phpunit": "^5.7",
