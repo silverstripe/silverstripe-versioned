@@ -37,6 +37,18 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     }
 
     /**
+     * Do not serialize() `$this->pool` because it may contain a non-serializable cache.
+     * For instance, Symfony\Component\Cache\Simple\FilesystemCache cannot be serialized because in will throw an
+     * exception in Symfony\Component\Cache\Traits\FilesystemCommonTrait::__sleep()
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        return [];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function get($key, $default = null)
