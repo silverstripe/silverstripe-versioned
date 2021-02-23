@@ -9,6 +9,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\ORM\SS_List;
@@ -409,7 +410,15 @@ class RecursivePublishable extends DataExtension
         }
 
         // Query the source for the list of items to NOT remove
-        $ownedSQL = $owner->getComponents($relationship)->sql($ownedParams);
+        $ownedSQL = $owner->getComponents($relationship);
+        // unset sort for subquery if we're using MSSQL
+        if( class_exists("SilverStripe\\MSSQL\\MSSQLSchemaManager") ) {
+            $manager = DB::get_schema();
+            if( get_class($manager) == "SilverStripe\MSSQL\MSSQLSchemaManager" ) {
+                $ownedSQL = $ownedSQL->dataQuery()->sort(null, null, true);
+            }
+        }
+        $ownedSQL = $ownedSQL->sql($ownedParams);
         $disowned->addWhere([
             "\"{$targetTable}\".\"ID\" NOT IN (SELECT \"Source\".\"ID\" FROM ({$ownedSQL}) AS \"Source\")" => $ownedParams
         ]);
