@@ -412,9 +412,9 @@ class RecursivePublishable extends DataExtension
         // Query the source for the list of items to NOT remove
         $ownedSQL = $owner->getComponents($relationship);
         // unset sort for subquery if we're using MSSQL
-        if( class_exists("SilverStripe\\MSSQL\\MSSQLSchemaManager") ) {
+        if (class_exists("SilverStripe\\MSSQL\\MSSQLSchemaManager")) {
             $manager = DB::get_schema();
-            if( get_class($manager) == "SilverStripe\MSSQL\MSSQLSchemaManager" ) {
+            if (get_class($manager) == "SilverStripe\MSSQL\MSSQLSchemaManager") {
                 $ownedSQL = $ownedSQL->dataQuery()->sort(null, null, true);
             }
         }
