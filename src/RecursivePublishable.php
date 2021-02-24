@@ -411,14 +411,8 @@ class RecursivePublishable extends DataExtension
 
         // Query the source for the list of items to NOT remove
         $ownedSQL = $owner->getComponents($relationship);
-        // unset sort for subquery if we're using MSSQL
-        if (class_exists("SilverStripe\\MSSQL\\MSSQLSchemaManager")) {
-            $manager = DB::get_schema();
-            if (get_class($manager) == "SilverStripe\MSSQL\MSSQLSchemaManager") {
-                $ownedSQL = $ownedSQL->dataQuery()->sort(null, null, true);
-            }
-        }
-        $ownedSQL = $ownedSQL->sql($ownedParams);
+        // remove sort for sub query because some DB drivers don't let you sort sub queries
+        $ownedSQL = $ownedSQL->dataQuery()->sort(null, null, true)->sql($ownedParams);
         $disowned->addWhere([
             "\"{$targetTable}\".\"ID\" NOT IN (SELECT \"Source\".\"ID\" FROM ({$ownedSQL}) AS \"Source\")" => $ownedParams
         ]);
