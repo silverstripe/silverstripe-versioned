@@ -1,10 +1,4 @@
 en:
-  SilverStripe\VersionedAdmin\ArchiveAdmin:
-    MENUTITLE: Archives
-  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
-    MENUTITLE: 'Edit Page'
-  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
-    MENUTITLE: SilverStripe\VersionedAdmin\Controllers\HistoryViewerController
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Empty
     ITEMS_CHANGES:

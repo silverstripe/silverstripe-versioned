@@ -1,10 +1,4 @@
 de:
-  SilverStripe\VersionedAdmin\ArchiveAdmin:
-    MENUTITLE: Archiv
-  SilverStripe\VersionedAdmin\Controllers\CMSPageHistoryViewerController:
-    MENUTITLE: 'Seite bearbeiten'
-  SilverStripe\VersionedAdmin\Controllers\HistoryViewerController:
-    MENUTITLE: Versionsverlauf
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Leer
     ITEMS_CHANGES:
