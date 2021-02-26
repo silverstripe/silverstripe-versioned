@@ -1998,6 +1998,20 @@ SQL
     }
 
     /**
+     * Determine if content differs on stages including nested objects
+     * $mode determines which relation will be used to traverse the ownership tree
+     * "strong" will use "cascade_duplicates"
+     * "weak" will use "owns"
+     *
+     * @param string $mode "strong" or "weak"
+     * @return bool
+     */
+    public function stagesDifferRecursive(string $mode = RecursiveStagesService::OWNERSHIP_STRONG): bool
+    {
+        return RecursiveStagesService::singleton()->stagesDifferRecursive($this->owner, $mode);
+    }
+
+    /**
      * @param string $filter
      * @param string $sort
      * @param string $limit
