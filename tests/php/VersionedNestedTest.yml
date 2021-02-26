@@ -1,0 +1,24 @@
+# site-config-1
+# -> primary-object-1 (top level publish object)
+# --> column-1
+# ---> group-1
+# ----> child-object-1
+
+SilverStripe\Versioned\Tests\VersionedNestedTest\PrimaryObject:
+  primary-object-1:
+    Title: PrimaryObject1
+
+SilverStripe\Versioned\Tests\VersionedNestedTest\ColumnObject:
+  column-1:
+    Title: Column1
+    PrimaryObject: =>SilverStripe\Versioned\Tests\VersionedNestedTest\PrimaryObject.primary-object-1
+
+SilverStripe\Versioned\Tests\VersionedNestedTest\GroupObject:
+  group-1:
+    Title: Group1
+    Column: =>SilverStripe\Versioned\Tests\VersionedNestedTest\ColumnObject.column-1
+
+SilverStripe\Versioned\Tests\VersionedNestedTest\ChildObject:
+  child-object-1:
+    Title: Item1
+    Group: =>SilverStripe\Versioned\Tests\VersionedNestedTest\GroupObject.group-1
