@@ -32,9 +32,11 @@ class VersionFilters
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
+                Versioned::set_stage($mode);
+                break;
             case 'latest_versions':
             case 'all_versions':
-                Versioned::set_stage($mode);
+                Versioned::set_reading_mode($mode);
                 break;
             case 'archive':
                 $date = $versioningArgs['archiveDate'];
@@ -186,6 +188,8 @@ class VersionFilters
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
+            case 'all_versions':
+            case 'latest_versions':
                 break;
             case 'archive':
                 if (empty($versioningArgs['archiveDate'])) {
@@ -201,10 +205,6 @@ class VersionFilters
                         $date
                     ));
                 }
-                break;
-            case 'all_versions':
-                break;
-            case 'latest_versions':
                 break;
             case 'status':
                 if (empty($versioningArgs['status'])) {
