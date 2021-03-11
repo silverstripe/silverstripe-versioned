@@ -84,10 +84,6 @@ class VersionedDataObjectPluginTest extends SapphireTest
         }
 
         $this->assertInstanceOf(Field::class, $type->getFieldByName('versions'));
-
-        $versions = $type->getFieldByName('versions');
-        $this->assertTrue($versions->hasPlugin(SortPlugin::IDENTIFIER));
-        //$this->assertEquals(VersionedResolver::class . '::resolveVersionList', $versions->getEncodedResolver()->getRef()->toString());
     }
 
     public function testPluginDoesntAddVersionedFieldsToUnversionedObjects()

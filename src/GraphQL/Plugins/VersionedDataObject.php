@@ -8,8 +8,11 @@ use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\Field;
 use SilverStripe\GraphQL\Schema\Interfaces\ModelTypePlugin;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
+use SilverStripe\GraphQL\Schema\Plugin\AbstractQuerySortPlugin;
+use SilverStripe\GraphQL\Schema\Plugin\PaginationPlugin;
 use SilverStripe\GraphQL\Schema\Plugin\SortPlugin;
 use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\Type\InputType;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
@@ -44,6 +47,15 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
     public static function updateSchema(Schema $schema): void
     {
         $schema->addModelbyClassName(Member::class);
+        // Hack.. we can't add a plugin within a plugin, so we have to add sort
+        // and pagination manually. This requires ensuring the sort types are added
+        // to the schema (most of the time this is redundant)
+        if (!$schema->getType('SortDirection')) {
+            AbstractQuerySortPlugin::updateSchema($schema);
+        }
+        if (!$schema->getType('PageInfo')) {
+            PaginationPlugin::updateSchema($schema);
+        }
     }
 
     /**
@@ -98,19 +110,14 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         }
 
         $schema->addType($versionType);
-        $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type) {
+        $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type, $schema, $config) {
                 $field->setResolver([VersionedResolver::class, 'resolveVersionList'])
-                    ->addResolverContext('sourceClass', $type->getModel()->getSourceClass())
-                    ->addPlugin(SortPlugin::IDENTIFIER, [
-                        'fields' => [
-                            'version' => true
-                        ],
-                        'input' => $type->getName() . 'VersionSort',
-                        'resolver' => [static::class, 'sortVersions'],
-                    ])
-                    ->addPlugin(Paginator::IDENTIFIER, [
-                        'connection' => $type->getName() . 'Versions',
-                    ]);
+                    ->addResolverContext('sourceClass', $type->getModel()->getSourceClass());
+                SortPlugin::singleton()->apply($field, $schema, [
+                    'resolver' => [static::class, 'sortVersions'],
+                    'fields' => [ 'version' => true ],
+                ]);
+                Paginator::singleton()->apply($field, $schema);
         });
     }
 
