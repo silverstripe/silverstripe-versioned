@@ -32,8 +32,6 @@ class VersionFilters
         switch ($mode) {
             case Versioned::LIVE:
             case Versioned::DRAFT:
-            case 'latest_versions':
-            case 'all_versions':
                 Versioned::set_stage($mode);
                 break;
             case 'archive':
@@ -41,18 +39,6 @@ class VersionFilters
                 Versioned::set_reading_mode($mode);
                 Versioned::reading_archived_date($date);
                 break;
-            case 'status':
-                throw new InvalidArgumentException(
-                    'The "status" mode is not supported for setting versioned reading stages'
-                );
-                break;
-            case 'version':
-                throw new InvalidArgumentException(
-                    'The "version" mode is not supported for setting versioned reading stages'
-                );
-                break;
-            default:
-                throw new InvalidArgumentException("Unsupported read mode {$mode}");
         }
     }
 
