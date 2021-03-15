@@ -78,7 +78,7 @@ class VersionedResolver
             if (!$object->canViewStage(Versioned::DRAFT, $member)) {
                 throw new Exception(sprintf(
                     'Cannot view versions on %s',
-                    $this->getDataObjectClass()
+                    $sourceClass
                 ));
             }
 
