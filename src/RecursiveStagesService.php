@@ -3,14 +3,13 @@
 namespace SilverStripe\Versioned;
 
 use SilverStripe\Core\Injector\Injectable;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\SS_List;
 
 /**
  * Functionality for detecting the need of publishing nested objects owned by common parent / ancestor object
  */
-class RecursiveStagesService
+class RecursiveStagesService implements RecursiveStagesInterface
 {
     use Injectable;
 
