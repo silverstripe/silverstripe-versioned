@@ -17,6 +17,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
@@ -74,6 +75,16 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * The draft (default) stage
      */
     const DRAFT = 'Stage';
+
+    /**
+     * Strong ownership uses 'owns' configuration to determine relationships
+     */
+    public const OWNERSHIP_STRONG = 'strong';
+
+    /**
+     * Strong ownership uses 'cascade_duplicates' configuration to determine relationships
+     */
+    public const OWNERSHIP_WEAK = 'weak';
 
     /**
      * A cache used by get_versionnumber_by_stage().
@@ -2058,6 +2069,141 @@ SQL
         $this->owner->extend('updateStagesDiffer', $stagesDiffer);
 
         return (bool) $stagesDiffer;
+    }
+
+    /**
+     * Determine if content differs on stages including nested objects
+     *
+     * @param string $mode
+     * @return bool
+     */
+    public function stagesDifferRecursive(string $mode = self::OWNERSHIP_STRONG): bool
+    {
+        $owner = $this->owner;
+
+        if ($owner === null || !$owner->exists()) {
+            return false;
+        }
+
+        $records = [$owner];
+
+        // compare existing content
+        while ($record = array_shift($records)) {
+            if (PublishStateHelper::checkNeedPublishingItem($record)) {
+                return true;
+            }
+
+            $relatedRecords = $this->findOwnedObjects($record, $mode);
+
+            foreach ($relatedRecords as $relatedRecord) {
+                $records[] = $relatedRecord;
+            }
+        }
+
+        // compare deleted content
+        $draftIdentifiers = $this->findOwnedIdentifiers($owner, $mode, Versioned::DRAFT);
+        $liveIdentifiers = $this->findOwnedIdentifiers($owner, $mode, Versioned::LIVE);
+
+        return $draftIdentifiers !== $liveIdentifiers;
+    }
+
+
+    /**
+     * Find all identifiers for owned objects
+     *
+     * @param DataObject $record
+     * @param string $mode
+     * @param string $stage
+     * @return array
+     */
+    protected function findOwnedIdentifiers(DataObject $record, string $mode, string $stage): array
+    {
+        $ids = Versioned::withVersionedMode(function () use ($record, $mode, $stage): array {
+            Versioned::set_stage($stage);
+
+            $record = DataObject::get_by_id($record->ClassName, $record->ID);
+
+            if ($record === null) {
+                return [];
+            }
+
+            $records = [$record];
+            $ids = [];
+
+            while ($record = array_shift($records)) {
+                $ids[] = implode('_', [$record->baseClass(), $record->ID]);
+                $relatedRecords = $this->findOwnedObjects($record, $mode);
+
+                foreach ($relatedRecords as $relatedRecord) {
+                    $records[] = $relatedRecord;
+                }
+            }
+
+            return $ids;
+        });
+
+        sort($ids, SORT_STRING);
+
+        return array_values($ids);
+    }
+
+    /**
+     * This lookup will attempt to find "Strongly owned" objects
+     * such objects are unable to exist without the current object
+     * We will use "cascade_duplicates" setting for this purpose as we can assume that if an object needs to be
+     * duplicated along with the owner object, it uses the strong ownership relation
+     *
+     * "Weakly owned" objects could be looked up via "owns" setting
+     * Such objects can exist even without the owner objects as they are often used as shared objects
+     * managed independently of their owners
+     *
+     * @param DataObject $record
+     * @param string $mode
+     * @return array
+     */
+    protected function findOwnedObjects(DataObject $record, string $mode): array
+    {
+        $ownershipType = $mode === self::OWNERSHIP_WEAK
+            ? 'owns'
+            : 'cascade_duplicates';
+
+        $relations = (array) $record->config()->get($ownershipType);
+        $relations = array_unique($relations);
+        $result = [];
+
+        foreach ($relations as $relation) {
+            $relation = (string) $relation;
+
+            if (!$relation) {
+                continue;
+            }
+
+            $relationData = $record->$relation();
+
+            if ($relationData instanceof DataObject) {
+                if (!$relationData->exists()) {
+                    continue;
+                }
+
+                $result[] = $relationData;
+
+                continue;
+            }
+
+            if (!$relationData instanceof SS_List) {
+                continue;
+            }
+
+            foreach ($relationData as $relatedRecord) {
+                if (!$relatedRecord instanceof DataObject || !$relatedRecord->exists()) {
+                    continue;
+                }
+
+                $result[] = $relatedRecord;
+            }
+        }
+
+        return $result;
     }
 
     /**
