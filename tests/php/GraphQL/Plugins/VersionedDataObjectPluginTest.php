@@ -58,7 +58,7 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $schema = new Schema('test', $config);
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
-        $plugin->updateSchema($schema);
+        $plugin->updateSchema($schema, []);
         $this->assertInstanceOf(ModelType::class, $schema->getModelByClassName(Member::class));
 
         $plugin->apply($type, $schema);
@@ -96,7 +96,7 @@ class VersionedDataObjectPluginTest extends SapphireTest
         $schema = new Schema('test', $config);
         $schema->addModel($type);
         $plugin = new VersionedDataObject();
-        $plugin->updateSchema($schema);
+        $plugin->updateSchema($schema, []);
 
         $plugin->apply($type, $schema);
         $type = $schema->getType('FakeVersion');
