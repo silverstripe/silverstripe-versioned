@@ -1,19 +1,75 @@
 nl:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Leeg
+    ITEMS_CHANGES:
+      one: '{total} (1 wijziging)'
+      other: '{total} ({count} wijzigingen)'
+    ITEMS_TOTAL:
+      one: '1 totaal'
+      other: '{count} totaal'
     NAME: Naam
     PLURALNAME: Campagnes
+    PLURALS:
+      one: 'Een campagne'
+      other: '{count} campagnes'
+    PUBLISHED_DATE_BY: '{date} door {name}'
+    PUBLISHED_TODAY: 'Vandaag {time}'
+    PUBLISHED_TODAY_BY: 'Vandaag {time} door {name}'
+    PUBLISHER_NAME: 'Gepubliceerd door'
+    PUBLISH_DATE: Publicatiedatum
     SINGULARNAME: Campagne
     STATE: Status
     STATE_OPEN: Actief
     STATE_PUBLISHED: Gepubliceerd
     STATE_REVERTED: Teruggedraaid
+  SilverStripe\Versioned\ChangeSetItem:
+    PLURALNAME: 'Lijst van wijzigingen'
+    PLURALS:
+      one: 'Lijst van wijziging'
+      other: '{count} mutatielijsten'
+    SINGULARNAME: Mutatielijst
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Archiveren
+    ArchivePermissionsFailure: 'Geen rechten om te archiveren'
+    Delete: Verwijder
+  SilverStripe\Versioned\GridFieldRestoreAction:
+    RESTORE: 'Terugzetten als concept'
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Gegenereerd bij het publiceren van ''{title}'' op {created}'
+  SilverStripe\Versioned\RestoreAction:
+    RESTORE: 'Terugzetten als concept'
+    RESTORE_CHANGEDLOCATION: '{model} "{id}" hersteld als root-item, doordat originele locatie niet meer bestond.'
+    RESTORE_DESC: 'Gearchiveerde versie terugzetten naar concept'
+    RESTORE_FALIURE_PERMISSION: 'Geen rechten om terug te zetten'
+    RESTORE_FALIURE_RECORD: 'Terugzetten niet gelukt'
+    RESTORE_FALIURE_STATE: 'Dit item bestaat al en kan niet teruggezet worden'
+    RESTORE_SUCCESS: 'Gelukt om {model} "{id}" terug te zetten'
+    RESTORE_TO_ROOT: 'Teruggezet op hoofniveau'
+    RESTORE_TO_ROOT_DESC: 'Gearchiveerde versie terugzetten naar concept op hoofdniveau'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    Archived: '{name} {link} gearchiveerd'
+    BUTTONAPPLYCHANGES: 'Wijzigingen opslaan'
     BUTTONARCHIVEDESC: 'Publicatie intrekken en archiveren'
+    BUTTONPUBLISHED: Gepubliceerd
+    BUTTONSAVED: Opgeslagen
+    BUTTONSAVEPUBLISH: Opslaan
     BUTTONUNPUBLISH: 'Publicatie intrekken'
-    BUTTONUNPUBLISHDESC: 'Dit record van de gepubliceerde site verwijderen'
+    BUTTONUNPUBLISHDESC: 'Dit item van de gepubliceerde site verwijderen'
+    DRAFT: Concept
+    MODIFIED: Aangepast
+    MoreOptions: 'Meer opties'
     Published: 'Gepubliceerd: {name} {link}'
+    Unpublished: 'Publicatie ingetrokken: {name} {link}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Item is nog niet gepubliceerd'
+    ADDEDTODRAFTSHORT: Concept
+    ARCHIVEDPAGEHELP: 'Item is verwijderd van concept en live'
+    ARCHIVEDPAGESHORT: Gearchiveerd
+    MODIFIEDONDRAFTHELP: 'Item heeft niet-gepubliceerde aanpassingen'
+    MODIFIEDONDRAFTSHORT: Aangepast
+    ONLIVEONLYSHORT: 'Alleen op Live-versie'
+    ONLIVEONLYSHORTHELP: 'Item is gepubliceerd, maar verwijderd van concept'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Om de concept site en de archieven te kunnen zien, moet u eerst inloggen met uw CMS wachtwoord. <a href="{link}">Klik hier om terug te gaan naar de gepubliceerde site.</a>'
