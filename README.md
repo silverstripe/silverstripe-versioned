@@ -6,8 +6,6 @@
 [![Latest Unstable Version](https://poser.pugx.org/silverstripe/versioned/v/unstable.svg)](https://packagist.org/packages/silverstripe/versioned)
 [![Total Downloads](https://poser.pugx.org/silverstripe/versioned/downloads.svg)](https://packagist.org/packages/silverstripe/versioned)
 [![License](https://poser.pugx.org/silverstripe/versioned/license.svg)](https://github.com/silverstripe/silverstripe-versioned#license)
-[![Dependency Status](https://www.versioneye.com/php/silverstripe:versioned/badge.svg)](https://www.versioneye.com/php/silverstripe:versioned)
-[![Reference Status](https://www.versioneye.com/php/silverstripe:admin/reference_badge.svg?style=flat)](https://www.versioneye.com/php/silverstripe:admin/references)
 ![helpfulrobot](https://helpfulrobot.io/silverstripe/versioned/badge)
 
 ## Overview
