@@ -1,7 +1,8 @@
 modelConfig:
   DataObject:
     plugins:
-      versioning: true
+      versioning:
+        before: inheritance
     operations:
       copyToStage:
         class: SilverStripe\Versioned\GraphQL\Operations\CopyToStageCreator
