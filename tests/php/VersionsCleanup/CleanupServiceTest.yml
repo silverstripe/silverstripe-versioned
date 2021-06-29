@@ -1,0 +1,36 @@
+TractorCow\Fluent\Model\Locale:
+  nz:
+    Locale: en_001
+    APIURLSegment: en
+    Title: 'International'
+    URLSegment: int
+    AlacrityMarket: en
+  us:
+    Locale: en_US
+    Title: 'United States'
+    URLSegment: us
+    AlacrityMarket: us
+    Fallbacks:
+      - =>TractorCow\Fluent\Model\Locale.nz
+
+App\Tests\VersionsCleanup\House:
+  house1:
+    Title: 'TestHouse1'
+    URLSegment: 'test-house1'
+  house2:
+    Title: 'TestHouse2'
+    URLSegment: 'test-house2'
+  house3:
+    Title: 'TestHouse3'
+    URLSegment: 'test-house3'
+
+App\Tests\VersionsCleanup\Ship:
+  ship1:
+    Title: 'TestShip1'
+    Address: 'TestAddress1'
+  ship2:
+    Title: 'TestShip2'
+    Address: 'TestAddress2'
+  ship3:
+    Title: 'TestShip3'
+    Address: 'TestAddress3'
