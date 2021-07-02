@@ -23,6 +23,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 use Closure;
+use SilverStripe\GraphQL\Schema\Field\ModelField;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -114,7 +115,12 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         }
 
         $schema->addType($versionType);
-        $type->addField('versions', '[' . $versionName . ']', function (Field $field) use ($type, $schema, $config) {
+        $versionsFieldConfig = new ModelField('versions', [
+            'type' => '[' . $versionName . ']',
+            // TODO This isn't the actual resolvedModelClass, it just avoids triggering database queries through inference
+            'resolvedModelClass' => $type->getModel()->getSourceClass()
+        ], $type->getModel());
+        $type->addField('versions', $versionsFieldConfig, function (Field $field) use ($type, $schema, $config) {
                 $field->setResolver([VersionedResolver::class, 'resolveVersionList'])
                     ->addResolverContext('sourceClass', $type->getModel()->getSourceClass());
                 SortPlugin::singleton()->apply($field, $schema, [
