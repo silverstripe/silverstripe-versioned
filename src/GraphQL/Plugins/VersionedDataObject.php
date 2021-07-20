@@ -106,7 +106,6 @@ class VersionedDataObject implements SchemaUpdater
                 Paginator::singleton()->apply($field, $schema);
             });
         }
-
     }
 
     /**
