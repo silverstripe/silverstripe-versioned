@@ -31,7 +31,7 @@ class CopyToStageTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
