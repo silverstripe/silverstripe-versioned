@@ -61,7 +61,7 @@ class VersionedDataObject implements SchemaUpdater
             );
 
             if (!Extensible::has_extension($class, Versioned::class)) {
-                return;
+                continue;
             }
 
             $versionName = $type->getModel()->getTypeName() . 'Version';
