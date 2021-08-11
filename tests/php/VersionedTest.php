@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests;
 use DateTime;
 use InvalidArgumentException;
 use ReflectionMethod;
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
@@ -13,6 +14,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Dev\TestSession;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
@@ -1045,8 +1047,7 @@ class VersionedTest extends SapphireTest
         Config::modify()->update(Versioned::class, 'use_session', false);
 
         $session = new Session([]);
-        $adminID = $this->logInWithPermission('ADMIN');
-        $session->set('loggedInAs', $adminID);
+        $this->logInWithPermission('ADMIN');
 
         Director::test('/?stage=Stage', null, $session);
         $this->assertNull(
@@ -1062,15 +1063,34 @@ class VersionedTest extends SapphireTest
     }
 
     /**
+     * Used to keep the default Controller for subsequent tests after testReadingPersistentWhenUseSessionTrue()
+     * because that uses TestSession which will remove all Controllers on TestSession::_destruct()
+     *
+     * @var Controller
+     */
+    protected static $defaultController;
+
+    protected function setUp()
+    {
+        if (!static::$defaultController && Controller::has_curr()) {
+            static::$defaultController = Controller::curr();
+        }
+        if (!Controller::has_curr() && static::$defaultController) {
+            static::$defaultController->pushCurrent();
+        }
+        parent::setUp();
+    }
+
+
+    /**
      * Tests that reading mode persists between requests
      */
     public function testReadingPersistentWhenUseSessionTrue()
     {
         Config::modify()->set(Versioned::class, 'use_session', true);
-
-        $session = new Session([]);
+        $testSession = new TestSession();
+        $session = $testSession->session();
         $adminID = $this->logInWithPermission('ADMIN');
-        $session->set('loggedInAs', $adminID);
         // Set to stage
         Director::test('/?stage=Stage', null, $session);
         $this->assertEquals(
@@ -1098,8 +1118,9 @@ class VersionedTest extends SapphireTest
             'Check that subsequent requests in the same session remain in Live mode'
         );
         // Test that session doesn't redundantly modify session stage without querystring args
-        $session2 = new Session([]);
-        $session2->set('loggedInAs', $adminID);
+        $testSession2 = new TestSession();
+        $session2 = $testSession2->session();
+        $this->logInAs($adminID);
         Director::test('/', null, $session2);
         $this->assertArrayNotHasKey('readingMode', $session2->changedData());
         Director::test('/?stage=Live', null, $session2);
@@ -1107,8 +1128,10 @@ class VersionedTest extends SapphireTest
         // Test choose_site_stage
         unset($_GET['stage']);
         unset($_GET['archiveDate']);
+        $testSession3 = new TestSession();
+        $session3 = $testSession3->session();
         $request = new HTTPRequest('GET', '/');
-        $request->setSession(new Session([]));
+        $request->setSession($session3);
         $request->getSession()->set('readingMode', 'Stage.Stage');
         Versioned::choose_site_stage($request);
         $this->assertEquals('Stage.Stage', Versioned::get_reading_mode());
