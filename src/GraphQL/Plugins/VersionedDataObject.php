@@ -4,8 +4,10 @@ namespace SilverStripe\Versioned\GraphQL\Plugins;
 
 use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Schema\DataObject\Plugin\Paginator;
+use SilverStripe\GraphQL\Schema\DataObject\Plugin\ScalarDBField;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\Field;
+use SilverStripe\GraphQL\Schema\Field\ModelField;
 use SilverStripe\GraphQL\Schema\Interfaces\ModelTypePlugin;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
 use SilverStripe\GraphQL\Schema\Plugin\AbstractQuerySortPlugin;
@@ -90,7 +92,9 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
         $memberTypeName = $memberType->getModel()->getTypeName();
         $resolver = ['resolver' => [VersionedResolver::class, 'resolveVersionFields']];
 
-        $type->addField('version', 'Int');
+        $type->addField('version', 'Int', function (ModelField $field) {
+            $field->addResolverAfterware([ScalarDBField::class, 'resolve']);
+        });
 
         $versionType = Type::create($versionName)
             ->addField('author', ['type' => $memberTypeName] + $resolver)
