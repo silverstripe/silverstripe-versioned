@@ -29,7 +29,7 @@ class ReadOneExtensionTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
@@ -44,7 +44,7 @@ class ReadOneExtensionTest extends SapphireTest
         $manager->addType(new ObjectType(['name' => StaticSchema::inst()->typeNameForDataObject(Fake::class)]));
         $read = new ReadOne(Fake::class);
         $readScaffold = $read->scaffold($manager);
-        $this->assertInternalType('callable', $readScaffold['resolve']);
+        $this->assertIsCallable($readScaffold['resolve']);
         $doResolve = function ($mode, $ID, $version = null) use ($readScaffold) {
             $args = [
                 'ID' => $ID,
@@ -94,7 +94,7 @@ class ReadOneExtensionTest extends SapphireTest
         $this->assertEquals($record->ID, $result->ID);
         $this->assertEquals('First', $result->Name);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $doResolve('version', $record->ID, null);
     }
 }

@@ -28,7 +28,7 @@ class RollbackTest extends SapphireTest
         FakeDataObjectStub::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
@@ -36,12 +36,10 @@ class RollbackTest extends SapphireTest
         }
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Current user does not have permission to roll back this resource
-     */
     public function testRollbackCannotBePerformedWithoutEditPermission()
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Current user does not have permission to roll back this resource');
         // Create a fake version of our stub
         $stub = FakeDataObjectStub::create();
         $stub->Name = 'First';
@@ -76,7 +74,7 @@ class RollbackTest extends SapphireTest
 
         $mutation = new Rollback($stubClass);
         $scaffold = $mutation->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve'], 'Resolve function is scaffolded correctly');
+        $this->assertIsCallable($scaffold['resolve'], 'Resolve function is scaffolded correctly');
 
         $args = [
             'ID' => $stub->ID,

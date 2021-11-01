@@ -22,7 +22,7 @@ class DataDifferencerTest extends SapphireTest
         DataDifferencerTest\HasOneRelationObject::class
     ];
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class DataDifferencerTest extends SapphireTest
         }
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         TestAssetStore::reset();
         parent::tearDown();
@@ -57,7 +57,7 @@ class DataDifferencerTest extends SapphireTest
     {
         $needle = preg_replace('#\s+#', '', $needle);
         $haystack = preg_replace('#\s+#', '', $haystack);
-        return parent::assertContains($needle, $haystack, $message);
+        return parent::assertStringContainsString($needle, $haystack, $message);
     }
 
     public function testArrayValues()

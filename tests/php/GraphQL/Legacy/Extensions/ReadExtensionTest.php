@@ -28,7 +28,7 @@ class ReadExtensionTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (!class_exists(Manager::class)) {
@@ -53,7 +53,7 @@ class ReadExtensionTest extends SapphireTest
         $read = new Read(Fake::class);
         $read->setUsePagination(false);
         $readScaffold = $read->scaffold($manager);
-        $this->assertInternalType('callable', $readScaffold['resolve']);
+        $this->assertIsCallable($readScaffold['resolve']);
         $readScaffold['resolve'](null, ['Versioning' => true], ['currentUser' => new Member()], new ResolveInfo([]));
     }
 }
