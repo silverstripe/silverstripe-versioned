@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests;
 use DateTime;
 use InvalidArgumentException;
 use ReflectionMethod;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -26,6 +27,7 @@ use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
 {
+    use ArraySubsetAsserts;
 
     protected static $fixture_file = 'VersionedTest.yml';
 
@@ -172,7 +174,7 @@ class VersionedTest extends SapphireTest
         $obj->ExtraField = 'Foo'; // ensure that child version table gets written
         $obj->write();
         $class = VersionedTest\TestObject::class;
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Can't find {$class}#{$obj->ID} in stage Live");
 
         // Fail publishing from live to stage
@@ -1070,7 +1072,7 @@ class VersionedTest extends SapphireTest
      */
     protected static $defaultController;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         if (!static::$defaultController && Controller::has_curr()) {
             static::$defaultController = Controller::curr();

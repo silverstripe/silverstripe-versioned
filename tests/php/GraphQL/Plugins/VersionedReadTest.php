@@ -34,7 +34,7 @@ if (!class_exists(Schema::class)) {
 
 class VersionedReadTest extends SapphireTest
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (!class_exists(Schema::class)) {

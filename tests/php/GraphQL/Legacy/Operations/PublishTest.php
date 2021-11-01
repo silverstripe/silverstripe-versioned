@@ -29,7 +29,7 @@ class PublishTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
@@ -45,7 +45,7 @@ class PublishTest extends SapphireTest
 
         $publish = new Publish(Fake::class);
         $scaffold = $publish->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         $record = new Fake();
         $record->Name = 'First';
@@ -73,7 +73,7 @@ class PublishTest extends SapphireTest
         $this->assertEquals('First', $result->Name);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $scaffold['resolve'](
             null,
             [

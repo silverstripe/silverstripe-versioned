@@ -31,7 +31,7 @@ class CopyToStageTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
@@ -48,7 +48,7 @@ class CopyToStageTest extends SapphireTest
         $manager->addType(new ObjectType(['name' => $typeName]));
         $copyToStage = new CopyToStage(Fake::class);
         $scaffold = $copyToStage->scaffold($manager);
-        $this->assertInternalType('callable', $scaffold['resolve']);
+        $this->assertIsCallable($scaffold['resolve']);
 
         /* @var Fake|Versioned $record */
         $record = new Fake();
@@ -100,7 +100,7 @@ class CopyToStageTest extends SapphireTest
         $this->assertEquals('Second', $recordLive->Title);
 
         // Test error
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $scaffold['resolve'](
             null,
             [

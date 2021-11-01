@@ -23,7 +23,7 @@ class ApplyVersionFiltersTest extends SapphireTest
         Fake::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (class_exists(Schema::class)) {
@@ -34,32 +34,32 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItValidatesArchiveDate()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/ArchiveDate parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/ArchiveDate parameter/');
         $filter->validateArgs(['Mode' => 'archive']);
     }
 
     public function testItValidatesArchiveDateFormat()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Invalid date/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Invalid date/');
         $filter->validateArgs(['Mode' => 'archive', 'ArchiveDate' => '01/12/2018']);
     }
 
     public function testItValidatesStatusParameter()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Status parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Status parameter/');
         $filter->validateArgs(['Mode' => 'status']);
     }
 
     public function testItValidatesVersionParameter()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Version parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Version parameter/');
         $filter->validateArgs(['Mode' => 'version']);
     }
 
@@ -105,8 +105,8 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItThrowsIfArchiveAndNoDateOnApplyToList()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/ArchiveDate parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/ArchiveDate parameter/');
         $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'archive']);
     }
@@ -114,8 +114,8 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItThrowsIfArchiveAndInvalidDateOnApplyToList()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Invalid date/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Invalid date/');
         $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'archive', 'ArchiveDate' => 'foo']);
     }
@@ -124,8 +124,8 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItThrowsIfVersionAndNoVersionOnApplyToList()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Version parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Version parameter/');
         $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'version']);
     }
@@ -193,8 +193,8 @@ class ApplyVersionFiltersTest extends SapphireTest
     public function testItThrowsOnNoStatusOnApplyToList()
     {
         $filter = new ApplyVersionFilters();
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('/Status parameter/');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Status parameter/');
         $list = Fake::get();
         $filter->applyToList($list, ['Mode' => 'status']);
     }

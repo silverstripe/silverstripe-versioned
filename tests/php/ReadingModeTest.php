@@ -152,7 +152,7 @@ class ReadingModeTest extends SapphireTest
      */
     public function testInvalidStage($stage)
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         ReadingMode::validateStage($stage);
     }
 

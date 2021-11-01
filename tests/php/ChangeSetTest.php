@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Tests;
 
 use BadMethodCallException;
-use PHPUnit_Framework_ExpectationFailedException;
+use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
@@ -32,7 +32,7 @@ class ChangeSetTest extends SapphireTest
         ChangeSetTest\UnstagedObject::class,
     ];
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // Reset overridden permissions
         foreach ($this->getExtraDataObjects() as $dataObjectClass) {
@@ -85,7 +85,7 @@ class ChangeSetTest extends SapphireTest
                 }
             }
 
-            throw new PHPUnit_Framework_ExpectationFailedException(
+            throw new ExpectationFailedException(
                 'Change set didn\'t include expected item',
                 new ComparisonFailure(
                     ['Class' => $class, 'ID' => $objectID, 'Added' => $mode],
@@ -106,11 +106,12 @@ class ChangeSetTest extends SapphireTest
                     'ChangeType' => $item->getChangeType()
                 ];
             }
-            throw new PHPUnit_Framework_ExpectationFailedException(
+            throw new ExpectationFailedException(
                 'Change set included items that weren\'t expected',
                 new ComparisonFailure([], $extra, '', print_r($extra, true))
             );
         }
+        $this->assertTrue(true, 'Exception was thrown when it should not have been');
     }
 
     public function testAddObject()

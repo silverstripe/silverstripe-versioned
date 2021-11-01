@@ -33,7 +33,7 @@ class VersionedResolverTest extends SapphireTest
         FakeDataObjectStub::class,
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         if (!class_exists(Schema::class)) {
@@ -142,7 +142,7 @@ class VersionedResolverTest extends SapphireTest
         $this->assertEquals('Second', $recordLive->Title);
 
         // Test error
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $resolve(
             null,
             [
@@ -188,7 +188,7 @@ class VersionedResolverTest extends SapphireTest
         $this->assertEquals('First', $result->Name);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $resolve(
             null,
             [
@@ -233,7 +233,7 @@ class VersionedResolverTest extends SapphireTest
 
         $record->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Not allowed/');
+        $this->expectExceptionMessageMatches('/^Not allowed/');
         $doResolve(
             null,
             [
@@ -244,13 +244,12 @@ class VersionedResolverTest extends SapphireTest
         );
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Current user does not have permission to roll back this resource
-     */
     public function testRollbackCannotBePerformedWithoutEditPermission()
     {
         // Create a fake version of our stub
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/Current user does not have permission to roll back this resource/');
+
         $stub = FakeDataObjectStub::create();
         $stub->Name = 'First';
         $stub->Editable = false;
