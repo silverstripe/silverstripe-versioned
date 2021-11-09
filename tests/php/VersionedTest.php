@@ -27,8 +27,6 @@ use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
 {
-    use ArraySubsetAsserts;
-
     protected static $fixture_file = 'VersionedTest.yml';
 
     public static $extra_dataobjects = [
@@ -664,7 +662,13 @@ class VersionedTest extends SapphireTest
             'Versioned.stage' => Versioned::DRAFT,
         ];
         $this->assertEquals($archiveParms, $page2v1->getInheritableQueryParams());
-        $this->assertArraySubset($archiveParms, $page2v1->Children()->getQueryParams());
+        $queryParms = $page2v1->Children()->getQueryParams();
+        foreach ($queryParms as $key => $val) {
+            if (!array_key_exists($key, $archiveParms)) {
+                continue;
+            }
+            $this->assertSame($val, $queryParms[$key], "queryParms[$key] should be $val");
+        }
         $this->assertListEquals(
             [
                 ['Title' => 'Page 2a'],
@@ -686,7 +690,13 @@ class VersionedTest extends SapphireTest
             'Versioned.stage' => Versioned::DRAFT,
         ];
         $this->assertEquals($archiveParms, $page2v2->getInheritableQueryParams());
-        $this->assertArraySubset($archiveParms, $page2v2->Children()->getQueryParams());
+        $queryParms = $page2v1->Children()->getQueryParams();
+        foreach ($queryParms as $key => $val) {
+            if (!array_key_exists($key, $archiveParms)) {
+                continue;
+            }
+            $this->assertSame($val, $queryParms[$key], "queryParms[$key] should be $val");
+        }
         $this->assertListEquals(
             [
                 ['Title' => 'Page 2a - v2'],
@@ -1304,6 +1314,7 @@ class VersionedTest extends SapphireTest
         $testData = new VersionedTest\RelatedWithoutversion();
         $testData->NewField = 'Test';
         $testData->write();
+        $this->assertTrue(true, 'No exceptions were thrown');
     }
 
     public function testCanView()
