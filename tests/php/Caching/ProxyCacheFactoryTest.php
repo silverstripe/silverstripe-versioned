@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned\Tests\Caching;
 
 use SilverStripe\Dev\SapphireTest;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
-use Symfony\Component\Cache\Simple\PhpFilesCache;
 
 class ProxyCacheFactoryTest extends SapphireTest
 {
@@ -24,7 +23,7 @@ class ProxyCacheFactoryTest extends SapphireTest
         ]);
         $result = $factory->create('dummy', ['argTwo' => 'two']);
 
-        $this->assertTrue($result instanceof PhpFilesCache);
+        $this->assertTrue($result instanceof PhpFilesAdapter);
     }
 
     public function testCreateCustomContainer()
@@ -50,6 +49,6 @@ class ProxyCacheFactoryTest extends SapphireTest
             'container' => ProxyCacheAdapterFake::class,
         ]);
         $result = $factory->create('dummy', ['disable-container' => true]);
-        $this->assertTrue($result instanceof PhpFilesCache);
+        $this->assertTrue($result instanceof PhpFilesAdapter);
     }
 }
