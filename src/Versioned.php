@@ -2100,11 +2100,18 @@ SQL
      */
     public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
+        /** @var DataObject $owner */
+        $owner = $this->owner;
+
+        // When an object is not yet in the Database, we can't get its versions
+        if (!$owner->isInDB()) {
+            return ArrayList::create();
+        }
+
         // Make sure the table names are not postfixed (e.g. _Live)
         $oldMode = static::get_reading_mode();
         static::set_stage(static::DRAFT);
 
-        $owner = $this->owner;
         $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
         if ($having) {
             // @todo - This method doesn't exist on DataList
