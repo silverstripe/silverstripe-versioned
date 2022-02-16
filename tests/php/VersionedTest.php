@@ -893,6 +893,15 @@ class VersionedTest extends SapphireTest
         $this->assertEquals($extraFields, ['2005', '2007', '2009'], 'Additional version fields returned');
     }
 
+    public function testAllVersionsOnUnsavedRecord()
+    {
+        $newPage = new VersionedTest\Subclass();
+        $this->assertCount(0, $newPage->allVersions(), 'No versions on unsaved record');
+
+        $singleton = VersionedTest\Subclass::singleton();
+        $this->assertCount(0, $singleton->allVersions(), 'No versions for singleton');
+    }
+
     public function testArchiveRelatedDataWithoutVersioned()
     {
         DBDatetime::set_mock_now('2009-01-01 00:00:00');
