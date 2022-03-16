@@ -258,7 +258,11 @@ class DataDifferencer extends ViewableData
      */
     public function changedFieldNames()
     {
-        $diffed = clone $this->fromRecord;
+        if ($this->fromRecord) {
+            $diffed = clone $this->fromRecord;
+        } else {
+            $diffed = clone $this->toRecord;
+        }
         $fields = array_keys($diffed->toMap());
 
         $changedFields = [];
@@ -267,7 +271,7 @@ class DataDifferencer extends ViewableData
             if (in_array($field, $this->ignoredFields)) {
                 continue;
             }
-            if ($this->fromRecord->$field != $this->toRecord->$field) {
+            if (!$this->fromRecord || $this->fromRecord->$field != $this->toRecord->$field) {
                 $changedFields[] = $field;
             }
         }
