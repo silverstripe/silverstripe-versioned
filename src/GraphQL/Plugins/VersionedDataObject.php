@@ -2,7 +2,6 @@
 
 namespace SilverStripe\Versioned\GraphQL\Plugins;
 
-use SilverStripe\Core\Extensible;
 use SilverStripe\GraphQL\Schema\DataObject\Plugin\Paginator;
 use SilverStripe\GraphQL\Schema\DataObject\Plugin\ScalarDBField;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
@@ -23,6 +22,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 use Closure;
+use SilverStripe\View\ViewableData;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -75,8 +75,7 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
             __CLASS__,
             DataObject::class
         );
-
-        if (!Extensible::has_extension($class, Versioned::class)) {
+        if (!ViewableData::has_extension($class, Versioned::class)) {
             return;
         }
 
