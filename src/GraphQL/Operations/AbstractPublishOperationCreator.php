@@ -6,7 +6,6 @@ use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\OperationResolver;
@@ -23,6 +22,7 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\View\ViewableData;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -53,7 +53,7 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
         string $typeName,
         array $config = []
     ): ?ModelOperation {
-        if (!Extensible::has_extension($model->getSourceClass(), Versioned::class)) {
+        if (!ViewableData::has_extension($model->getSourceClass(), Versioned::class)) {
             return null;
         }
 
