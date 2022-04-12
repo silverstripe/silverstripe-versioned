@@ -655,6 +655,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
         // We can ONLY promote a filter on the primary key of the base table. Any other conditions will make the
         // version returned incorrect, as we are filtering out version that may be the latest (and correct) version
         foreach ($baseQuery->getWhere() as $condition) {
+            if (is_object($condition)) {
+                continue;
+            }
             $conditionClause = key($condition);
             // Pull out the table and field for this condition. We'll skip anything we can't parse
             if (preg_match('/^"([^"]+)"\."([^"]+)"/', $conditionClause, $matches) !== 1) {
