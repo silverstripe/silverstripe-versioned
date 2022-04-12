@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Extensions;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
@@ -13,6 +12,7 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Core\Injector\Injector;
 
 // GraphQL dependency is optional in versioned,
@@ -54,6 +54,6 @@ class ReadExtensionTest extends SapphireTest
         $read->setUsePagination(false);
         $readScaffold = $read->scaffold($manager);
         $this->assertIsCallable($readScaffold['resolve']);
-        $readScaffold['resolve'](null, ['Versioning' => true], ['currentUser' => new Member()], new ResolveInfo([]));
+        $readScaffold['resolve'](null, ['Versioning' => true], ['currentUser' => new Member()], new FakeResolveInfo());
     }
 }
