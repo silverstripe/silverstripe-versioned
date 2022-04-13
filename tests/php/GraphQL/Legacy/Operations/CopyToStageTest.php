@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
@@ -13,6 +12,7 @@ use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\CopyToStage;
 use SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 
@@ -67,7 +67,7 @@ class CopyToStageTest extends SapphireTest
                 ],
             ],
             [ 'currentUser' => $member ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
         $recordLive = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
@@ -93,7 +93,7 @@ class CopyToStageTest extends SapphireTest
                 ],
             ],
             [ 'currentUser' => $member ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
         $recordLive = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
@@ -110,7 +110,7 @@ class CopyToStageTest extends SapphireTest
                 ],
             ],
             [ 'currentUser' => new Member() ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
     }
 }

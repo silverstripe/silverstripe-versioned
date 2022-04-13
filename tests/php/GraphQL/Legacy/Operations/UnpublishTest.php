@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
@@ -12,6 +11,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\Unpublish;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Versioned\Versioned;
 use Exception;
 
@@ -67,7 +67,7 @@ class UnpublishTest extends SapphireTest
                 'ID' => $record->ID
             ],
             [ 'currentUser' => $member ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
         $result = Versioned::get_by_stage(Fake::class, Versioned::LIVE)
             ->byID($record->ID);
@@ -83,7 +83,7 @@ class UnpublishTest extends SapphireTest
                 'ID' => $record->ID
             ],
             [ 'currentUser' => new Member() ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
     }
 }

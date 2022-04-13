@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use Exception;
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Schema\Schema;
@@ -15,6 +14,7 @@ use SilverStripe\Versioned\GraphQL\Operations\ReadVersions;
 use SilverStripe\Versioned\GraphQL\Types\VersionedStage;
 use SilverStripe\Versioned\GraphQL\Types\VersionSortType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Versioned\Tests\VersionedTest\UnversionedWithField;
 
 // GraphQL dependency is optional in versioned,
@@ -58,7 +58,7 @@ class ReadVersionsTest extends SapphireTest
             new UnversionedWithField(),
             [],
             ['currentUser' => new Member()],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
     }
 
@@ -79,7 +79,7 @@ class ReadVersionsTest extends SapphireTest
             new Fake(),
             [],
             ['currentUser' => new Member()],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
     }
 
@@ -110,7 +110,7 @@ class ReadVersionsTest extends SapphireTest
             $record,
             [],
             ['currentUser' => $member],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
 
         $this->assertInstanceOf(SS_List::class, $result);

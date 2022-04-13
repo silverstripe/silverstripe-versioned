@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Extensions;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
@@ -13,6 +12,7 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\Fake;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 use SilverStripe\Versioned\Versioned;
 
 // GraphQL dependency is optional in versioned,
@@ -60,7 +60,7 @@ class ReadOneExtensionTest extends SapphireTest
                 null,
                 $args,
                 ['currentUser' => Security::getCurrentUser()],
-                new ResolveInfo([])
+                new FakeResolveInfo()
             );
         };
 

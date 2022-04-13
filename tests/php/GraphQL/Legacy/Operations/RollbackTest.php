@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Operations;
 
 use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\ResolveInfo;
 use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\GraphQL\Manager;
@@ -13,6 +12,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\GraphQL\Operations\Rollback;
 use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeDataObjectStub;
+use SilverStripe\Versioned\Tests\GraphQL\Fake\FakeResolveInfo;
 
 // GraphQL dependency is optional in versioned,
 // and this legacy implementation relies on existence of this class (in GraphQL v3)
@@ -85,7 +85,7 @@ class RollbackTest extends SapphireTest
             null,
             $args,
             [ 'currentUser' => $member ?: Security::getCurrentUser() ],
-            new ResolveInfo([])
+            new FakeResolveInfo()
         );
     }
 }
