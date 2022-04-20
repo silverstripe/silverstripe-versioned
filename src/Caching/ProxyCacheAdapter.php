@@ -114,10 +114,10 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
         // Enforce $poolResult is same length / order as $keyIDs prior to combining back
         $items = array_map(function ($keyID) use ($default, $itemsByID) {
             return isset($itemsByID[$keyID]) ? $itemsByID[$keyID] : $default;
-        }, $keyIDs);
+        }, $keyIDs ?? []);
 
         // Combine back with original keys
-        return array_combine($keys, $items);
+        return array_combine($keys ?? [], $items ?? []);
     }
 
     /**

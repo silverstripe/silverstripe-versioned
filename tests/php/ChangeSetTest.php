@@ -71,7 +71,7 @@ class ChangeSetTest extends SapphireTest
         $items = $cs->Changes()->toArray();
 
         foreach ($match as $key => $mode) {
-            list($class, $identifier) = explode('.', $key);
+            list($class, $identifier) = explode('.', $key ?? '');
             $objectID = $this->idFromFixture($class, $identifier);
             $objectClass = DataObject::getSchema()->baseDataClass($class);
 
@@ -96,7 +96,7 @@ class ChangeSetTest extends SapphireTest
             );
         }
 
-        if (count($items)) {
+        if (count($items ?? [])) {
             $extra = [];
             foreach ($items as $item) {
                 $extra[] = [

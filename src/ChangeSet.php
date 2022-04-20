@@ -278,7 +278,7 @@ class ChangeSet extends DataObject
         $all = array_merge($referenced, $explicit);
 
         /** @var string[][] $implicit Anything that is in $all, but not in $explicit, is an implicit inclusion */
-        $implicit = array_diff_key($all, $explicit);
+        $implicit = array_diff_key($all ?? [], $explicit);
 
         foreach ($implicit as $key => $object) {
             $implicit[$key]['ReferencedBy'] = $references[$key];
@@ -315,7 +315,7 @@ class ChangeSet extends DataObject
                 $objectKey = $this->implicitKey($item);
 
                 // If a ChangeSetItem exists, but isn't in $implicit, it's no longer required, so delete it
-                if (!array_key_exists($objectKey, $implicit)) {
+                if (!array_key_exists($objectKey, $implicit ?? [])) {
                     $item->delete();
                 } else {
                     // Otherwise it is required, so update ReferencedBy and remove from $implicit
@@ -352,7 +352,7 @@ class ChangeSet extends DataObject
             $objectKey = $this->implicitKey($item);
 
             // If a ChangeSetItem exists, but isn't in $implicit -> validation failure
-            if (!array_key_exists($objectKey, $implicit)) {
+            if (!array_key_exists($objectKey, $implicit ?? [])) {
                 return false;
             }
             // Exists, remove from $implicit

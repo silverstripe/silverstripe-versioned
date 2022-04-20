@@ -123,7 +123,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function getChangeType()
     {
-        if (!class_exists($this->ObjectClass)) {
+        if (!class_exists($this->ObjectClass ?? '')) {
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
@@ -175,7 +175,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     protected function getObjectInStage($stage)
     {
-        if (!class_exists($this->ObjectClass)) {
+        if (!class_exists($this->ObjectClass ?? '')) {
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
@@ -195,7 +195,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     protected function getObjectLatestVersion()
     {
-        if (!class_exists($this->ObjectClass)) {
+        if (!class_exists($this->ObjectClass ?? '')) {
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
@@ -257,7 +257,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function publish()
     {
-        if (!class_exists($this->ObjectClass)) {
+        if (!class_exists($this->ObjectClass ?? '')) {
             throw new UnexpectedDataException("Invalid Class '{$this->ObjectClass}' in ChangeSetItem #{$this->ID}");
         }
 
@@ -554,7 +554,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      */
     public function isVersioned()
     {
-        if (!$this->ObjectClass || !class_exists($this->ObjectClass)) {
+        if (!$this->ObjectClass || !class_exists($this->ObjectClass ?? '')) {
             return false;
         }
         /** @var Versioned|DataObject $singleton */

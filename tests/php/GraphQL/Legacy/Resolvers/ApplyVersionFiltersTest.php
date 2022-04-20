@@ -285,7 +285,7 @@ class ApplyVersionFiltersTest extends SapphireTest
 
         $this->assertCount(2, $list);
         $ids = $list->column('ID');
-        $this->assertTrue(in_array($record3->ID, $ids));
-        $this->assertTrue(in_array($oldID, $ids));
+        $this->assertTrue(in_array($record3->ID, $ids ?? []));
+        $this->assertTrue(in_array($oldID, $ids ?? []));
     }
 }

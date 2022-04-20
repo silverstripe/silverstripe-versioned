@@ -24,7 +24,7 @@ class ReadingMode
         if (!is_string($mode)) {
             throw new InvalidArgumentException("mode must be a string");
         }
-        $parts = explode('.', $mode);
+        $parts = explode('.', $mode ?? '');
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;
@@ -80,21 +80,21 @@ class ReadingMode
     public static function fromQueryString($query)
     {
         if (is_string($query)) {
-            parse_str($query, $query);
+            parse_str($query ?? '', $query);
         }
         if (empty($query)) {
             return null;
         }
         // Check date
-        $archiveDate = isset($query['archiveDate']) && strtotime($query['archiveDate'])
+        $archiveDate = isset($query['archiveDate']) && strtotime($query['archiveDate'] ?? '')
             ? $query['archiveDate']
             : null;
 
         // Check stage (ignore invalid stages)
         $stage = null;
-        if (isset($query['stage']) && strcasecmp($query['stage'], Versioned::DRAFT) === 0) {
+        if (isset($query['stage']) && strcasecmp($query['stage'] ?? '', Versioned::DRAFT ?? '') === 0) {
             $stage = Versioned::DRAFT;
-        } elseif (isset($query['stage']) && strcasecmp($query['stage'], Versioned::LIVE) === 0) {
+        } elseif (isset($query['stage']) && strcasecmp($query['stage'] ?? '', Versioned::LIVE ?? '') === 0) {
             $stage = Versioned::LIVE;
         }
 
@@ -129,7 +129,7 @@ class ReadingMode
         if (!is_string($mode)) {
             throw new InvalidArgumentException("mode must be a string");
         }
-        $parts = explode('.', $mode);
+        $parts = explode('.', $mode ?? '');
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;

@@ -92,17 +92,17 @@ class DataDifferencer extends ViewableData
             $fields = array_keys($diffed->toMap() + $this->toRecord->toMap());
         } else {
             $diffed = clone $this->toRecord;
-            $fields = array_keys($this->toRecord->toMap());
+            $fields = array_keys($this->toRecord->toMap() ?? []);
         }
 
         $hasOnes = array_merge($this->fromRecord->hasOne(), $this->toRecord->hasOne());
 
         // Loop through properties
         foreach ($fields as $field) {
-            if (in_array($field, $this->ignoredFields)) {
+            if (in_array($field, $this->ignoredFields ?? [])) {
                 continue;
             }
-            if (in_array($field, array_keys($hasOnes))) {
+            if (in_array($field, array_keys($hasOnes ?? []))) {
                 continue;
             }
 
@@ -134,7 +134,7 @@ class DataDifferencer extends ViewableData
 
         // Loop through has_one
         foreach ($hasOnes as $relName => $relSpec) {
-            if (in_array($relName, $this->ignoredFields)) {
+            if (in_array($relName, $this->ignoredFields ?? [])) {
                 continue;
             }
 
@@ -246,11 +246,11 @@ class DataDifferencer extends ViewableData
     public function changedFieldNames()
     {
         $base = $this->fromRecord ?: $this->toRecord;
-        $fields = array_keys($base->toMap());
+        $fields = array_keys($base->toMap() ?? []);
 
         $changedFields = [];
         foreach ($fields as $field) {
-            if (in_array($field, $this->ignoredFields)) {
+            if (in_array($field, $this->ignoredFields ?? [])) {
                 continue;
             }
             if (!$this->fromRecord || $this->fromRecord->$field != $this->toRecord->$field) {

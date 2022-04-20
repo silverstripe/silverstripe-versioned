@@ -64,7 +64,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(0, count($roofs));
+                $this->assertEquals(0, count($roofs ?? []));
             });
 
             $roof1->publishRecursive();
@@ -79,7 +79,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(1, count($roofs));
+                $this->assertEquals(1, count($roofs ?? []));
             });
         });
     }
@@ -110,7 +110,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(0, count($visitors));
+                $this->assertEquals(0, count($visitors ?? []));
 
                 // check many many
                 $columnName = null;
@@ -119,7 +119,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(0, count($visitors));
+                $this->assertEquals(0, count($visitors ?? []));
             });
 
             $houseVisit1->publishRecursive();
@@ -134,7 +134,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(1, count($visitors));
+                $this->assertEquals(1, count($visitors ?? []));
 
                 // check many many
                 $columnName = null;
@@ -143,7 +143,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(0, count($visitors));
+                $this->assertEquals(0, count($visitors ?? []));
             });
 
             $visitor1->publishRecursive();
@@ -158,7 +158,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(1, count($visitors));
+                $this->assertEquals(1, count($visitors ?? []));
 
                 // check many many
                 $columnName = null;
@@ -167,7 +167,7 @@ class VersionedTableTest extends SapphireTest
                     ->where(sprintf('%s IS NOT NULL', $columnName))
                     ->columnUnique($columnName);
 
-                $this->assertEquals(1, count($visitors));
+                $this->assertEquals(1, count($visitors ?? []));
             });
         });
     }

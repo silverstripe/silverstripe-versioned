@@ -69,7 +69,7 @@ class VersionedTest extends SapphireTest
 
             // Check unique -> non-unique conversion
             foreach ($indexes as $indexKey => $indexSpec) {
-                if (array_intersect($indexSpec['columns'], $expectedColumns)) {
+                if (array_intersect($indexSpec['columns'] ?? [], $expectedColumns)) {
                     $isUnique = $indexSpec['type'] === 'unique';
                     $this->assertEquals($isUnique, $expectation['value'], $expectation['message']);
                 }
@@ -664,7 +664,7 @@ class VersionedTest extends SapphireTest
         $this->assertEquals($archiveParms, $page2v1->getInheritableQueryParams());
         $queryParms = $page2v1->Children()->getQueryParams();
         foreach ($queryParms as $key => $val) {
-            if (!array_key_exists($key, $archiveParms)) {
+            if (!array_key_exists($key, $archiveParms ?? [])) {
                 continue;
             }
             $this->assertSame($val, $queryParms[$key], "queryParms[$key] should be $val");
@@ -692,7 +692,7 @@ class VersionedTest extends SapphireTest
         $this->assertEquals($archiveParms, $page2v2->getInheritableQueryParams());
         $queryParms = $page2v1->Children()->getQueryParams();
         foreach ($queryParms as $key => $val) {
-            if (!array_key_exists($key, $archiveParms)) {
+            if (!array_key_exists($key, $archiveParms ?? [])) {
                 continue;
             }
             $this->assertSame($val, $queryParms[$key], "queryParms[$key] should be $val");
@@ -940,23 +940,23 @@ class VersionedTest extends SapphireTest
         $tables = DB::table_list();
         $this->assertContains(
             'versionedtest_singlestage',
-            array_keys($tables),
+            array_keys($tables ?? []),
             'Contains base table'
         );
 
         $this->assertContains(
             'versionedtest_singlestage_versions',
-            array_keys($tables),
+            array_keys($tables ?? []),
             'Contains versions table'
         );
         $this->assertNotContains(
             'versionedtest_singlestage_live',
-            array_keys($tables),
+            array_keys($tables ?? []),
             'Does not contain separate table with _Live suffix'
         );
         $this->assertNotContains(
             'versionedtest_singlestage_stage',
-            array_keys($tables),
+            array_keys($tables ?? []),
             'Does not contain separate table with _Stage suffix'
         );
 

@@ -84,7 +84,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
                 $config->removeComponent($deleteComponent);
             }
         }
-        if (!in_array('Actions', $columns)) {
+        if (!in_array('Actions', $columns ?? [])) {
             $columns[] = 'Actions';
         }
     }

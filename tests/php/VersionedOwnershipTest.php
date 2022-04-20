@@ -48,7 +48,7 @@ class VersionedOwnershipTest extends SapphireTest
         // Automatically publish any object named *_published
         foreach ($this->getFixtureFactory()->getFixtures() as $class => $fixtures) {
             foreach ($fixtures as $name => $id) {
-                if (stripos($name, '_published') !== false) {
+                if (stripos($name ?? '', '_published') !== false) {
                     /** @var Versioned|DataObject $object */
                     $object = DataObject::get($class)->byID($id);
                     $object->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);

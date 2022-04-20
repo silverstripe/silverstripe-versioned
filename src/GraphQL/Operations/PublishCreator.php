@@ -22,7 +22,7 @@ class PublishCreator extends AbstractPublishOperationCreator
      */
     protected function createOperationName(string $typeName): string
     {
-        return 'publish' . ucfirst($typeName);
+        return 'publish' . ucfirst($typeName ?? '');
     }
 
     /**

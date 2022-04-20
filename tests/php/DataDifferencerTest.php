@@ -55,8 +55,8 @@ class DataDifferencerTest extends SapphireTest
      */
     public static function assertContainsIgnoreWhitespace($needle, $haystack, $message = '')
     {
-        $needle = preg_replace('#\s+#', '', $needle);
-        $haystack = preg_replace('#\s+#', '', $haystack);
+        $needle = preg_replace('#\s+#', '', $needle ?? '');
+        $haystack = preg_replace('#\s+#', '', $haystack ?? '');
         return parent::assertStringContainsString($needle, $haystack, $message);
     }
 

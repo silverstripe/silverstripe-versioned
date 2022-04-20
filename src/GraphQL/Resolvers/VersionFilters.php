@@ -91,7 +91,7 @@ class VersionFilters
                 $statuses = $versioningArgs['status'];
 
                 // If we need to search archived records, we need to manually join draft table
-                if (in_array('archived', $statuses)) {
+                if (in_array('archived', $statuses ?? [])) {
                     $list = $list
                         ->setDataQueryParam('Versioned.mode', 'latest_versions');
                     // Join a temporary alias BaseTable_Draft, renaming this on execution to BaseTable
@@ -120,32 +120,32 @@ class VersionFilters
                 $conditions = [];
 
                 // Modified exist on both stages, but differ
-                if (in_array('modified', $statuses)) {
+                if (in_array('modified', $statuses ?? [])) {
                     $conditions[] = "\"{$liveTable}\".\"ID\" IS NOT NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL"
                         . " AND \"{$draftTable}\".\"Version\" <> \"{$liveTable}\".\"Version\"";
                 }
 
                 // Is deleted and sent to archive
-                if (in_array('archived', $statuses)) {
+                if (in_array('archived', $statuses ?? [])) {
                     // Note: Include items staged for deletion for the time being, as these are effectively archived
                     // we could split this out into "staged for deletion" in the future
                     $conditions[] = "\"{$draftTable}\".\"ID\" IS NULL";
                 }
 
                 // Is on draft only
-                if (in_array('draft', $statuses)) {
+                if (in_array('draft', $statuses ?? [])) {
                     $conditions[] = "\"{$liveTable}\".\"ID\" IS NULL AND \"{$draftTable}\".\"ID\" IS NOT NULL";
                 }
 
-                if (in_array('published', $statuses)) {
+                if (in_array('published', $statuses ?? [])) {
                     $conditions[] = "\"{$liveTable}\".\"ID\" IS NOT NULL";
                 }
 
                 // Validate that all statuses have been handled
-                if (empty($conditions) || count($statuses) !== count($conditions)) {
+                if (empty($conditions) || count($statuses ?? []) !== count($conditions ?? [])) {
                     throw new InvalidArgumentException("Invalid statuses provided");
                 }
-                $list = $list->whereAny(array_filter($conditions));
+                $list = $list->whereAny(array_filter($conditions ?? []));
                 break;
             case 'version':
                 // Note: Only valid for ReadOne
@@ -222,6 +222,6 @@ class VersionFilters
     {
         $dt = DateTime::createFromFormat('Y-m-d', $date);
 
-        return ($dt !== false && !array_sum($dt->getLastErrors()));
+        return ($dt !== false && !array_sum($dt->getLastErrors() ?? []));
     }
 }
