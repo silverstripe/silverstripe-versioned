@@ -118,8 +118,8 @@ class Versioned_Version extends ViewableData
         $component = $this;
 
         // We're dealing with relations here so we traverse the dot syntax
-        if (strpos($fieldName, '.') !== false) {
-            $relations = explode('.', $fieldName);
+        if (strpos($fieldName ?? '', '.') !== false) {
+            $relations = explode('.', $fieldName ?? '');
             $fieldName = array_pop($relations);
             foreach ($relations as $relation) {
                 // Inspect $component for element $relation

@@ -21,7 +21,7 @@ class UnpublishCreator extends AbstractPublishOperationCreator
      */
     protected function createOperationName(string $typeName): string
     {
-        return 'unpublish' . ucfirst($typeName);
+        return 'unpublish' . ucfirst($typeName ?? '');
     }
 
     /**

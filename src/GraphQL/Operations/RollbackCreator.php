@@ -54,7 +54,7 @@ class RollbackCreator implements OperationCreator
         $defaultPlugins = $this->config()->get('default_plugins');
         $configPlugins = $config['plugins'] ?? [];
         $plugins = array_merge($defaultPlugins, $configPlugins);
-        $mutationName = 'rollback' . ucfirst($typeName);
+        $mutationName = 'rollback' . ucfirst($typeName ?? '');
         return ModelMutation::create($model, $mutationName)
             ->setPlugins($plugins)
             ->setType($typeName)

@@ -37,7 +37,7 @@ class CustomRelation extends DataObject implements TestOnly
      */
     public function Pages()
     {
-        $title = str_replace('Custom', 'Page', $this->Title);
+        $title = str_replace('Custom', 'Page', $this->Title ?? '');
         return TestPage::get()->filter('Title', $title);
     }
 }

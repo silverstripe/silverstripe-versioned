@@ -17,7 +17,7 @@ class VersionedCacheAdapter extends ProxyCacheAdapter
     {
         $state = Versioned::get_reading_mode();
         if ($state) {
-            return $key . '_' . md5($state);
+            return $key . '_' . md5($state ?? '');
         }
         return $key;
     }

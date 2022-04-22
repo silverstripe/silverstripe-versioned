@@ -175,7 +175,7 @@ class VersionedResolver
             AbstractPublishOperationCreator::ACTION_PUBLISH,
             AbstractPublishOperationCreator::ACTION_UNPUBLISH,
         ];
-        if (!in_array($action, $allowedActions)) {
+        if (!in_array($action, $allowedActions ?? [])) {
             throw new InvalidArgumentException(sprintf(
                 'Invalid publish action: %s',
                 $action

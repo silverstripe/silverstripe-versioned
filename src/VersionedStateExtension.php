@@ -57,7 +57,7 @@ class VersionedStateExtension extends Extension
         // Decorate
         $link = Controller::join_links(
             $link,
-            '?' . http_build_query($queryargs)
+            '?' . http_build_query($queryargs ?? [])
         );
     }
 
@@ -70,8 +70,8 @@ class VersionedStateExtension extends Extension
     protected function hasVersionedQuery($link)
     {
         // Find querystrings
-        $parts = explode('?', $link, 2);
-        if (count($parts) < 2) {
+        $parts = explode('?', $link ?? '', 2);
+        if (count($parts ?? []) < 2) {
             return false;
         }
 

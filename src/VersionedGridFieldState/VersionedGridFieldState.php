@@ -89,11 +89,11 @@ class VersionedGridFieldState implements GridField_ColumnProvider
         }
 
         $matchedVersionedFields = array_intersect(
-            $columns,
+            $columns ?? [],
             $this->versionedLabelFields
         );
 
-        if (count($matchedVersionedFields) > 0) {
+        if (count($matchedVersionedFields ?? []) > 0) {
             // Get first matched column
             $this->setColumn(reset($matchedVersionedFields));
         } elseif ($columns) {
