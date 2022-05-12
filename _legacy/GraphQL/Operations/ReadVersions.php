@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
 use SilverStripe\ORM\DataObject;
@@ -22,6 +23,10 @@ if (!class_exists(ListQueryScaffolder::class)) {
  */
 class ReadVersions extends ListQueryScaffolder implements OperationResolver
 {
+    use Configurable;
+
+    //disable checking of drafts on object->canViewStage
+    private static $disable_draft_visibility_check = false;
     /**
      * ReadOperationScaffolder constructor.
      *
@@ -49,12 +54,19 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
                 $this->getDataObjectClass()
             ));
         }
-        if (!$object->canViewStage(Versioned::DRAFT, $context['currentUser'])) {
-            throw new Exception(sprintf(
-                'Cannot view versions on %s',
-                $this->getDataObjectClass()
-            ));
+
+        //Occasionally some records will fail to show their history at all
+        //By setting disable_visibility_check to true, these records are able to
+        //be viewed.
+        if($this->config()->disable_draft_visibility_check === false) {
+            if (!$object->canViewStage(Versioned::DRAFT, $context['currentUser'])) {
+                throw new Exception(sprintf(
+                    'Cannot view versions on %s',
+                    $this->getDataObjectClass()
+                ));
+            }
         }
+
 
         // Get all versions
         $list = $object->VersionsList();
