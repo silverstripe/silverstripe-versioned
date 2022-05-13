@@ -108,7 +108,7 @@ class DataObjectScaffolderExtension extends Extension
         // With the version type in the manager now, add the versioning fields to the dataobject type
         $owner
             ->addFields([$version])
-            ->nestedQuery($versions, new ReadVersions($class, $versionName));
+            ->nestedQuery($versions, ReadVersions::create($class, $versionName));
     }
 
     /**

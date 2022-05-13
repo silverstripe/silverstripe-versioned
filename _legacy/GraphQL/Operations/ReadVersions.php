@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
 use Exception;
+use SilverStripe\Core\Injector\Injectable;
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\GraphQL\OperationResolver;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\ListQueryScaffolder;
@@ -22,6 +23,7 @@ if (!class_exists(ListQueryScaffolder::class)) {
  */
 class ReadVersions extends ListQueryScaffolder implements OperationResolver
 {
+    use Injectable;
     /**
      * ReadOperationScaffolder constructor.
      *
