@@ -1,6 +1,6 @@
 ## SilverStripe Versioned
 
-[![Build Status](https://api.travis-ci.com/silverstripe/silverstripe-versioned.svg?branch=1)](https://travis-ci.com/silverstripe/silverstripe-versioned)
+[![CI](https://github.com/silverstripe/silverstripe-versioned/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/silverstripe-versioned/actions/workflows/ci.yml)
 [![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 [![Latest Stable Version](https://poser.pugx.org/silverstripe/versioned/version.svg)](http://www.silverstripe.org/stable-download/)
 [![Latest Unstable Version](https://poser.pugx.org/silverstripe/versioned/v/unstable.svg)](https://packagist.org/packages/silverstripe/versioned)
