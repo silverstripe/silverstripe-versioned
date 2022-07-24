@@ -1691,7 +1691,7 @@ SQL
 
         // If we weren't definitely loaded from live, and we can't view non-live content, we need to
         // check to make sure this version is the live version and so can be viewed
-        $latestVersion = Versioned::get_versionnumber_by_stage(get_class($owner), static::LIVE, $owner->ID);
+        $latestVersion = Versioned::get_versionnumber_by_stage($this->owner->baseClass(), static::LIVE, $owner->ID);
         if ($latestVersion == $owner->Version) {
             // Even if this is loaded from a non-live stage, this is the live version
             return true;
@@ -1733,7 +1733,8 @@ SQL
             Versioned::set_stage($stage);
 
             $owner = $this->owner;
-            $versionFromStage = DataObject::get(get_class($owner))->byID($owner->ID);
+            $baseClass = DataObject::getSchema()->baseDataClass($owner);
+            $versionFromStage = DataObject::get($baseClass)->byID($owner->ID);
 
             return $versionFromStage ? $versionFromStage->canView($member) : false;
         });
@@ -1939,8 +1940,10 @@ SQL
             return false;
         }
         // Count live owners
+        $baseClass = $this->owner->baseClass();
+
         /** @var Versioned|RecursivePublishable|DataObject $liveRecord */
-        $liveRecord = static::get_by_stage(get_class($this->owner), Versioned::LIVE)->byID($this->owner->ID);
+        $liveRecord = static::get_by_stage($baseClass, Versioned::LIVE)->byID($this->owner->ID);
         return $liveRecord->findOwners(false)->count() > 0;
     }
 
@@ -2086,7 +2089,7 @@ SQL
     public function VersionsList()
     {
         $id = $this->owner->ID ?: $this->owner->OldID;
-        $class = get_class($this->owner);
+        $class = DataObject::getSchema()->baseDataClass($this->owner);
         return Versioned::get_all_versions($class, $id);
     }
 
@@ -2169,8 +2172,10 @@ SQL
     public function compareVersions($from, $to)
     {
         $owner = $this->owner;
-        $fromRecord = Versioned::get_version(get_class($owner), $owner->ID, $from);
-        $toRecord = Versioned::get_version(get_class($owner), $owner->ID, $to);
+        $baseClass = $this->owner->baseClass();
+
+        $fromRecord = Versioned::get_version($baseClass, $owner->ID, $from);
+        $toRecord = Versioned::get_version($baseClass, $owner->ID, $to);
 
         $diff = new DataDifferencer($fromRecord, $toRecord);
 
@@ -2790,7 +2795,7 @@ SQL
         }
 
         /** @var Versioned|DataObject $version */
-        $version = static::get_latest_version(get_class($owner), $owner->ID);
+        $version = static::get_latest_version($this->owner->baseClass(), $owner->ID);
         return ($version->Version == $owner->Version);
     }
 
