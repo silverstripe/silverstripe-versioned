@@ -8,7 +8,7 @@ use LogicException;
 use SilverStripe\Assets\Thumbnail;
 use SilverStripe\Control\Controller;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\CMSPreviewable;
+use SilverStripe\Admin\Previewable;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
@@ -512,7 +512,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Preview draft
         $stage = $this->getObjectInStage(Versioned::DRAFT);
-        if ($stage instanceof CMSPreviewable && $stage->canView() && ($link = $stage->PreviewLink())) {
+        if ($stage instanceof Previewable && $stage->canView() && ($link = $stage->PreviewLink())) {
             $links[Versioned::DRAFT] = [
                 'href' => Controller::join_links($link, '?stage=' . Versioned::DRAFT),
                 'type' => $stage->getMimeType(),
@@ -522,7 +522,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         // Preview live if versioned
         if ($this->isVersioned()) {
             $live = $this->getObjectInStage(Versioned::LIVE);
-            if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
+            if ($live instanceof Previewable && $live->canView() && ($link = $live->PreviewLink())) {
                 $links[Versioned::LIVE] = [
                 'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
                 'type' => $live->getMimeType(),
@@ -541,7 +541,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     public function CMSEditLink()
     {
         $link = $this->getObjectInStage(Versioned::DRAFT);
-        if ($link instanceof CMSPreviewable) {
+        if ($link instanceof Previewable) {
             return $link->CMSEditLink();
         }
         return null;
