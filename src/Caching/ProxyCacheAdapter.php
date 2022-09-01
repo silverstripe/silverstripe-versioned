@@ -140,7 +140,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function prune()
+    public function prune(): bool
     {
         if ($this->pool instanceof PruneableInterface) {
             return $this->pool->prune();
