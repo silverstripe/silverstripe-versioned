@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Convert;
 use SilverStripe\Forms\FieldList;
@@ -323,7 +324,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 ->addExtraClass('btn-outline-primary font-icon-tick')
                 ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-save')
                 ->setAttribute('data-btn-alternate-remove', 'btn-outline-primary font-icon-tick')
-                ->setAttribute('data-text-alternate', _t('SilverStripe\\CMS\\Controllers\\CMSMain.SAVEDRAFT', 'Save draft'));
+                ->setAttribute('data-text-alternate', _t(CMSMain::class . '.SAVEDRAFT', 'Save draft'));
         }
 
         // "publish" action
@@ -370,8 +371,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             // Replace "delete" action
             $actions->removeByName('action_doDelete');
             $title = $isPublished
-                ? _t('SilverStripe\\CMS\\Controllers\\CMSMain.UNPUBLISH_AND_ARCHIVE', 'Unpublish and archive')
-                : _t('SilverStripe\\CMS\\Controllers\\CMSMain.ARCHIVE', 'Archive');
+                ? _t(CMSMain::class . '.UNPUBLISH_AND_ARCHIVE', 'Unpublish and archive')
+                : _t(CMSMain::class . '.ARCHIVE', 'Archive');
 
             $actionArchive = FormAction::create('doArchive', $title)
                 ->addExtraClass('delete btn btn-secondary')

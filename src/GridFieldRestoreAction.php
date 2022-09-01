@@ -126,11 +126,11 @@ class GridFieldRestoreAction implements GridField_ColumnProvider, GridField_Acti
             $restoreToRoot = RestoreAction::shouldRestoreToRoot($record);
 
             $title = $restoreToRoot
-                ? _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_TO_ROOT', 'Restore to draft at top level')
-                : _t('SilverStripe\\Versioned\\RestoreAction.RESTORE', 'Restore to draft');
+                ? _t(RestoreAction::class . '.RESTORE_TO_ROOT', 'Restore to draft at top level')
+                : _t(RestoreAction::class . '.RESTORE', 'Restore to draft');
             $description = $restoreToRoot
-                ? _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_TO_ROOT_DESC', 'Restore the archived version to draft as a top level item')
-                : _t('SilverStripe\\Versioned\\RestoreAction.RESTORE_DESC', 'Restore the archived version to draft');
+                ? _t(RestoreAction::class . '.RESTORE_TO_ROOT_DESC', 'Restore the archived version to draft as a top level item')
+                : _t(RestoreAction::class . '.RESTORE_DESC', 'Restore the archived version to draft');
 
             $field = GridField_FormAction::create(
                 $gridField,
