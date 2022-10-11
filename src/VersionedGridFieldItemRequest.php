@@ -113,12 +113,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
     /**
      * Archive this versioned record
-     *
-     * @param array $data
-     * @param Form $form
-     * @return HTTPResponse
      */
-    public function doArchive($data, $form)
+    public function doArchive(array $data, Form $form): HTTPResponse
     {
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
@@ -149,12 +145,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
     /**
      * Publish this versioned record
-     *
-     * @param array $data
-     * @param Form $form
-     * @return HTTPResponse
      */
-    public function doPublish($data, $form)
+    public function doPublish(array $data, Form $form): HTTPResponse
     {
         /** @var Versioned|RecursivePublishable|DataObject $record */
         $record = $this->getRecord();
@@ -187,12 +179,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
     /**
      * Delete this record from the live site
-     *
-     * @param array $data
-     * @param Form $form
-     * @return HTTPResponse
      */
-    public function doUnpublish($data, $form)
+    public function doUnpublish(array $data, Form $form): HTTPResponse
     {
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
