@@ -375,7 +375,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Get modified date for the given version
      *
-     * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion instead
+     * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion() instead
      * @param int $version
      * @return string
      */
@@ -1820,7 +1820,7 @@ SQL
      */
     public function doPublish()
     {
-        Deprecation::notice('5.0', 'Use publishRecursive instead');
+        Deprecation::notice('5.0', 'Use publishRecursive() instead');
         return $this->owner->publishRecursive();
     }
 
@@ -1964,7 +1964,7 @@ SQL
     }
 
     /**
-     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
+     * @deprecated 1.2..2.0 Will be removed without equivalent functionality to replace it
      */
     public function onAfterRevertToLive()
     {
@@ -1975,7 +1975,7 @@ SQL
      */
     public function publish($fromStage, $toStage, $createNewVersion = true)
     {
-        Deprecation::notice('5.0', 'Use copyVersionToStage instead');
+        Deprecation::notice('5.0', 'Use copyVersionToStage() instead');
         $this->owner->copyVersionToStage($fromStage, $toStage, true);
     }
 
@@ -2025,7 +2025,7 @@ SQL
      */
     public function migrateVersion($version)
     {
-        Deprecation::notice('5.0', 'use setMigratingVersion instead');
+        Deprecation::notice('5.0', 'Use setMigratingVersion() instead');
         $this->setMigratingVersion($version);
     }
 
@@ -2083,7 +2083,7 @@ SQL
      * NOTE: Versions() will be replaced with this method in SilverStripe 5.0
      *
      * @internal
-     * @deprecated 1.5.0 Will be removed in 2.0.0, use Versions() instead
+     * @deprecated 1.5.0 Use Versions() instead
      * @return DataList
      */
     public function VersionsList()
@@ -2096,12 +2096,12 @@ SQL
     /**
      * Return a list of all the versions available.
      *
-     * @deprecated 1.5.0 Will be removed in 2.0.0, please use Versions() instead
+     * @deprecated 1.5.0 Use Versions() instead
      * @param  string $filter
      * @param  string $sort
      * @param  string $limit
-     * @param  string $join @deprecated use leftJoin($table, $joinClause) instead
-     * @param  string $having @deprecated
+     * @param  string $join
+     * @param  string $having
      * @return ArrayList
      */
     public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
@@ -2700,7 +2700,7 @@ SQL
     }
 
     /**
-     * @deprecated 1.2..2.0 This extension method is redundant and will be removed
+     * @deprecated 1.2..2.0 Will be removed without equivalent functionality to replace it
      */
     public function onAfterRollback()
     {
