@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Core\Extension;
 use SilverStripe\Versioned\GraphQL\Types\CopyToStageInputType;
 use SilverStripe\Versioned\GraphQL\Types\VersionedInputType;
@@ -17,7 +18,7 @@ if (!class_exists(Manager::class)) {
 }
 
 /**
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class ManagerExtension extends Extension
 {
@@ -26,6 +27,11 @@ class ManagerExtension extends Extension
      *
      * @param $config
      */
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function updateConfig(&$config)
     {
         if (!isset($config['types'])) {

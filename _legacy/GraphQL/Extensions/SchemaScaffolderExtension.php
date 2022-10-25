@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Core\Extension;
 use SilverStripe\GraphQL\Manager;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\SchemaScaffolder;
@@ -16,7 +17,7 @@ if (!class_exists(Manager::class)) {
 }
 
 /**
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class SchemaScaffolderExtension extends Extension
 {
@@ -26,6 +27,11 @@ class SchemaScaffolderExtension extends Extension
      *
      * @param Manager $manager
      */
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function onBeforeAddToManager(Manager $manager)
     {
         $memberType = StaticSchema::inst()->typeNameForDataObject(Member::class);

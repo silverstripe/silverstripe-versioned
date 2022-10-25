@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use SilverStripe\Dev\Deprecation;
 use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -24,7 +25,7 @@ if (!class_exists(MutationScaffolder::class)) {
 /**
  * Scaffolds a generic update operation for DataObjects.
  *
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 abstract class PublishOperation extends MutationScaffolder implements OperationResolver
 {
@@ -33,6 +34,7 @@ abstract class PublishOperation extends MutationScaffolder implements OperationR
      */
     public function __construct($dataObjectClass)
     {
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
         parent::__construct(null, null, $this, $dataObjectClass);
     }
 

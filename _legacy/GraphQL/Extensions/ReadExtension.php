@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Resolvers\ApplyVersionFilters;
@@ -21,10 +22,15 @@ if (!class_exists(Manager::class)) {
  * Decorator for either a Read or ReadOne query scaffolder
  *
  * @property Read|ReadOne $owner
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class ReadExtension extends Extension
 {
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function updateList(DataList &$list, $args)
     {
         if (!isset($args[$this->argName()])) {
