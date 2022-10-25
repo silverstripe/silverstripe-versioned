@@ -16,7 +16,7 @@ if (!class_exists(Manager::class)) {
 }
 
 /**
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class ApplyVersionFilters
 {
@@ -30,7 +30,7 @@ class ApplyVersionFilters
      */
     public function __construct()
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
     }
 
     public function applyToReadingState($versioningArgs)

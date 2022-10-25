@@ -20,7 +20,7 @@ if (!class_exists(ListQueryScaffolder::class)) {
 /**
  * Scaffolds a generic read operation for DataObjects.
  *
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class ReadVersions extends ListQueryScaffolder implements OperationResolver
 {
@@ -33,7 +33,7 @@ class ReadVersions extends ListQueryScaffolder implements OperationResolver
      */
     public function __construct($dataObjectClass, $versionTypeName)
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
         $this->setDataObjectClass($dataObjectClass);
         $operationName = 'read' . ucfirst($versionTypeName);
 

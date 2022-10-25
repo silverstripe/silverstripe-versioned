@@ -17,7 +17,7 @@ if (!class_exists(PublishOperation::class)) {
 /**
  * Scaffolds a generic update operation for DataObjects.
  *
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class Publish extends PublishOperation
 {
@@ -28,7 +28,7 @@ class Publish extends PublishOperation
      */
     public function __construct($dataObjectClass)
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
         parent::__construct($dataObjectClass);
     }
 

@@ -25,7 +25,7 @@ if (!class_exists(MutationScaffolder::class)) {
  * copy[TypeName]ToStage(ID!, FromVersion!, FromStage!, ToStage!)
  *
  * @internal This is a low level API that might be removed in the future. Consider using the "rollback" mutation instead
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class CopyToStage extends MutationScaffolder implements OperationResolver
 {
@@ -36,7 +36,7 @@ class CopyToStage extends MutationScaffolder implements OperationResolver
      */
     public function __construct($dataObjectClass)
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
         parent::__construct(null, null, $this, $dataObjectClass);
     }
 

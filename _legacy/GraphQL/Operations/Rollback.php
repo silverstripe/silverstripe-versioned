@@ -24,7 +24,7 @@ if (!class_exists(MutationScaffolder::class)) {
  *
  * rollback[TypeName](ID!, ToVersion!)
  *
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class Rollback extends MutationScaffolder implements OperationResolver
 {
@@ -35,7 +35,7 @@ class Rollback extends MutationScaffolder implements OperationResolver
      */
     public function __construct($dataObjectClass)
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
         parent::__construct(null, null, $this, $dataObjectClass);
     }
 

@@ -22,13 +22,13 @@ if (!class_exists(Manager::class)) {
  * Decorator for either a Read or ReadOne query scaffolder
  *
  * @property Read|ReadOne $owner
- * @deprecated 1.8.0 Use _graphql directory functionality instead
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class ReadExtension extends Extension
 {
     public function __construct()
     {
-        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
     }
 
     public function updateList(DataList &$list, $args)
