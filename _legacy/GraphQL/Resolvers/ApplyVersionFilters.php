@@ -2,6 +2,7 @@
 
 namespace SilverStripe\GraphQL\Resolvers;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Versioned\Versioned;
@@ -15,7 +16,7 @@ if (!class_exists(Manager::class)) {
 }
 
 /**
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use _graphql directory functionality instead
  */
 class ApplyVersionFilters
 {
@@ -27,6 +28,11 @@ class ApplyVersionFilters
      *
      * @param $versioningArgs
      */
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function applyToReadingState($versioningArgs)
     {
         list ($mode, $archiveDate) = StaticSchema::inst()->extractKeys(

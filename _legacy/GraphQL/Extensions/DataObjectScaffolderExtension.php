@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use SilverStripe\Dev\Deprecation;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Extension;
@@ -19,7 +20,7 @@ if (!class_exists(Manager::class)) {
 }
 
 /**
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use _graphql directory functionality instead
  */
 class DataObjectScaffolderExtension extends Extension
 {
@@ -27,6 +28,11 @@ class DataObjectScaffolderExtension extends Extension
      * Adds the "Version" and "Versions" fields to any dataobject that has the Versioned extension.
      * @param Manager $manager
      */
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function onBeforeAddToManager(Manager $manager)
     {
         /* @var DataObjectScaffolder $owner */

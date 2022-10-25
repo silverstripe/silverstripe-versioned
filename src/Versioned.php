@@ -375,13 +375,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Get modified date for the given version
      *
-     * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion() instead
+     * @deprecated 1.2.0 Use getLastEditedAndStageForVersion() instead
      * @param int $version
      * @return string
      */
     protected function getLastEditedForVersion($version)
     {
-        Deprecation::notice('5.0', 'Use getLastEditedAndStageForVersion instead');
+        Deprecation::notice('1.2.0', 'Use getLastEditedAndStageForVersion() instead');
         $result = $this->getLastEditedAndStageForVersion($version);
         if ($result) {
             return reset($result);
@@ -1816,11 +1816,11 @@ SQL
     }
 
     /**
-     * @deprecated 4.0..5.0
+     * @deprecated 1.0.0 Use publishRecursive() instead
      */
     public function doPublish()
     {
-        Deprecation::notice('5.0', 'Use publishRecursive() instead');
+        Deprecation::notice('1.0.0', 'Use publishRecursive() instead');
         return $this->owner->publishRecursive();
     }
 
@@ -1964,18 +1964,19 @@ SQL
     }
 
     /**
-     * @deprecated 1.2..2.0 Will be removed without equivalent functionality to replace it
+     * @deprecated 1.2.0 Will be removed without equivalent functionality to replace it
      */
     public function onAfterRevertToLive()
     {
+        Deprecation::notice('1.2.0', 'Will be removed without equivalent functionality to replace it');
     }
 
     /**
-     * @deprecated 4.0..5.0
+     * @deprecated 1.0.0 Use copyVersionToStage() instead
      */
     public function publish($fromStage, $toStage, $createNewVersion = true)
     {
-        Deprecation::notice('5.0', 'Use copyVersionToStage() instead');
+        Deprecation::notice('1.0.0', 'Use copyVersionToStage() instead');
         $this->owner->copyVersionToStage($fromStage, $toStage, true);
     }
 
@@ -2020,12 +2021,12 @@ SQL
     }
 
     /**
-     * @deprecated 4.0...5.0
+     * @deprecated 1.0.0 Use setMigratingVersion() instead
      * @param string $version The version.
      */
     public function migrateVersion($version)
     {
-        Deprecation::notice('5.0', 'Use setMigratingVersion() instead');
+        Deprecation::notice('1.0.0', 'Use setMigratingVersion() instead');
         $this->setMigratingVersion($version);
     }
 
@@ -2088,6 +2089,7 @@ SQL
      */
     public function VersionsList()
     {
+        Deprecation::notice('1.5.0', 'Use Versions() instead');
         $id = $this->owner->ID ?: $this->owner->OldID;
         $class = DataObject::getSchema()->baseDataClass($this->owner);
         return Versioned::get_all_versions($class, $id);
@@ -2106,6 +2108,7 @@ SQL
      */
     public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
+        Deprecation::notice('1.5.0', 'Use Versions() instead');
         /** @var DataObject $owner */
         $owner = $this->owner;
 
@@ -2687,12 +2690,12 @@ SQL
      *
      * {@see doRevertToLive()} to reollback to live
      *
-     * @deprecated 4.2..5.0 Use rollbackRecursive() instead
+     * @deprecated 1.2.0 Use rollbackRecursive() instead
      * @param int $version Version number
      */
     public function doRollbackTo($version)
     {
-        Deprecation::notice('5.0', 'Use rollbackRecursive() instead');
+        Deprecation::notice('1.2.0', 'Use rollbackRecursive() instead');
         $owner = $this->owner;
         $owner->extend('onBeforeRollback', $version);
         $owner->rollbackRecursive($version);
@@ -2700,10 +2703,11 @@ SQL
     }
 
     /**
-     * @deprecated 1.2..2.0 Will be removed without equivalent functionality to replace it
+     * @deprecated 1.2.0 Will be removed without equivalent functionality to replace it
      */
     public function onAfterRollback()
     {
+        Deprecation::notice('1.2.0', 'Will be removed without equivalent functionality to replace it');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use SilverStripe\Dev\Deprecation;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use InvalidArgumentException;
@@ -23,7 +24,7 @@ if (!class_exists(MutationScaffolder::class)) {
  *
  * rollback[TypeName](ID!, ToVersion!)
  *
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use _graphql directory functionality instead
  */
 class Rollback extends MutationScaffolder implements OperationResolver
 {
@@ -34,6 +35,7 @@ class Rollback extends MutationScaffolder implements OperationResolver
      */
     public function __construct($dataObjectClass)
     {
+        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
         parent::__construct(null, null, $this, $dataObjectClass);
     }
 

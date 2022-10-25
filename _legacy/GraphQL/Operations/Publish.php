@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Operations;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\Security\Member;
 use SilverStripe\Versioned\RecursivePublishable;
@@ -16,13 +17,21 @@ if (!class_exists(PublishOperation::class)) {
 /**
  * Scaffolds a generic update operation for DataObjects.
  *
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use _graphql directory functionality instead
  */
 class Publish extends PublishOperation
 {
     /**
+     * @param string $dataObjectClass
+     *
      * @return string
      */
+    public function __construct($dataObjectClass)
+    {
+        Deprecation::notice('1.8.0', 'Use _graphql directory functionality instead', Deprecation::SCOPE_CLASS);
+        parent::__construct($dataObjectClass);
+    }
+
     protected function createOperationName()
     {
         return 'publish' . ucfirst($this->getTypeName());

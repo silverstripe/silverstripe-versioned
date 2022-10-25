@@ -3,6 +3,7 @@
 
 namespace SilverStripe\Versioned\Dev;
 
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Dev\TestSession;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\VersionedStateExtension;
@@ -11,7 +12,7 @@ use SilverStripe\Versioned\VersionedStateExtension;
  * Decorates TestSession object to update get / post requests with versioned querystring arguments.
  * Session vars assigned by FunctionalTest::useDraftSite are respected here.
  *
- * @deprecated 2.2..3.0 Use ?stage=Stage|Live in your request's querystring instead
+ * @deprecated 2.2.0 Use ?stage=Stage|Live in your request's querystring instead
  * @property TestSession $owner
  */
 class VersionedTestSessionExtension extends VersionedStateExtension
@@ -21,6 +22,11 @@ class VersionedTestSessionExtension extends VersionedStateExtension
      *
      * @param string $url
      */
+    public function __construct()
+    {
+        Deprecation::notice('2.2.0', 'Use ?stage=Stage|Live in your request\'s querystring instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function updateLink(&$url)
     {
         $session = $this->owner->session();
