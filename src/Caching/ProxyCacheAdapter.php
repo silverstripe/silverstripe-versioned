@@ -51,7 +51,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null): mixed
     {
         $keyID = $this->getKeyID($key);
         return $this->pool->get($keyID, $default);
@@ -60,7 +60,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $keyID = $this->getKeyID($key);
         return $this->pool->has($keyID);
@@ -69,7 +69,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $keyID = $this->getKeyID($key);
         return $this->pool->delete($keyID);
@@ -78,7 +78,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, $ttl = null): bool
     {
         $keyID = $this->getKeyID($key);
         return $this->pool->set($keyID, $value, $ttl);
@@ -87,7 +87,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function setMultiple($items, $ttl = null)
+    public function setMultiple(iterable $items, $ttl = null): bool
     {
         // Map associative item keys to ids (safely casting as array as byproduct)
         $itemsByID = [];
@@ -103,7 +103,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, $default = null): iterable
     {
         $keys = $this->iteratorToArray($keys);
         $keyIDs = $this->getKeyIDs($keys);
@@ -123,7 +123,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function clear()
+    public function clear(): bool
     {
         return $this->pool->clear();
     }
@@ -131,7 +131,7 @@ abstract class ProxyCacheAdapter implements CacheInterface, ResettableInterface,
     /**
      * {@inheritdoc}
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
         $keyIDs = $this->getKeyIDs($keys);
         return $this->pool->deleteMultiple($keyIDs);
