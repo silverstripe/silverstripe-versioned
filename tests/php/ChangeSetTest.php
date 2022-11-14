@@ -48,7 +48,9 @@ class ChangeSetTest extends SapphireTest
     protected function publishAllFixtures()
     {
         $this->logInWithPermission('ADMIN');
-        foreach ($this->fixtureFactory->getFixtures() as $class => $fixtures) {
+        /** @var FixtureTestState $state */
+        $state = static::$state->getStateByName('fixtures');
+        foreach ($state->getFixtureFactory(static::class)->getFixtures() as $class => $fixtures) {
             foreach ($fixtures as $handle => $id) {
                 /** @var Versioned|DataObject $object */
                 $object = $this->objFromFixture($class, $handle);

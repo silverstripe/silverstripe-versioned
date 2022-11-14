@@ -294,7 +294,7 @@ class VersionedTest extends SapphireTest
         $page1->Content = 'orig';
         $page1->write();
         $firstVersion = $page1->Version;
-        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
+        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         $this->assertEquals(
             $firstVersion,
             $page1->Version,
@@ -306,7 +306,7 @@ class VersionedTest extends SapphireTest
         $secondVersion = $page1->Version;
         $this->assertTrue($firstVersion < $secondVersion, 'write creates new version');
 
-        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, true);
+        $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
         /** @var VersionedTest\TestObject $thirdVersionObject */
         $thirdVersionObject = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID);
         $thirdVersion = $thirdVersionObject->Version;
@@ -896,10 +896,10 @@ class VersionedTest extends SapphireTest
     public function testAllVersionsOnUnsavedRecord()
     {
         $newPage = new VersionedTest\Subclass();
-        $this->assertCount(0, $newPage->allVersions(), 'No versions on unsaved record');
+        $this->assertCount(0, $newPage->Versions(), 'No versions on unsaved record');
 
         $singleton = VersionedTest\Subclass::singleton();
-        $this->assertCount(0, $singleton->allVersions(), 'No versions for singleton');
+        $this->assertCount(0, $singleton->Versions(), 'No versions for singleton');
     }
 
     public function testArchiveRelatedDataWithoutVersioned()
@@ -1065,7 +1065,7 @@ class VersionedTest extends SapphireTest
 
     public function testReadingNotPersistentWhenUseSessionFalse()
     {
-        Config::modify()->update(Versioned::class, 'use_session', false);
+        Config::modify()->set(Versioned::class, 'use_session', false);
 
         $session = new Session([]);
         $this->logInWithPermission('ADMIN');
@@ -1563,7 +1563,7 @@ class VersionedTest extends SapphireTest
         $record = new VersionedTest\TestObject();
         $record->write();
 
-        $versions = $record->VersionsList();
+        $versions = $record->Versions();
         $latestVersion = $versions->last();
 
         $author = $latestVersion->Author();
@@ -1578,7 +1578,7 @@ class VersionedTest extends SapphireTest
         $record->write();
         $record->publishRecursive();
 
-        $versions = $record->VersionsList();
+        $versions = Versioned::get_all_versions(get_class($record), $record->ID);
         $latestVersion = $versions->last();
 
         $publisher = $latestVersion->Publisher();
@@ -1613,7 +1613,7 @@ class VersionedTest extends SapphireTest
                 1 => 'First version',
                 2 => 'Second version original',
             ],
-            $record->VersionsList()->map('Version', 'Name')->toArray()
+            $record->Versions()->map('Version', 'Name')->toArray()
         );
 
 
@@ -1633,7 +1633,7 @@ class VersionedTest extends SapphireTest
 
         // ...however the versions list has the original value
         // Note that publication creates a new version
-        $versions = $record->VersionsList()->map('Version', 'Name')->toArray();
+        $versions = $record->Versions()->map('Version', 'Name')->toArray();
         $this->assertEquals(
             [
                 1 => 'First version',
@@ -1644,7 +1644,7 @@ class VersionedTest extends SapphireTest
         );
 
         // The second version has WasPublished = true
-        $versions = $record->VersionsList()->map('Version', 'WasPublished')->toArray();
+        $versions = $record->Versions()->map('Version', 'WasPublished')->toArray();
         $this->assertEquals(
             [
                 1 => 0,
@@ -1669,7 +1669,7 @@ class VersionedTest extends SapphireTest
         $record->doArchive();
 
         // ensure the version entries are correct
-        $versions = $record->VersionsList()->toArray();
+        $versions = Versioned::get_all_versions(get_class($record), $record->ID)->toArray();
         $this->assertCount(3, $versions, 'All versions should be retrieved');
 
         /** @var TestObject $createdVersion */

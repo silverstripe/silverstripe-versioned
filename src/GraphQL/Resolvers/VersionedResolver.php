@@ -83,8 +83,15 @@ class VersionedResolver
             }
 
             // Get all versions
-            return $object->VersionsList();
+            return self::getVersionsList($object);
         };
+    }
+
+    private static function getVersionsList(DataObject $object)
+    {
+        $id = $object->ID ?: $object->OldID;
+        $class = DataObject::getSchema()->baseDataClass($object);
+        return Versioned::get_all_versions($class, $id);
     }
 
     /**
