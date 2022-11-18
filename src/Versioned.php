@@ -2684,14 +2684,15 @@ SQL
     
     /**
      * write to draft and if a published version already exists and it is currently the same as draft then 
-     * publish it as well.
+     * publish the change as well.
      * 
      * This allows you to update pages and keep them in the same state (published / modified / draft) as before
      */
     public function writeAndPublishIfAppropriate(?bool $recursive = true, ?bool $forceInsert = false)
     {
         // check reading mode
-        ReadingMode::validateStage(Versioned::DRAFT);
+        $myStage = Versioned::get_stage();
+        Versioned::set_stage(Versioned::DRAFT);
         // is it on live and is live the same as draft
         $canBePublished = $this->owner->isPublished() && ! $this->owner->isModifiedOnDraft();
         $this->owner->writeToStage(Versioned::DRAFT, $forceInsert);
@@ -2702,6 +2703,7 @@ SQL
                 $this->owner->publishRecursive();
             }
         }    
+        Versioned::set_stage($myStage);
     }
 
     /**
