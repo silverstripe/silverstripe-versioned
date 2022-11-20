@@ -2698,9 +2698,10 @@ SQL
         $this->owner->writeToStage(Versioned::DRAFT, $forceInsert);
         if ($canBePublished) {
             if ($recursive) {
-                $this->owner->publishSingle();
-            } else {
                 $this->owner->publishRecursive();
+            } else {
+                $this->owner->publishSingle();
+                
             }
         }    
         Versioned::set_stage($myStage);
