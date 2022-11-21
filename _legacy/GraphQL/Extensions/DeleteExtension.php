@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\GraphQL\Extensions;
 
+use SilverStripe\Dev\Deprecation;
 use Exception;
 use SilverStripe\Core\Extension;
 use SilverStripe\GraphQL\Scaffolding\Scaffolders\CRUD\Delete;
@@ -18,7 +19,7 @@ if (!class_exists(Manager::class)) {
 /**
  * Extends the @see Delete CRUD scaffolder to unpublish any items first
  *
- * @deprecated 4.8..5.0 Use silverstripe/graphql:^4 functionality.
+ * @deprecated 1.8.0 Use the latest version of graphql instead
  */
 class DeleteExtension extends Extension
 {
@@ -30,6 +31,11 @@ class DeleteExtension extends Extension
      * @param array $context
      * @throws Exception
      */
+    public function __construct()
+    {
+        Deprecation::notice('1.8.0', 'Use the latest version of graphql instead', Deprecation::SCOPE_CLASS);
+    }
+
     public function augmentMutation(DataList $objects, $args, $context)
     {
         foreach ($objects as $object) {

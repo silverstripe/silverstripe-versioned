@@ -16,6 +16,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Dev\SapphireTest;
 use DateTime;
+use SilverStripe\Dev\State\FixtureTestState;
 
 /**
  * Tests ownership API of versioned DataObjects
@@ -46,7 +47,9 @@ class VersionedOwnershipTest extends SapphireTest
         Versioned::set_stage(Versioned::DRAFT);
 
         // Automatically publish any object named *_published
-        foreach ($this->getFixtureFactory()->getFixtures() as $class => $fixtures) {
+        /** @var FixtureTestState $state */
+        $state = static::$state->getStateByName('fixtures');
+        foreach ($state->getFixtureFactory(static::class)->getFixtures() as $class => $fixtures) {
             foreach ($fixtures as $name => $id) {
                 if (stripos($name ?? '', '_published') !== false) {
                     /** @var Versioned|DataObject $object */

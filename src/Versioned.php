@@ -364,13 +364,13 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
     /**
      * Get modified date for the given version
      *
-     * @deprecated 4.2..5.0 Use getLastEditedAndStageForVersion instead
+     * @deprecated 1.2.0 Use getLastEditedAndStageForVersion() instead
      * @param int $version
      * @return string
      */
     protected function getLastEditedForVersion($version)
     {
-        Deprecation::notice('5.0', 'Use getLastEditedAndStageForVersion instead');
+        Deprecation::notice('1.2.0', 'Use getLastEditedAndStageForVersion() instead');
         $result = $this->getLastEditedAndStageForVersion($version);
         if ($result) {
             return reset($result);
@@ -2035,36 +2035,6 @@ SQL
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
-        return $this->allVersions($filter, $sort, $limit, $join, $having);
-    }
-
-    /**
-     * NOTE: Versions() will be replaced with this method in SilverStripe 5.0
-     *
-     * @internal
-     * @deprecated 1.5.0 Will be removed in 2.0.0, use Versions() instead
-     * @return DataList
-     */
-    public function VersionsList()
-    {
-        $id = $this->owner->ID ?: $this->owner->OldID;
-        $class = DataObject::getSchema()->baseDataClass($this->owner);
-        return Versioned::get_all_versions($class, $id);
-    }
-
-    /**
-     * Return a list of all the versions available.
-     *
-     * @deprecated 1.5.0 Will be removed in 2.0.0, please use Versions() instead
-     * @param  string $filter
-     * @param  string $sort
-     * @param  string $limit
-     * @param  string $join @deprecated use leftJoin($table, $joinClause) instead
-     * @param  string $having @deprecated
-     * @return ArrayList
-     */
-    public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
-    {
         /** @var DataObject $owner */
         $owner = $this->owner;
 
@@ -2118,6 +2088,36 @@ SQL
 
         Versioned::set_reading_mode($oldMode);
         return $versions;
+    }
+
+    /**
+     * @internal
+     * @deprecated 1.5.0 Use allVersions() instead
+     * @return DataList
+     */
+    public function VersionsList()
+    {
+        Deprecation::notice('1.5.0', 'Use allVersions() instead');
+        $id = $this->owner->ID ?: $this->owner->OldID;
+        $class = DataObject::getSchema()->baseDataClass($this->owner);
+        return Versioned::get_all_versions($class, $id);
+    }
+
+    /**
+     * Return a list of all the versions available.
+     *
+     * @deprecated 1.5.0 Use Versions() instead
+     * @param  string $filter
+     * @param  string $sort
+     * @param  string $limit
+     * @param  string $join
+     * @param  string $having
+     * @return ArrayList
+     */
+    public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
+    {
+        Deprecation::notice('1.5.0', 'Use Versions() instead');
+        return $this->Versions($filter, $sort, $limit, $join, $having);
     }
 
     /**
