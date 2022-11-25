@@ -12,7 +12,6 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Resettable;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
@@ -359,23 +358,6 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
 
         // By stage
         return Versioned::get_by_stage($baseClass, $from)->byID($id);
-    }
-
-    /**
-     * Get modified date for the given version
-     *
-     * @deprecated 1.2.0 Use getLastEditedAndStageForVersion() instead
-     * @param int $version
-     * @return string
-     */
-    protected function getLastEditedForVersion($version)
-    {
-        Deprecation::notice('1.2.0', 'Use getLastEditedAndStageForVersion() instead');
-        $result = $this->getLastEditedAndStageForVersion($version);
-        if ($result) {
-            return reset($result);
-        }
-        return null;
     }
 
     /**
@@ -1954,18 +1936,11 @@ SQL
      * @param int|string|null $fromStage Place to copy from.  Can be either a stage name or a version number.
      * Null copies current object to stage
      * @param string $toStage Place to copy to.  Must be a stage name.
-     * @param bool $createNewVersion [DEPRECATED] This parameter is ignored, as copying to stage should always
-     * create a new version.
      */
-    public function copyVersionToStage($fromStage, $toStage, $createNewVersion = true)
+    public function copyVersionToStage($fromStage, $toStage)
     {
-        // Disallow $createNewVersion = false
-        if (!$createNewVersion) {
-            Deprecation::notice('5.0', 'copyVersionToStage no longer allows $createNewVersion to be false');
-            $createNewVersion = true;
-        }
         $owner = $this->owner;
-        $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage, $createNewVersion);
+        $owner->invokeWithExtensions('onBeforeVersionedPublish', $fromStage, $toStage);
 
         // Get at specific version
         $from = $this->getAtVersion($fromStage);
@@ -1975,7 +1950,7 @@ SQL
         }
 
         $from->writeToStage($toStage);
-        $owner->invokeWithExtensions('onAfterVersionedPublish', $fromStage, $toStage, $createNewVersion);
+        $owner->invokeWithExtensions('onAfterVersionedPublish', $fromStage, $toStage);
     }
 
     /**
@@ -2008,9 +1983,6 @@ SQL
      */
     public function stagesDiffer()
     {
-        if (func_num_args() > 0) {
-            Deprecation::notice('5.0', 'Versioned only has two stages and stagesDiffer no longer requires parameters');
-        }
         $id = $this->owner->ID ?: $this->owner->OldID;
         if (!$id || !$this->hasStages()) {
             return false;
@@ -2088,36 +2060,6 @@ SQL
 
         Versioned::set_reading_mode($oldMode);
         return $versions;
-    }
-
-    /**
-     * @internal
-     * @deprecated 1.5.0 Use allVersions() instead
-     * @return DataList
-     */
-    public function VersionsList()
-    {
-        Deprecation::notice('1.5.0', 'Use allVersions() instead');
-        $id = $this->owner->ID ?: $this->owner->OldID;
-        $class = DataObject::getSchema()->baseDataClass($this->owner);
-        return Versioned::get_all_versions($class, $id);
-    }
-
-    /**
-     * Return a list of all the versions available.
-     *
-     * @deprecated 1.5.0 Use Versions() instead
-     * @param  string $filter
-     * @param  string $sort
-     * @param  string $limit
-     * @param  string $join
-     * @param  string $having
-     * @return ArrayList
-     */
-    public function allVersions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
-    {
-        Deprecation::notice('1.5.0', 'Use Versions() instead');
-        return $this->Versions($filter, $sort, $limit, $join, $having);
     }
 
     /**
