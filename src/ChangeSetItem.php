@@ -304,16 +304,21 @@ class ChangeSetItem extends DataObject implements Thumbnail
             case static::CHANGE_CREATED: {
                 // Non-recursive publish
                 $object = $this->getObjectInStage(Versioned::DRAFT);
-                $object->publishSingle();
+                $member = Security::getCurrentUser();
 
-                // Point after version to the published version actually created, not the
-                // version copied from draft.
-                $this->VersionAfter = Versioned::get_versionnumber_by_stage(
-                    $this->ObjectClass,
-                    Versioned::LIVE,
-                    $this->ObjectID,
-                    false
-                );
+                // Check if object has canPublish set to true
+                if ($object->canPublish($member)) {
+                    $object->publishSingle();
+
+                    // Point after version to the published version actually created, not the
+                    // version copied from draft.
+                    $this->VersionAfter = Versioned::get_versionnumber_by_stage(
+                        $this->ObjectClass,
+                        Versioned::LIVE,
+                        $this->ObjectID,
+                        false
+                    );
+                }
                 break;
             }
             default:
@@ -524,8 +529,8 @@ class ChangeSetItem extends DataObject implements Thumbnail
             $live = $this->getObjectInStage(Versioned::LIVE);
             if ($live instanceof CMSPreviewable && $live->canView() && ($link = $live->PreviewLink())) {
                 $links[Versioned::LIVE] = [
-                'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
-                'type' => $live->getMimeType(),
+                    'href' => Controller::join_links($link, '?stage=' . Versioned::LIVE),
+                    'type' => $live->getMimeType(),
                 ];
             }
         }
