@@ -1986,7 +1986,7 @@ SQL
      * @param int|string|null $fromStage Place to copy from.  Can be either a stage name or a version number.
      * Null copies current object to stage
      * @param string $toStage Place to copy to.  Must be a stage name.
-     * @param bool $createNewVersion [DEPRECATED] This parameter is ignored, as copying to stage should always
+     * @param bool $createNewVersion @deprecated This parameter is ignored, as copying to stage should always
      * create a new version.
      */
     public function copyVersionToStage($fromStage, $toStage, $createNewVersion = true)
