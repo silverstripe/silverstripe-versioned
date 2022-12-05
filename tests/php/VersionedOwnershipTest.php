@@ -372,7 +372,7 @@ class VersionedOwnershipTest extends SapphireTest
 
         // Test that a changeset was created
         /** @var ChangeSet $changeset */
-        $changeset = ChangeSet::get()->sort('"ChangeSet"."ID" DESC')->first();
+        $changeset = ChangeSet::get()->orderBy('"ChangeSet"."ID" DESC')->first();
         $this->assertNotEmpty($changeset);
 
         // Test that this changeset is inferred
@@ -455,7 +455,7 @@ class VersionedOwnershipTest extends SapphireTest
 
         // Test that a changeset was created
         /** @var ChangeSet $changeset */
-        $changeset = ChangeSet::get()->sort('"ChangeSet"."ID" DESC')->first();
+        $changeset = ChangeSet::get()->orderBy('"ChangeSet"."ID" DESC')->first();
         $this->assertNotEmpty($changeset);
 
         // Test that this changeset is inferred

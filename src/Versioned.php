@@ -2874,11 +2874,14 @@ SQL
      */
     public static function get_including_deleted($class, $filter = "", $sort = "")
     {
-        $list = DataList::create($class)
-            ->where($filter)
-            ->sort($sort)
-            ->setDataQueryParam("Versioned.mode", "latest_versions");
-
+        $list = DataList::create($class);
+        if (!empty($filter)) {
+            $list = $list->where($filter);
+        }
+        if (!empty($sort)) {
+            $list = $list->orderBy($sort);
+        }
+        $list = $list->setDataQueryParam("Versioned.mode", "latest_versions");
         return $list;
     }
 
