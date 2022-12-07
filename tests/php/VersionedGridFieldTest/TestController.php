@@ -42,7 +42,7 @@ class TestController extends Controller implements TestOnly
     public function Form()
     {
         $objects = TestObject::get()
-            ->sort('"VersionedTest_DataObject"."ID" ASC');
+            ->orderBy('"VersionedTest_DataObject"."ID" ASC');
         $field = new GridField('testfield', 'testfield', $objects, GridFieldConfig_RelationEditor::create());
         return new Form($this, 'Form', new FieldList($field), new FieldList());
     }

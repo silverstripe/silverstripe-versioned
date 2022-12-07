@@ -219,11 +219,9 @@ class VersionedTest extends SapphireTest
     public function testGetIncludingDeleted()
     {
         // Get all ids of pages
-        $allPageIDs = DataObject::get(
-            VersionedTest\TestObject::class,
-            "\"ParentID\" = 0",
-            "\"VersionedTest_DataObject\".\"ID\" ASC"
-        )->column('ID');
+        $allPageIDs = DataObject::get(VersionedTest\TestObject::class)
+            ->where("\"ParentID\" = 0")
+            ->orderBy("\"VersionedTest_DataObject\".\"ID\" ASC")->column('ID');
 
         // Modify a page, ensuring that the Version ID and Record ID will differ,
         // and then subsequently delete it
@@ -234,11 +232,9 @@ class VersionedTest extends SapphireTest
         $targetPage->delete();
 
         // Get all items, ignoring deleted
-        $remainingPages = DataObject::get(
-            VersionedTest\TestObject::class,
-            "\"ParentID\" = 0",
-            "\"VersionedTest_DataObject\".\"ID\" ASC"
-        );
+        $remainingPages = DataObject::get(VersionedTest\TestObject::class)
+            ->where("\"ParentID\" = 0")
+            ->orderBy("\"VersionedTest_DataObject\".\"ID\" ASC");
         // Check that page 3 has gone
         $this->assertNotNull($remainingPages);
         $this->assertEquals(["Page 1", "Page 2", "Subclass Page 1"], $remainingPages->column('Title'));
