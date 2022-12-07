@@ -3,14 +3,12 @@
 
 namespace SilverStripe\Versioned\Dev;
 
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\Dev\TestSession;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\VersionedStateExtension;
 
 /**
  * Decorates TestSession object to update get / post requests with versioned querystring arguments.
- * Session vars assigned by FunctionalTest::useDraftSite are respected here.
  *
  * @property TestSession $owner
  */
@@ -42,8 +40,6 @@ class VersionedTestSessionExtension extends VersionedStateExtension
     }
 
     /**
-     * Get reading mode set by FunctionalTest::useDraftSite()
-     *
      * @return string
      */
     protected function getReadingmode()
