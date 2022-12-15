@@ -221,7 +221,19 @@ class VersionFilters
     protected function isValidDate($date)
     {
         $dt = DateTime::createFromFormat('Y-m-d', $date);
-
-        return ($dt !== false && !array_sum($dt->getLastErrors() ?? []));
+        if ($dt === false) {
+            return false;
+        }
+        // DateTime::getLastErrors() has an undocumented difference pre PHP 8.2 for what's returned
+        // if there are no errors
+        // https://www.php.net/manual/en/datetime.getlasterrors.php
+        $errors = $dt->getLastErrors();
+        // PHP 8.2 - will return false if no errors
+        if ($errors === false) {
+            return true;
+        }
+        // PHP 8.2+ will only return an array containing a count of errors only if there are errors
+        // PHP < 8.2 will always return an array containing a count of errors even if there are no errors
+        return array_sum($errors) === 0;
     }
 }
