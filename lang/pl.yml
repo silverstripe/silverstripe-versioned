@@ -66,6 +66,10 @@ pl:
     MODIFIED: Zmodyfikowano
     Published: 'Opublikowano {name} {link}'
     Unpublished: 'Cofnięto publikację {name} {title}'
+    BUTTONPUBLISHED: Opublikowane
+    BUTTONSAVED: Zapisane
+    BUTTONSAVEPUBLISH: Publikuj
+    MoreOptions: 'Więcej opcji'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Rekord nie został jeszcze opublikowany'
     ADDEDTODRAFTSHORT: Szkic
