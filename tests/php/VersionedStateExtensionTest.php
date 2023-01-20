@@ -20,7 +20,7 @@ class VersionedStateExtensionTest extends SapphireTest
         Versioned::set_stage(Versioned::DRAFT);
         $controller = new VersionedStateExtensionTest\TestController();
         $link = $controller->Link('?some=var');
-        $this->assertEquals('my_controller/?some=var&stage=' . Versioned::DRAFT, $link);
+        $this->assertEquals('my_controller?some=var&stage=' . Versioned::DRAFT, $link);
     }
 
     public function testUpdateLinkAddsStageParamsOnlyOnceInDraftMode()
@@ -28,7 +28,7 @@ class VersionedStateExtensionTest extends SapphireTest
         Versioned::set_stage(Versioned::DRAFT);
         $controller = new VersionedStateExtensionTest\TestController();
         $link = $controller->Link('?some=var&stage=' . Versioned::LIVE);
-        $this->assertEquals('my_controller/?some=var&stage=' . Versioned::LIVE, $link);
+        $this->assertEquals('my_controller?some=var&stage=' . Versioned::LIVE, $link);
     }
 
     public function testUpdateLinkDoesNotAddStageParamsInLiveMode()
@@ -36,7 +36,7 @@ class VersionedStateExtensionTest extends SapphireTest
         Versioned::set_stage(Versioned::LIVE);
         $controller = new VersionedStateExtensionTest\TestController();
         $link = $controller->Link('?some=var');
-        $this->assertEquals('my_controller/?some=var', $link);
+        $this->assertEquals('my_controller?some=var', $link);
     }
 
     public function testUpdateLinkRespectsQueryArgs()
@@ -47,20 +47,20 @@ class VersionedStateExtensionTest extends SapphireTest
         $obj2 = new VersionedStateExtensionTest\LinkableObject();
         $obj2->URLSegment = 'helloworld';
         $obj2->write();
-        $this->assertEquals('item/helloworld/?stage=Stage', $obj2->Link());
+        $this->assertEquals('item/helloworld?stage=Stage', $obj2->Link());
 
         // Objects selected in stage also have stage=Stage link
         $obj1ID = $this->idFromFixture(VersionedStateExtensionTest\LinkableObject::class, 'object1');
         /** @var VersionedStateExtensionTest\LinkableObject $obj1 */
         $obj1 = VersionedStateExtensionTest\LinkableObject::get()->byID($obj1ID);
-        $this->assertEquals('item/myobject/?stage=Stage', $obj1->Link());
+        $this->assertEquals('item/myobject?stage=Stage', $obj1->Link());
 
         // Selecting live-specific version of this object should NOT have stage=Stage querystring
         // This is intentional so we can create cross-stage links
         /** @var VersionedStateExtensionTest\LinkableObject $obj1Live */
         $obj1Live = Versioned::get_by_stage(VersionedStateExtensionTest\LinkableObject::class, Versioned::LIVE)
             ->byID($obj1ID);
-        $this->assertEquals('item/myobject/', $obj1Live->Link());
+        $this->assertEquals('item/myobject', $obj1Live->Link());
     }
 
     public function testDontUpdateLeftAndMainLinks()
