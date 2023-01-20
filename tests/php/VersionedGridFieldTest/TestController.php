@@ -11,9 +11,6 @@ use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use SilverStripe\Versioned\Versioned;
 
-/**
- * @skipUpgrade
- */
 class TestController extends Controller implements TestOnly
 {
     protected function init()
