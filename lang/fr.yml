@@ -4,14 +4,17 @@ fr:
     ITEMS_CHANGES:
       one: '{total} (1 modification)'
       other: '{total} ({count} modifications)'
+      many: '{total} ({count} modifications)'
     ITEMS_TOTAL:
       one: '1 au total'
       other: '{count} au total'
+      many: '{count} au total'
     NAME: Nom
     PLURALNAME: Campagnes
     PLURALS:
       one: 'Une campagne'
       other: '{count} Campagnes'
+      many: '{count} Campagnes'
     PUBLISHED_DATE_BY: '{date} par {name}'
     PUBLISHED_TODAY: 'Aujourd''hui {time}'
     PUBLISHED_TODAY_BY: 'Aujourd''hui {time} par {name}'
