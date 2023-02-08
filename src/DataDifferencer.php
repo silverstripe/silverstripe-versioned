@@ -8,7 +8,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\View\ArrayData;
-use SilverStripe\View\Parsers\Diff;
+use SilverStripe\View\Parsers\HtmlDiff;
 use SilverStripe\View\ViewableData;
 
 /**
@@ -128,7 +128,7 @@ class DataDifferencer extends ViewableData
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
-                $diffed->setField($field, DBField::create_field('HTMLFragment', Diff::compareHTML($fromValue, $toValue)));
+                $diffed->setField($field, DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromValue, $toValue)));
             }
         }
 
@@ -166,7 +166,7 @@ class DataDifferencer extends ViewableData
                 // Set the field.
                 $diffed->setField(
                     $setField,
-                    DBField::create_field('HTMLFragment', Diff::compareHTML($fromTitle, $toTitle))
+                    DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromTitle, $toTitle))
                 );
             }
         }
@@ -215,7 +215,7 @@ class DataDifferencer extends ViewableData
             // Only show HTML diffs for fields which allow HTML values in the first place
             $fieldObj = $this->toRecord->dbObject($field);
             if ($this->fromRecord) {
-                $fieldDiff = Diff::compareHTML(
+                $fieldDiff = HtmlDiff::compareHtml(
                     $this->fromRecord->$field,
                     $this->toRecord->$field,
                     (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml')

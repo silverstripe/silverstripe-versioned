@@ -75,7 +75,7 @@ class DataDifferencerTest extends SapphireTest
         $obj1Diff = $differ->diffedData();
         // TODO Using getter would split up field again, bug only caused by simulating
         // an array-based value in the first place.
-        $this->assertContainsIgnoreWhitespace('<ins>a</ins><del>a,b</del>', $obj1Diff->getField('Choices'));
+        $this->assertContainsIgnoreWhitespace('<del>a,b</del><ins>a</ins>', $obj1Diff->getField('Choices'));
     }
 
     public function testCast()
@@ -106,7 +106,7 @@ class DataDifferencerTest extends SapphireTest
         $differ = new DataDifferencer($obj1v1, $obj1v3);
         $obj1Diff = $differ->diffedData();
         $this->assertContainsIgnoreWhitespace(
-            '<ins>&lt;strong&gt;Value&lt;/strong&gt;</ins>  <del>a,b</del>',
+            '<del>a,b</del>  <ins>&lt;strong&gt;Value&lt;/strong&gt;</ins>',
             $obj1Diff->getField('Choices')
         );
     }
@@ -141,7 +141,7 @@ class DataDifferencerTest extends SapphireTest
         /** @skipUpgrade */
         $this->assertContainsIgnoreWhitespace($image2->Name, $obj1Diff->getField('Image'));
         $this->assertContainsIgnoreWhitespace(
-            '<ins>obj2</ins>  <del>obj1</del>',
+            '<del>obj1</del>  <ins>obj2</ins>',
             $obj1Diff->getField('HasOneRelationID')
         );
     }
