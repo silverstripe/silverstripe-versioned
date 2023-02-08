@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
@@ -128,7 +129,10 @@ class DataDifferencer extends ViewableData
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
-                $diffed->setField($field, DBField::create_field('HTMLFragment', Diff::compareHTML($fromValue, $toValue)));
+                $diffValue = Deprecation::withNoReplacement(function () use ($fromValue, $toValue) {
+                    return Diff::compareHTML($fromValue, $toValue);
+                });
+                $diffed->setField($field, DBField::create_field('HTMLFragment', $diffValue));
             }
         }
 
@@ -163,10 +167,13 @@ class DataDifferencer extends ViewableData
                     $fromTitle = $this->getObjectDisplay($relObjFrom);
                 }
 
+                $diffTitle = Deprecation::withNoReplacement(function () use ($fromTitle, $toTitle) {
+                    return Diff::compareHTML($fromTitle, $toTitle);
+                });
                 // Set the field.
                 $diffed->setField(
                     $setField,
-                    DBField::create_field('HTMLFragment', Diff::compareHTML($fromTitle, $toTitle))
+                    DBField::create_field('HTMLFragment', $diffTitle)
                 );
             }
         }
@@ -215,11 +222,16 @@ class DataDifferencer extends ViewableData
             // Only show HTML diffs for fields which allow HTML values in the first place
             $fieldObj = $this->toRecord->dbObject($field);
             if ($this->fromRecord) {
-                $fieldDiff = Diff::compareHTML(
-                    $this->fromRecord->$field,
-                    $this->toRecord->$field,
-                    (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml')
-                );
+                $fromField = $this->fromRecord->$field;
+                $toField = $this->toRecord->$field;
+                $escapeHtml = (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml');
+                $fieldDiff = Deprecation::withNoReplacement(function () use ($fromField, $toField, $escapeHtml) {
+                    Diff::compareHTML(
+                        $fromField,
+                        $toField,
+                        $escapeHtml
+                    );
+                });
             } else {
                 if ($fieldObj && $fieldObj->config()->get('escape_type') == 'xml') {
                     $fieldDiff = "<ins>" . $this->toRecord->$field . "</ins>";
