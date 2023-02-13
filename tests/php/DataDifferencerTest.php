@@ -10,9 +10,6 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\DataDifferencer;
 use SilverStripe\Versioned\Versioned;
 
-/**
- * @skipUpgrade
- */
 class DataDifferencerTest extends SapphireTest
 {
     protected static $fixture_file = 'DataDifferencerTest.yml';
@@ -136,9 +133,7 @@ class DataDifferencerTest extends SapphireTest
         $differ = new DataDifferencer($obj1v1, $obj1v2);
         $obj1Diff = $differ->diffedData();
 
-        /** @skipUpgrade */
         $this->assertContainsIgnoreWhitespace($image1->Name, $obj1Diff->getField('Image'));
-        /** @skipUpgrade */
         $this->assertContainsIgnoreWhitespace($image2->Name, $obj1Diff->getField('Image'));
         $this->assertContainsIgnoreWhitespace(
             '<del>obj1</del>  <ins>obj2</ins>',
