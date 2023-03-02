@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
@@ -128,7 +129,7 @@ class DataDifferencer extends ViewableData
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
-                $diffed->setField($field, DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromValue, $toValue)));
+                $diffed->setField($field, DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromValue ?? '', $toValue ?? '')));
             }
         }
 
@@ -163,10 +164,13 @@ class DataDifferencer extends ViewableData
                     $fromTitle = $this->getObjectDisplay($relObjFrom);
                 }
 
+                $diffTitle = Deprecation::withNoReplacement(function () use ($fromTitle, $toTitle) {
+                    return Diff::compareHTML($fromTitle, $toTitle);
+                });
                 // Set the field.
                 $diffed->setField(
                     $setField,
-                    DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromTitle, $toTitle))
+                    DBField::create_field('HTMLFragment', HtmlDiff::compareHtml($fromTitle ?? '', $toTitle ?? ''))
                 );
             }
         }
@@ -216,8 +220,8 @@ class DataDifferencer extends ViewableData
             $fieldObj = $this->toRecord->dbObject($field);
             if ($this->fromRecord) {
                 $fieldDiff = HtmlDiff::compareHtml(
-                    $this->fromRecord->$field,
-                    $this->toRecord->$field,
+                    $this->fromRecord->$field ?? '',
+                    $this->toRecord->$field ?? '',
                     (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml')
                 );
             } else {
