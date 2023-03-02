@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
@@ -163,6 +164,9 @@ class DataDifferencer extends ViewableData
                     $fromTitle = $this->getObjectDisplay($relObjFrom);
                 }
 
+                $diffTitle = Deprecation::withNoReplacement(function () use ($fromTitle, $toTitle) {
+                    return Diff::compareHTML($fromTitle, $toTitle);
+                });
                 // Set the field.
                 $diffed->setField(
                     $setField,
