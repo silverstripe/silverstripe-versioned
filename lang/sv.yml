@@ -30,5 +30,21 @@ sv:
     BUTTONUNPUBLISHDESC: 'Ta bort detta object från den publicerade webbplatsen'
     Published: 'Publicerade {name} {link}'
     Unpublished: 'Avpublicerade {name} {title}'
+    BUTTONAPPLYCHANGES: 'Applicera ändringar'
+    BUTTONPUBLISHED: Publicerad
+    BUTTONSAVEPUBLISH: Publicera
+    DRAFT: Utkast
+    MODIFIED: Ändrad
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Du måste logga in med ditt CMS-lösenord för att se utkast eller arkiverat innehåll. <a href="{link}">Klicka här för att gå tillbaka till den publicerade webbplatsen.</a>'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arkiv
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Skapad genom publicering av ''{title}'' {created}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Objektet har inte publicerats ännu'
+    ADDEDTODRAFTSHORT: Utkast
+    ARCHIVEDPAGESHORT: Arkiverad
+    MODIFIEDONDRAFTHELP: 'Objektet har opublicerade ändringar'
+    MODIFIEDONDRAFTSHORT: Ändrad
+    ONLIVEONLYSHORTHELP: 'Objektet är publicerat, men har raderats från utkast'

@@ -19,5 +19,9 @@ hr:
     BUTTONARCHIVEDESC: 'Poništi objavljivanje i pošalji u arhivu'
     BUTTONUNPUBLISH: 'Poništi objavljivanje'
     BUTTONUNPUBLISHDESC: 'Ukloni ovaj zapis s objavljene strancie'
+    BUTTONPUBLISHED: Objavljen
+    BUTTONSAVEPUBLISH: Objavi
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Morate se prijaviti s vašom CMS lozinkom kako bi ste vidjeti neobjavljeni ili arhivirani sadržaj. <a href="{link}">Kliknite ovdje da se vratite na objavljenu stranicu.</a>'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arhiviraj
