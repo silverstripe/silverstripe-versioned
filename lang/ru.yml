@@ -24,5 +24,10 @@ ru:
     BUTTONUNPUBLISH: 'Отменить публикацию'
     BUTTONUNPUBLISHDESC: 'Удалить эту запись с сайта'
     Published: 'Опубликовано {name} {link}'
+    BUTTONSAVEPUBLISH: Опубликовать
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Вы должны войти в систему с помощью вашего пароля чтобы иметь возможность просматривать черновые или архивные страницы. Нажмите чтобы вернуться на опубликованный сайт.'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Архив
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Сгенерировано автоматически при публикации ''{title}'' в {created}'

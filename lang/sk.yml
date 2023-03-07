@@ -14,3 +14,10 @@ sk:
     BUTTONUNPUBLISH: Nezverejniť
     BUTTONUNPUBLISHDESC: 'Odstrániť tento záznam zo zverejneného webu'
     Published: 'Zverejnené {name} {link}'
+    BUTTONSAVEPUBLISH: Zverejniť
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Archív
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Generované vydavetaľom ''{title}'' v {created}'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte sa prihlásiť s vašim CMS heslom pre náhľad koncepu alebo archivovaného obsahu. <a href="{link}">Kliknite tu pre návrat do zverejneného webu.</a>'

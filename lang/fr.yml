@@ -58,5 +58,9 @@ fr:
     ADDEDTODRAFTSHORT: Brouillon
     ARCHIVEDPAGESHORT: Archivé
     MODIFIEDONDRAFTSHORT: Modifié
+    ADDEDTODRAFTHELP: 'L''élément n''a pas encore été publié'
+    ARCHIVEDPAGEHELP: 'L''élément est retiré des brouillons et en ligne'
+    MODIFIEDONDRAFTHELP: 'L''élément a des changements non publiés'
+    ONLIVEONLYSHORTHELP: 'L''élément est publié, mais a été effacé des brouillons'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Vous devez vous identifier avec votre mot de passe CMS pour voir le contenu brouillon ou archivé. <a href="{link}">Cliquez ici pour revenir au site publié.</a>'
