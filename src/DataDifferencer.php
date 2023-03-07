@@ -164,9 +164,6 @@ class DataDifferencer extends ViewableData
                     $fromTitle = $this->getObjectDisplay($relObjFrom);
                 }
 
-                $diffTitle = Deprecation::withNoReplacement(function () use ($fromTitle, $toTitle) {
-                    return Diff::compareHTML($fromTitle, $toTitle);
-                });
                 // Set the field.
                 $diffed->setField(
                     $setField,

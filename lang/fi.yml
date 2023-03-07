@@ -58,6 +58,8 @@ fi:
     MODIFIED: Muokattu
     Published: 'Julkaistiin {name} {link}'
     Unpublished: 'Poistettiin julkaisusta {name} {title}'
+    BUTTONPUBLISHED: Julkaistu
+    BUTTONSAVEPUBLISH: Julkaise
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Kohdetta ei ole julkaistu vielä'
     ADDEDTODRAFTSHORT: Vedos

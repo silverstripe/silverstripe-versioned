@@ -37,5 +37,23 @@ da:
     BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
     Published: 'Udgiv {name} {link}'
     Unpublished: 'Fjern udgivelse af {name} {title}'
+    BUTTONAPPLYCHANGES: 'Anvend ændringer'
+    BUTTONPUBLISHED: Udgivet
+    BUTTONSAVEPUBLISH: Udgiv
+    DRAFT: Kladde
+    MODIFIED: Modificeret
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Du skal logge ind med din CMS adgangskode for at se kladde og arkiv versioner af dit indhold. <a href="{link}">Klik her for at vende tilbage til det udgivne site.</a>'
+  SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Arkiver
+  SilverStripe\Versioned\RecursivePublishable:
+    INFERRED_TITLE: 'Genereret ved udgivelse af ''{title}'' den {created}'
+  SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
+    ADDEDTODRAFTHELP: 'Elementet er endnu ikke blevet udgivet'
+    ADDEDTODRAFTSHORT: Kladde
+    ARCHIVEDPAGEHELP: 'Elementet er fjernet fra kladde og udgivet'
+    ARCHIVEDPAGESHORT: Arkiverede
+    MODIFIEDONDRAFTHELP: 'Elementet har ændringer der ikke er udgivet'
+    MODIFIEDONDRAFTSHORT: Modificeret
+    ONLIVEONLYSHORT: 'Kun på udgivet'
+    ONLIVEONLYSHORTHELP: 'Elementet er udgivet, men er slettet fra kladden'
