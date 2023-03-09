@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "silverstripe/framework": "^4.10",
+        "silverstripe/framework": "4.13.x-dev",
         "symfony/cache": "^3.4 || ^4",
         "silverstripe/vendor-plugin": "^1"
     },
@@ -31,7 +31,10 @@
     },
     "autoload": {
         "psr-4": {
-            "SilverStripe\\Versioned\\": ["src/", "_legacy/"],
+            "SilverStripe\\Versioned\\": [
+                "src/",
+                "_legacy/"
+            ],
             "SilverStripe\\Versioned\\Tests\\": "tests/php/"
         }
     },
