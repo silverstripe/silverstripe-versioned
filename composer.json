@@ -20,7 +20,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "silverstripe/framework": "4.13.0-beta1",
+        "silverstripe/framework": "4.13.x-dev",
         "symfony/cache": "^3.4 || ^4",
         "silverstripe/vendor-plugin": "^1"
     },
