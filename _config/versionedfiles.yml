@@ -3,4 +3,4 @@ Name: versionedfiles
 ---
 SilverStripe\Assets\File:
   extensions:
-    - SilverStripe\Versioned\Versioned
+    Versioned: SilverStripe\Versioned\Versioned
