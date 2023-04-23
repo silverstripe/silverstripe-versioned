@@ -43,7 +43,7 @@ class VersionedResolver
             case 'publisher':
                 return $obj->Publisher();
             case 'published':
-                return $obj->isPublished();
+                return $obj->WasPublished;
             case 'draft':
                 return $obj->WasDraft;
             case 'deleted':
