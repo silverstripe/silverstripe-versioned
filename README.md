@@ -9,15 +9,13 @@ Enables versioning of DataObjects.
 
 ## Installation
 
+```sh
+composer require silverstripe/versioned
 ```
-$ composer require silverstripe/versioned
-```
-
-You'll also need to run `dev/build`.
 
 ## Documentation
 
-See [doc.silverstripe.org](http://doc.silverstripe.org)
+See [docs.silverstripe.org](https://docs.silverstripe.org)
 
 ## Versioning
 
