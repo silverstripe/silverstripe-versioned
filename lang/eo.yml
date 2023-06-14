@@ -22,6 +22,9 @@ eo:
     STATE_OPEN: Aktiva
     STATE_PUBLISHED: Publikigita
     STATE_REVERTED: Malfarita
+    db_Name: Nomo
+    db_PublishDate: 'Dato de publikigo'
+    db_State: Ŝtato
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Ŝangi agordojn'
     PLURALS:

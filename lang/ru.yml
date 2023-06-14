@@ -9,6 +9,8 @@ ru:
       other: '{count} кампаний'
     SINGULARNAME: Кампания
     STATE: Состояние
+    db_Name: Имя
+    db_State: Состояние
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Объекты набора изменений'
     PLURALS:
