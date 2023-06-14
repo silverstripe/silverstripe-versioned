@@ -28,6 +28,9 @@ pl:
     STATE_OPEN: Aktywny
     STATE_PUBLISHED: Opublikowano
     STATE_REVERTED: Przywrócono
+    db_Name: Nazwa
+    db_PublishDate: 'Data publikacji'
+    db_State: Stan
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Zmień ustawione elementy'
     PLURALS:

@@ -25,6 +25,9 @@ it:
     STATE_OPEN: Attiva
     STATE_PUBLISHED: Pubblicata
     STATE_REVERTED: Ripristinata
+    db_Name: Nome
+    db_PublishDate: 'Data pubblicazione'
+    db_State: Stato
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Elementi del Gruppo Modifiche'
     PLURALS:

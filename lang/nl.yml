@@ -22,6 +22,9 @@ nl:
     STATE_OPEN: Actief
     STATE_PUBLISHED: Gepubliceerd
     STATE_REVERTED: Teruggedraaid
+    db_Name: Naam
+    db_PublishDate: Publicatiedatum
+    db_State: Status
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Lijst van wijzigingen'
     PLURALS:

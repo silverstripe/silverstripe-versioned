@@ -25,6 +25,9 @@ fr:
     STATE_OPEN: Active
     STATE_PUBLISHED: Publié
     STATE_REVERTED: Revenu
+    db_Name: Nom
+    db_PublishDate: 'Date de publication'
+    db_State: Statut
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archive
     Delete: Effacer
