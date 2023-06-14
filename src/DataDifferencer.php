@@ -226,7 +226,7 @@ class DataDifferencer extends ViewableData
                 $toField = $this->toRecord->$field;
                 $escapeHtml = (!$fieldObj || $fieldObj->config()->get('escape_type') != 'xml');
                 $fieldDiff = Deprecation::withNoReplacement(function () use ($fromField, $toField, $escapeHtml) {
-                    Diff::compareHTML(
+                    return Diff::compareHTML(
                         $fromField,
                         $toField,
                         $escapeHtml
