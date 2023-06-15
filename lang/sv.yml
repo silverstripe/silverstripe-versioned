@@ -21,6 +21,9 @@ sv:
     STATE: Status
     STATE_OPEN: Aktiv
     STATE_PUBLISHED: Publicerad
+    db_Name: Namn
+    db_PublishDate: Publiceringsdatum
+    db_State: Status
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:

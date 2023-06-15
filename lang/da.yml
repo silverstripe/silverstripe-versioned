@@ -22,6 +22,9 @@ da:
     STATE_OPEN: Aktiv
     STATE_PUBLISHED: Udgivet
     STATE_REVERTED: Gendannet
+    db_Name: Navn
+    db_PublishDate: 'Udgivelses dato'
+    db_State: Tilstand
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Change Set Items'
     PLURALS:
