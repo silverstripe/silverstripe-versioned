@@ -10,6 +10,9 @@ hr:
     STATE_OPEN: Aktivan
     STATE_PUBLISHED: Objavljen
     STATE_REVERTED: Poništeno
+    db_Name: Naziv
+    db_PublishDate: 'Datum objave'
+    db_State: Stanje
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Promjena postavki stavki'
     SINGULARNAME: 'Promjena postavki stavke'

@@ -22,12 +22,28 @@ en:
     STATE_OPEN: Active
     STATE_PUBLISHED: Published
     STATE_REVERTED: Reverted
+    db_Description: Description
+    db_IsInferred: 'Is inferred'
+    db_LastSynced: 'Last synced'
+    db_Name: Name
+    db_PublishDate: 'Publish date'
+    db_State: State
+    has_many_Changes: Changes
+    has_one_Owner: Owner
+    has_one_Publisher: Publisher
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Change Set Items'
     PLURALS:
       one: 'A Change Set Item'
       other: '{count} Change Set Items'
     SINGULARNAME: 'Change Set Item'
+    belongs_many_many_References: References
+    db_Added: Added
+    db_VersionAfter: 'Version after'
+    db_VersionBefore: 'Version before'
+    has_one_ChangeSet: 'Change set'
+    has_one_Object: Object
+    many_many_ReferencedBy: 'Referenced by'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archive
     ArchivePermissionsFailure: 'No archive permissions'
@@ -48,6 +64,7 @@ en:
     RESTORE_TO_ROOT_DESC: 'Restore the archived version to draft as a top level item'
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versions
+    db_Version: Version
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Archived {name} {title}'
     BUTTONAPPLYCHANGES: 'Apply changes'

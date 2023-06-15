@@ -22,6 +22,9 @@ fi:
     STATE_OPEN: Aktiivinen
     STATE_PUBLISHED: Julkaistu
     STATE_REVERTED: Palautettu
+    db_Name: Nimi
+    db_PublishDate: Julkaisupäivä
+    db_State: Tila
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Muuta valikoiman kohteita'
     PLURALS:
