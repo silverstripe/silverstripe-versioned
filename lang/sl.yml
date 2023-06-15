@@ -28,6 +28,9 @@ sl:
     STATE_OPEN: Aktivno
     STATE_PUBLISHED: Objavljeno
     STATE_REVERTED: Povrnjeno
+    db_Name: Naziv
+    db_PublishDate: 'Datum objave'
+    db_State: Stanje
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Nizi sprememb'
     PLURALS:

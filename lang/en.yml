@@ -65,6 +65,7 @@ en:
   SilverStripe\Versioned\Versioned:
     db_Version: Version
     has_many_Versions: Versions
+    db_Version: Version
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Archived {name} {title}'
     BUTTONAPPLYCHANGES: 'Apply changes'

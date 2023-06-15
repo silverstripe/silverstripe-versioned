@@ -4,6 +4,8 @@ cs:
     PLURALNAME: Kampaně
     SINGULARNAME: Kampaň
     STATE: Stav
+    db_Name: Název
+    db_State: Stav
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Změnit nastavení položek '
     SINGULARNAME: 'Změnit nastevení položky'
