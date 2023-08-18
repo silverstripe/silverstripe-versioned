@@ -9,17 +9,17 @@ sk:
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Zmeniť nastavenie položiek'
     SINGULARNAME: 'Zmeniť nastavenie položky'
-  SilverStripe\Versioned\Versioned:
-    has_many_Versions: Verzie
-  SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    BUTTONARCHIVEDESC: 'Nezverejniť a poslať do archívu'
-    BUTTONUNPUBLISH: Nezverejniť
-    BUTTONUNPUBLISHDESC: 'Odstrániť tento záznam zo zverejneného webu'
-    Published: 'Zverejnené {name} {link}'
-    BUTTONSAVEPUBLISH: Zverejniť
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archív
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: 'Generované vydavetaľom ''{title}'' v {created}'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Verzie
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    BUTTONARCHIVEDESC: 'Nezverejniť a poslať do archívu'
+    BUTTONSAVEPUBLISH: Zverejniť
+    BUTTONUNPUBLISH: Nezverejniť
+    BUTTONUNPUBLISHDESC: 'Odstrániť tento záznam zo zverejneného webu'
+    Published: 'Zverejnené {name} {link}'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Musíte sa prihlásiť s vašim CMS heslom pre náhľad koncepu alebo archivovaného obsahu. <a href="{link}">Kliknite tu pre návrat do zverejneného webu.</a>'
