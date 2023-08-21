@@ -2,22 +2,22 @@ sl:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Prazno
     ITEMS_CHANGES:
-      one: '{total} (1 sprememba)'
-      two: '{total} ({count} spremembi)'
       few: '{total} ({count} sprememb)'
+      one: '{total} (1 sprememba)'
       other: '{total} ({count} sprememb)'
+      two: '{total} ({count} spremembi)'
     ITEMS_TOTAL:
-      one: '1 skupaj'
-      two: '{count} skupaj'
       few: '{count} skupaj'
+      one: '1 skupaj'
       other: '{count} skupaj'
+      two: '{count} skupaj'
     NAME: Naziv
     PLURALNAME: Kampanje
     PLURALS:
-      one: Kampanja
-      two: '{count} kampanji'
       few: '{count} kampanj'
+      one: Kampanja
       other: '{count} kampanj'
+      two: '{count} kampanji'
     PUBLISHED_DATE_BY: 'Objavil {name}, {date}'
     PUBLISHED_TODAY: 'Danes {time}'
     PUBLISHED_TODAY_BY: 'Objavil {name} danes, {time}'
@@ -34,10 +34,10 @@ sl:
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Nizi sprememb'
     PLURALS:
-      one: 'Niz sprememb'
-      two: '{count} niza sprememb'
       few: '{count} nizov sprememb'
+      one: 'Niz sprememb'
       other: '{count} nizov sprememb'
+      two: '{count} niza sprememb'
     SINGULARNAME: 'Preoblikuj niz sprememb'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arhiviraj

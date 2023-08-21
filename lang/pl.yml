@@ -2,21 +2,21 @@ pl:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Pusty
     ITEMS_CHANGES:
-      one: '{total} (zmiana)'
       few: '{total} ({count} zmian)'
       many: '{total} ({count} zmian)'
+      one: '{total} (zmiana)'
       other: '{total} ({count} zmian)'
     ITEMS_TOTAL:
-      one: '1 ogólem'
       few: '{count} ogólem'
       many: '{count} ogólem'
+      one: '1 ogólem'
       other: '{count} ogólem'
     NAME: Nazwa
     PLURALNAME: Kampanie
     PLURALS:
-      one: Kampania
       few: Kampanie
       many: 'Kampanii {count} '
+      one: Kampania
       other: 'Kampanii {count} '
     PUBLISHED_DATE_BY: '{date} przez {name}'
     PUBLISHED_TODAY: 'Dzisiaj {time}'
@@ -34,9 +34,9 @@ pl:
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Zmień ustawione elementy'
     PLURALS:
-      one: 'Zmień element'
       few: 'Zmień elementy'
       many: 'Zmień elementy {count}'
+      one: 'Zmień element'
       other: 'Zmień ustawione elementy {count}'
     SINGULARNAME: 'Zmień ustawione elementy'
   SilverStripe\Versioned\GridFieldArchiveAction:
@@ -63,16 +63,16 @@ pl:
     Archived: 'Zarchiwizowano {name} {title}'
     BUTTONAPPLYCHANGES: 'Zastosowano zmiany'
     BUTTONARCHIVEDESC: 'Cofnij publikację i wyślij do archiwum'
+    BUTTONPUBLISHED: Opublikowane
+    BUTTONSAVED: Zapisane
+    BUTTONSAVEPUBLISH: Publikuj
     BUTTONUNPUBLISH: 'Cofnij publikację'
     BUTTONUNPUBLISHDESC: 'Usuń rekord z opublikowanych stron'
     DRAFT: Szkic
     MODIFIED: Zmodyfikowano
+    MoreOptions: 'Więcej opcji'
     Published: 'Opublikowano {name} {link}'
     Unpublished: 'Cofnięto publikację {name} {title}'
-    BUTTONPUBLISHED: Opublikowane
-    BUTTONSAVED: Zapisane
-    BUTTONSAVEPUBLISH: Publikuj
-    MoreOptions: 'Więcej opcji'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Rekord nie został jeszcze opublikowany'
     ADDEDTODRAFTSHORT: Szkic

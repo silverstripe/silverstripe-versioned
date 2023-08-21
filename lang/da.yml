@@ -31,26 +31,24 @@ da:
       one: 'A Change Set Item'
       other: '{count} Change Set Items'
     SINGULARNAME: 'Change Set Item'
-  SilverStripe\Versioned\Versioned:
-    has_many_Versions: Versioner
-  SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    Archived: 'Arkiverede {name} {title}'
-    BUTTONARCHIVEDESC: 'Fjern udgivelse og læg i arkiv'
-    BUTTONUNPUBLISH: 'Fjern udgivelse'
-    BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
-    Published: 'Udgiv {name} {link}'
-    Unpublished: 'Fjern udgivelse af {name} {title}'
-    BUTTONAPPLYCHANGES: 'Anvend ændringer'
-    BUTTONPUBLISHED: Udgivet
-    BUTTONSAVEPUBLISH: Udgiv
-    DRAFT: Kladde
-    MODIFIED: Modificeret
-  SilverStripe\Versioned\VersionedHTTPMiddleware:
-    DRAFT_SITE_ACCESS_RESTRICTION: 'Du skal logge ind med din CMS adgangskode for at se kladde og arkiv versioner af dit indhold. <a href="{link}">Klik her for at vende tilbage til det udgivne site.</a>'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arkiver
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: 'Genereret ved udgivelse af ''{title}'' den {created}'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Versioner
+  SilverStripe\Versioned\VersionedGridFieldItemRequest:
+    Archived: 'Arkiverede {name} {title}'
+    BUTTONAPPLYCHANGES: 'Anvend ændringer'
+    BUTTONARCHIVEDESC: 'Fjern udgivelse og læg i arkiv'
+    BUTTONPUBLISHED: Udgivet
+    BUTTONSAVEPUBLISH: Udgiv
+    BUTTONUNPUBLISH: 'Fjern udgivelse'
+    BUTTONUNPUBLISHDESC: 'Fjern fra udgivet site'
+    DRAFT: Kladde
+    MODIFIED: Modificeret
+    Published: 'Udgiv {name} {link}'
+    Unpublished: 'Fjern udgivelse af {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Elementet er endnu ikke blevet udgivet'
     ADDEDTODRAFTSHORT: Kladde
@@ -60,3 +58,5 @@ da:
     MODIFIEDONDRAFTSHORT: Modificeret
     ONLIVEONLYSHORT: 'Kun på udgivet'
     ONLIVEONLYSHORTHELP: 'Elementet er udgivet, men er slettet fra kladden'
+  SilverStripe\Versioned\VersionedHTTPMiddleware:
+    DRAFT_SITE_ACCESS_RESTRICTION: 'Du skal logge ind med din CMS adgangskode for at se kladde og arkiv versioner af dit indhold. <a href="{link}">Klik her for at vende tilbage til det udgivne site.</a>'

@@ -2,19 +2,19 @@ fr:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Vide
     ITEMS_CHANGES:
+      many: '{total} ({count} modifications)'
       one: '{total} (1 modification)'
       other: '{total} ({count} modifications)'
-      many: '{total} ({count} modifications)'
     ITEMS_TOTAL:
+      many: '{count} au total'
       one: '1 au total'
       other: '{count} au total'
-      many: '{count} au total'
     NAME: Nom
     PLURALNAME: Campagnes
     PLURALS:
+      many: '{count} Campagnes'
       one: 'Une campagne'
       other: '{count} Campagnes'
-      many: '{count} Campagnes'
     PUBLISHED_DATE_BY: '{date} par {name}'
     PUBLISHED_TODAY: 'Aujourd''hui {time}'
     PUBLISHED_TODAY_BY: 'Aujourd''hui {time} par {name}'
@@ -58,12 +58,12 @@ fr:
     Published: '{name} {link} publié'
     Unpublished: '{name} {title} dépublié'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
-    ADDEDTODRAFTSHORT: Brouillon
-    ARCHIVEDPAGESHORT: Archivé
-    MODIFIEDONDRAFTSHORT: Modifié
     ADDEDTODRAFTHELP: 'L''élément n''a pas encore été publié'
+    ADDEDTODRAFTSHORT: Brouillon
     ARCHIVEDPAGEHELP: 'L''élément est retiré des brouillons et en ligne'
+    ARCHIVEDPAGESHORT: Archivé
     MODIFIEDONDRAFTHELP: 'L''élément a des changements non publiés'
+    MODIFIEDONDRAFTSHORT: Modifié
     ONLIVEONLYSHORTHELP: 'L''élément est publié, mais a été effacé des brouillons'
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Vous devez vous identifier avec votre mot de passe CMS pour voir le contenu brouillon ou archivé. <a href="{link}">Cliquez ici pour revenir au site publié.</a>'
