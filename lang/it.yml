@@ -2,19 +2,19 @@ it:
   SilverStripe\Versioned\ChangeSet:
     EMPTY: Vuota
     ITEMS_CHANGES:
+      many: '{total} ({count} modifiche)'
       one: '{total} (1 modifica)'
       other: '{total} ({count} modifiche)'
-      many: '{total} ({count} modifiche)'
     ITEMS_TOTAL:
+      many: '{count} totale'
       one: '1 totale'
       other: '{count} totale'
-      many: '{count} totale'
     NAME: Nome
     PLURALNAME: Campagne
     PLURALS:
+      many: '{count} Campagne'
       one: 'Una Campagna'
       other: '{count} Campagne'
-      many: '{count} Campagne'
     PUBLISHED_DATE_BY: '{date} di {name}'
     PUBLISHED_TODAY: 'Oggi {time}'
     PUBLISHED_TODAY_BY: 'Oggi {time} di {name}'
@@ -31,9 +31,9 @@ it:
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Elementi del Gruppo Modifiche'
     PLURALS:
+      many: '{count} Elementi del Gruppo Modifiche'
       one: 'Un Elemento del Gruppo Modifiche'
       other: '{count} Elementi del Gruppo Modifiche'
-      many: '{count} Elementi del Gruppo Modifiche'
     SINGULARNAME: 'Elemento del Gruppo Modifiche'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archivio

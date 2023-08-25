@@ -22,15 +22,28 @@ eo:
     STATE_OPEN: Aktiva
     STATE_PUBLISHED: Publikigita
     STATE_REVERTED: Malfarita
+    db_Description: Priskribo
+    db_IsInferred: Induktita
+    db_LastSynced: 'Laste sinkronigita'
     db_Name: Nomo
     db_PublishDate: 'Dato de publikigo'
     db_State: Ŝtato
+    has_many_Changes: Ŝanĝoj
+    has_one_Owner: Posedanto
+    has_one_Publisher: Publikiginto
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Ŝangi agordojn'
     PLURALS:
       one: 'Unu ŝanĝara ero'
       other: '{count} ŝanĝaraj eroj'
     SINGULARNAME: 'Ŝangi agordon'
+    belongs_many_many_References: Referencoj
+    db_Added: Aldonita
+    db_VersionAfter: 'Versio antaŭ'
+    db_VersionBefore: 'Versio post'
+    has_one_ChangeSet: 'Ŝanĝi aron'
+    has_one_Object: Objekto
+    many_many_ReferencedBy: Referencis
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arkivo
     ArchivePermissionsFailure: 'Mankas arkivaj permesoj'
@@ -50,6 +63,7 @@ eo:
     RESTORE_TO_ROOT: 'Restaŭri al malneto ĉe la supra nivelo'
     RESTORE_TO_ROOT_DESC: 'Restaŭri la enarkivigitan version al malneto kiel la supranivela ero'
   SilverStripe\Versioned\Versioned:
+    db_Version: Versio
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Enarkivigita {name} {titolo}'

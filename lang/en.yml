@@ -63,8 +63,8 @@ en:
     RESTORE_TO_ROOT: 'Restore to draft at top level'
     RESTORE_TO_ROOT_DESC: 'Restore the archived version to draft as a top level item'
   SilverStripe\Versioned\Versioned:
-    has_many_Versions: Versions
     db_Version: Version
+    has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Archived {name} {title}'
     BUTTONAPPLYCHANGES: 'Apply changes'
