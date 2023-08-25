@@ -55,14 +55,14 @@ fi:
     Archived: 'Arkistoitiin {name} {title}'
     BUTTONAPPLYCHANGES: 'Hyväksy muutokset'
     BUTTONARCHIVEDESC: 'Poista julkaisusta ja arkistoi'
+    BUTTONPUBLISHED: Julkaistu
+    BUTTONSAVEPUBLISH: Julkaise
     BUTTONUNPUBLISH: 'Poista julkaisusta'
     BUTTONUNPUBLISHDESC: 'Poista tämä tietue julkaistulta sivustolta'
     DRAFT: Vedos
     MODIFIED: Muokattu
     Published: 'Julkaistiin {name} {link}'
     Unpublished: 'Poistettiin julkaisusta {name} {title}'
-    BUTTONPUBLISHED: Julkaistu
-    BUTTONSAVEPUBLISH: Julkaise
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Kohdetta ei ole julkaistu vielä'
     ADDEDTODRAFTSHORT: Vedos
