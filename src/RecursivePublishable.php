@@ -201,7 +201,6 @@ class RecursivePublishable extends DataExtension
         }
 
         // Build reverse lookup for ownership
-        // @todo - Cache this more intelligently
         $rules = $this->lookupReverseOwners();
 
         // Hand off to recursive method

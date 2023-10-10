@@ -188,8 +188,6 @@ class DataDifferencer extends ViewableData
         }
 
         // Use image tag
-        // TODO Use CMSThumbnail instead to limit max size, blocked by DataDifferencerTest and GC
-        // not playing nice with mocked images
         if ($object instanceof Image) {
             return $object->getTag();
         }

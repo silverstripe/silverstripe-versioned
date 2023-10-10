@@ -213,8 +213,6 @@ class ChangeSet extends DataObject
         ])->first();
 
         if ($item) {
-            // TODO: Handle case of implicit added item being removed.
-
             $item->delete();
         }
 
