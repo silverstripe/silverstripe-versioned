@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use Psr\Container\NotFoundExceptionInterface;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ChildObject;
@@ -31,9 +32,6 @@ class RecursiveStagesServiceTest extends SapphireTest
         PrimaryObject::class => [
             Versioned::class,
         ],
-        ColumnObject::class => [
-            Versioned::class,
-        ],
         GroupObject::class => [
             Versioned::class,
         ],
@@ -43,50 +41,103 @@ class RecursiveStagesServiceTest extends SapphireTest
     ];
 
     /**
+     * @return void
+     * @throws NotFoundExceptionInterface
+     */
+    public function testStageDiffersRecursiveWithInvalidObject(): void
+    {
+        Versioned::withVersionedMode(function (): void {
+            Versioned::set_stage(Versioned::DRAFT);
+
+            /** @var PrimaryObject|Versioned $primaryItem */
+            $primaryItem = PrimaryObject::create();
+
+            $this->assertFalse($primaryItem->stagesDifferRecursive(), 'We expect to see no changes on invalid object');
+        });
+    }
+
+    /**
      * @param string $class
      * @param string $identifier
      * @param bool $delete
+     * @param bool $expected
+     * @return void
      * @throws ValidationException
+     * @throws NotFoundExceptionInterface
      * @dataProvider objectsProvider
      */
-    public function testStageDiffersRecursive(string $class, string $identifier, bool $delete): void
+    public function testStageDiffersRecursive(string $class, string $identifier, bool $delete, bool $expected): void
     {
-        /** @var PrimaryObject|Versioned $primaryItem */
-        $primaryItem = $this->objFromFixture(PrimaryObject::class, 'primary-object-1');
-        $primaryItem->publishRecursive();
+        Versioned::withVersionedMode(function () use ($class, $identifier, $delete, $expected): void {
+            Versioned::set_stage(Versioned::DRAFT);
 
-        $this->assertFalse($primaryItem->stagesDifferRecursive());
+            /** @var PrimaryObject|Versioned $primaryObject */
+            $primaryObject = $this->objFromFixture(PrimaryObject::class, 'primary-object-1');
+            $primaryObject->publishRecursive();
 
-        $record = $this->objFromFixture($class, $identifier);
+            $this->assertFalse($primaryObject->stagesDifferRecursive(), 'We expect no changes to be present initially');
 
-        if ($delete) {
-            $record->delete();
-        } else {
-            $record->Title = 'New Title';
-            $record->write();
-        }
+            // Fetch a specific record and make an edit
+            $record = $this->objFromFixture($class, $identifier);
 
-        $this->assertTrue($primaryItem->stagesDifferRecursive());
-    }
+            if ($delete) {
+                // Delete the record
+                $record->delete();
+            } else {
+                // Update the record
+                $record->Title .= '-updated';
+                $record->write();
+            }
 
-    public function testStageDiffersRecursiveWithInvalidObject(): void
-    {
-        /** @var PrimaryObject|Versioned $primaryItem */
-        $primaryItem = PrimaryObject::create();
-
-        $this->assertFalse($primaryItem->stagesDifferRecursive());
+            $this->assertEquals($expected, $primaryObject->stagesDifferRecursive(), 'We expect to see changes depending on the case');
+        });
     }
 
     public function objectsProvider(): array
     {
         return [
-            [PrimaryObject::class, 'primary-object-1', false],
-            [ColumnObject::class, 'column-1', false],
-            [ColumnObject::class, 'column-1', true],
-            [GroupObject::class, 'group-1', false],
-            [GroupObject::class, 'group-1', true],
-            [ChildObject::class, 'child-object-1', false],
-            [ChildObject::class, 'child-object-1', true],
+            'primary object (versioned, update)' => [
+                PrimaryObject::class,
+                'primary-object-1',
+                false,
+                true,
+            ],
+            'column (non-versioned, update)' => [
+                ColumnObject::class,
+                'column-1',
+                false,
+                false,
+            ],
+            'column (non-versioned, delete)' => [
+                ColumnObject::class,
+                'column-1',
+                true,
+                false,
+            ],
+            'group (versioned, update)' => [
+                GroupObject::class,
+                'group-1',
+                false,
+                true,
+            ],
+            'group (versioned, delete)' => [
+                GroupObject::class,
+                'group-1',
+                true,
+                true,
+            ],
+            'child (versioned, update)' => [
+                ChildObject::class,
+                'child-object-1',
+                false,
+                true,
+            ],
+            'child (versioned, delete)' => [
+                ChildObject::class,
+                'child-object-1',
+                true,
+                true,
+            ],
         ];
     }
 }

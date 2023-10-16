@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use InvalidArgumentException;
 use LogicException;
+use Psr\Container\NotFoundExceptionInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
@@ -2000,19 +2001,17 @@ SQL
 
     /**
      * Determine if content differs on stages including nested objects
-     * $mode determines which relation will be used to traverse the ownership tree
-     * "strong" will use "cascade_duplicates"
-     * "weak" will use "owns"
+     * 'owns' configuration drives the relationship traversal
      *
-     * @param string $mode "strong" or "weak"
      * @return bool
+     * @throws NotFoundExceptionInterface
      */
-    public function stagesDifferRecursive(string $mode = RecursiveStagesService::OWNERSHIP_STRONG): bool
+    public function stagesDifferRecursive(): bool
     {
         /** @var RecursiveStagesInterface $service */
         $service = Injector::inst()->get(RecursiveStagesInterface::class);
 
-        return $service->stagesDifferRecursive($this->owner, $mode);
+        return $service->stagesDifferRecursive($this->owner);
     }
 
     /**

@@ -7,6 +7,7 @@ SilverStripe\Control\RequestHandler:
 SilverStripe\ORM\DataObject:
   extensions:
     - SilverStripe\Versioned\VersionedStateExtension
+    - SilverStripe\Versioned\RecursiveStagesExtension
 ---
 Name: versionedstate-test
 ---

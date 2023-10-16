@@ -7,50 +7,29 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 
 /**
- * Class PrimaryObject
- *
  * @method HasManyList|ColumnObject[] Columns()
- * @package SilverStripe\Versioned\Tests\RecursiveStagesServiceTest
  */
 class PrimaryObject extends DataObject implements TestOnly
 {
-    /**
-     * @var string
-     */
-    private static $table_name = 'RecursiveStagesServiceTest_PrimaryObject';
+    private static string $table_name = 'RecursiveStagesServiceTest_PrimaryObject';
 
-    /**
-     * @var array
-     */
-    private static $db = [
+    private static array $db = [
         'Title' => 'Varchar(255)',
     ];
 
-    /**
-     * @var array
-     */
-    private static $has_many = [
+    private static array $has_many = [
         'Columns' => ColumnObject::class,
     ];
 
-    /**
-     * @var array
-     */
-    private static $owns = [
+    private static array $owns = [
         'Columns',
     ];
 
-    /**
-     * @var array
-     */
-    private static $cascade_duplicates = [
+    private static array $cascade_duplicates = [
         'Columns',
     ];
 
-    /**
-     * @var array
-     */
-    private static $cascade_deletes = [
+    private static array $cascade_deletes = [
         'Columns',
     ];
 }

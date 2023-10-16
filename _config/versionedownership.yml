@@ -4,6 +4,10 @@ Name: versionedownership
 SilverStripe\ORM\DataObject:
   extensions:
     RecursivePublishable: SilverStripe\Versioned\RecursivePublishable
+
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Versioned\RecursiveStagesInterface:
+    class: SilverStripe\Versioned\RecursiveStagesService
 ---
 Name: versionedownership-admin
 OnlyIf:
@@ -12,9 +16,3 @@ OnlyIf:
 SilverStripe\Admin\LeftAndMain:
   extensions:
     RecursivePublishableHandler: SilverStripe\Versioned\RecursivePublishableHandler
----
-Name: versionedrecursivestages
----
-SilverStripe\Core\Injector\Injector:
-  SilverStripe\Versioned\RecursiveStagesInterface:
-    class: SilverStripe\Versioned\RecursiveStagesService
