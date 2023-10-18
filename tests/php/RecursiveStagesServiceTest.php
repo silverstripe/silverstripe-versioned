@@ -2,9 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
-use Psr\Container\NotFoundExceptionInterface;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\ORM\ValidationException;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ChildObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ColumnObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\GroupObject;
@@ -40,10 +38,6 @@ class RecursiveStagesServiceTest extends SapphireTest
         ],
     ];
 
-    /**
-     * @return void
-     * @throws NotFoundExceptionInterface
-     */
     public function testStageDiffersRecursiveWithInvalidObject(): void
     {
         Versioned::withVersionedMode(function (): void {
@@ -57,13 +51,6 @@ class RecursiveStagesServiceTest extends SapphireTest
     }
 
     /**
-     * @param string $class
-     * @param string $identifier
-     * @param bool $delete
-     * @param bool $expected
-     * @return void
-     * @throws ValidationException
-     * @throws NotFoundExceptionInterface
      * @dataProvider objectsProvider
      */
     public function testStageDiffersRecursive(string $class, string $identifier, bool $delete, bool $expected): void

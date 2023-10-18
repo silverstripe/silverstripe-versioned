@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned;
 
 use InvalidArgumentException;
 use LogicException;
-use Psr\Container\NotFoundExceptionInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
 use SilverStripe\Control\Director;
@@ -2002,9 +2001,6 @@ SQL
     /**
      * Determine if content differs on stages including nested objects
      * 'owns' configuration drives the relationship traversal
-     *
-     * @return bool
-     * @throws NotFoundExceptionInterface
      */
     public function stagesDifferRecursive(): bool
     {

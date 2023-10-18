@@ -12,7 +12,6 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\ORM\SS_List;
-use SilverStripe\ORM\Tests\MySQLDatabaseTest\Data;
 
 /**
  * Provides owns / owned_by and recursive publishing API for all objects.
@@ -447,5 +446,23 @@ class RecursivePublishable extends DataExtension
         // Get candidates from ownership and intersect
         $owns = $this->owner->config()->get('owns');
         $relations = array_intersect($allowed ?? [], $owns);
+    }
+
+    /**
+     * Make sure to flush cached data in case the data changes
+     * Extension point in @see DataObject::onAfterWrite()
+     */
+    public function onAfterWrite(): void
+    {
+        RecursiveStagesService::reset();
+    }
+
+    /**
+     * Make sure to flush cached data in case the data changes
+     * Extension point in @see DataObject::onAfterDelete()
+     */
+    public function onAfterDelete(): void
+    {
+        RecursiveStagesService::reset();
     }
 }

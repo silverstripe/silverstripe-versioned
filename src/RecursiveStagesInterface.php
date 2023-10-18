@@ -14,9 +14,6 @@ interface RecursiveStagesInterface
 {
     /**
      * Determine if content differs on stages including nested objects
-     *
-     * @param DataObject $object
-     * @return bool
      */
     public function stagesDifferRecursive(DataObject $object): bool;
 }

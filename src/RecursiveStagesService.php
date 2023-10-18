@@ -2,8 +2,6 @@
 
 namespace SilverStripe\Versioned;
 
-use Exception;
-use Psr\Container\NotFoundExceptionInterface;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
@@ -25,10 +23,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         $this->ownedObjectsCache = [];
     }
 
-    /**
-     * @return void
-     * @throws NotFoundExceptionInterface
-     */
     public static function reset(): void
     {
         /** @var RecursiveStagesInterface $service */
@@ -46,10 +40,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
      * Determine if content differs on stages including nested objects
      * This method also supports non-versioned models to allow traversal of hierarchy
      * which includes both versioned and non-versioned models
-     *
-     * @param DataObject $object
-     * @return bool
-     * @throws Exception
      */
     public function stagesDifferRecursive(DataObject $object): bool
     {
@@ -64,10 +54,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
     /**
      * Execution ownership hierarchy traversal and inspect individual models
-     *
-     * @param DataObject $object
-     * @return bool
-     * @throws Exception
      */
     protected function determineStagesDifferRecursive(DataObject $object): bool
     {
@@ -76,11 +62,12 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
             return false;
         }
 
+        // Compare existing content (perform full ownership traversal)
         $models = [$object];
 
-        // Compare existing content (perform full ownership traversal)
+        /** @var DataObject|Versioned $model */
         while ($model = array_shift($models)) {
-            if ($this->isModelDirty($model)) {
+            if ($model->hasExtension(Versioned::class) && $model->isModifiedOnDraft()) {
                 // Model is dirty,
                 // we can return here as there is no need to check the rest of the hierarchy
                 return true;
@@ -101,11 +88,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
     /**
      * Get unique identifiers for all owned objects, so we can easily compare them
-     *
-     * @param DataObject $object
-     * @param string $stage
-     * @return array
-     * @throws Exception
      */
     protected function getOwnedIdentifiers(DataObject $object, string $stage): array
     {
@@ -123,9 +105,10 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
             $identifiers = [];
 
             while ($model = array_shift($models)) {
-                // Compose a unique identifier, so we can easily compare models
-                // Note that we intentionally use base class here, so we can cover the situation where model class changes
-                $identifiers[] = implode('_', [$model->baseClass(), $model->ID]);
+                // Compose a unique identifier, so we can easily compare models across stages
+                // Note that we can't use getUniqueKey() as that one contains stage fragments
+                // which prevents us from making cross-stage comparison
+                $identifiers[] = $model->ClassName . '-' . $model->ID;
                 $relatedObjects = $this->getOwnedObjects($model);
                 $models = array_merge($models, $relatedObjects);
             }
@@ -141,10 +124,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
     /**
      * This lookup will attempt to find "owned" objects
      * This method uses the 'owns' relation, same as @see RecursivePublishable::publishRecursive()
-     *
-     * @param DataObject|RecursivePublishable $object
-     * @return array
-     * @throws Exception
      */
     protected function getOwnedObjects(DataObject $object): array
     {
@@ -154,7 +133,7 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
         // Add versioned stage to cache key to cover the case where non-versioned model owns versioned models
         // In this situation the versioned models can have different cached state which we need to cover
-        $cacheKey = sprintf('%s-%s', $object->getUniqueKey(), Versioned::get_stage());
+        $cacheKey = $object->getUniqueKey() . '-' . Versioned::get_stage();
 
         if (!array_key_exists($cacheKey, $this->ownedObjectsCache)) {
             $this->ownedObjectsCache[$cacheKey] = $object
@@ -165,23 +144,5 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         }
 
         return $this->ownedObjectsCache[$cacheKey];
-    }
-
-    /**
-     * Determine if model is dirty (has draft changes that need publishing)
-     * Non-versioned models are supported
-     *
-     * @param DataObject $object
-     * @return bool
-     */
-    protected function isModelDirty(DataObject $object): bool
-    {
-        if ($object->hasExtension(Versioned::class)) {
-            /** @var $object Versioned */
-            return !$object->isPublished() || $object->stagesDiffer();
-        }
-
-        // Non-versioned models are never dirty
-        return false;
     }
 }
