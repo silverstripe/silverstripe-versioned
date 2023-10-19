@@ -72,8 +72,23 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         // Compare existing content (perform full ownership traversal)
         $models = [$object];
 
+        // We will keep track of inspected models so we don;t inspect the same model multiple times
+        // This prevents some edge cases like infinite loops
+        $identifiers = [];
+
         /** @var DataObject|Versioned $model */
         while ($model = array_shift($models)) {
+            $identifier = $this->getObjectIdentifier($model);
+
+            if (in_array($identifier, $identifiers)) {
+                // We've already inspected this model, so we can skip processing it
+                // This is to prevent potential infinite loops
+                continue;
+            }
+
+            // Mark model as inspected
+            $identifiers[] = $identifier;
+
             if ($model->hasExtension(Versioned::class) && $model->isModifiedOnDraft()) {
                 // Model is dirty,
                 // we can return here as there is no need to check the rest of the hierarchy
@@ -112,10 +127,15 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
             $identifiers = [];
 
             while ($model = array_shift($models)) {
-                // Compose a unique identifier, so we can easily compare models across stages
-                // Note that we can't use getUniqueKey() as that one contains stage fragments
-                // which prevents us from making cross-stage comparison
-                $identifiers[] = $model->ClassName . '-' . $model->ID;
+                $identifier = $this->getObjectIdentifier($model);
+
+                if (in_array($identifier, $identifiers)) {
+                    // We've already inspected this model, so we can skip processing it
+                    // This is to prevent potential infinite loops
+                    continue;
+                }
+
+                $identifiers[] = $identifier;
                 $relatedObjects = $this->getOwnedObjects($model);
                 $models = array_merge($models, $relatedObjects);
             }
@@ -154,5 +174,15 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         }
 
         return $this->ownedObjectsCache[$cacheKey];
+    }
+
+    /**
+     * This method covers cases where @see DataObject::getUniqueKey() can't be used
+     * For example when we want to compare models across stages we can't use getUniqueKey()
+     * as that one contains stage fragments which prevents us from making cross-stage comparison
+     */
+    private function getObjectIdentifier(DataObject $object): string
+    {
+        return $object->ClassName . '-' . $object->ID;
     }
 }
