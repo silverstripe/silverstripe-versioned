@@ -40,6 +40,11 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
      * Determine if content differs on stages including nested objects
      * This method also supports non-versioned models to allow traversal of hierarchy
      * which includes both versioned and non-versioned models
+     * In-memory cache is included and optimised for the most likely lookup profile:
+     * Non-shared models can have deep ownership hierarchy (i.e. content blocks)
+     * Shared models are unlikely to have deep ownership hierarchy (i.e Assets)
+     * This means that we provide in-memory cache only for top level models as we do not expect to query
+     * the nested models multiple times
      */
     public function stagesDifferRecursive(DataObject $object): bool
     {
@@ -54,6 +59,8 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
     /**
      * Execution ownership hierarchy traversal and inspect individual models
+     * This method use "stack based" recursive traversal as opposed to "true" recursive traversal
+     * for performance reasons (avoid memory spikes and long execution times due to deeper stack)
      */
     protected function determineStagesDifferRecursive(DataObject $object): bool
     {
