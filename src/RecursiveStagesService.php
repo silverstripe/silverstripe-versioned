@@ -127,6 +127,7 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
      */
     protected function getOwnedObjects(DataObject $object): array
     {
+        /** @var DataObject|Versioned $object */
         if (!$object->hasExtension(RecursivePublishable::class)) {
             return [];
         }
@@ -137,8 +138,10 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
         if (!array_key_exists($cacheKey, $this->ownedObjectsCache)) {
             $this->ownedObjectsCache[$cacheKey] = $object
-                // We intentionally avoid recursive traversal here as it's not memory efficient,
-                // stack based approach is used instead for better performance
+                // We intentionally avoid "true" recursive traversal here as it's not performant
+                // (often the cause of memory usage spikes and longer exeuction time due to deeper stack depth)
+                // Instead we use "stack based" recursive traversal approach for better performance
+                // which avoids the nested method calls
                 ->findOwned(false)
                 ->toArray();
         }
