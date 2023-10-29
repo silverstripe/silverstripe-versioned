@@ -2021,7 +2021,6 @@ SQL
 
         $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
         if ($having) {
-            // @todo - This method doesn't exist on DataList
             $list->having($having);
         }
 
@@ -2655,8 +2654,6 @@ SQL
 
     /**
      * Returns whether the current record is the latest one.
-     *
-     * @todo Performance - could do this directly via SQL.
      *
      * @see get_latest_version()
      * @see latestPublished
