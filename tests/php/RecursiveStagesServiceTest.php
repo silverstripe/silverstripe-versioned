@@ -45,6 +45,7 @@ class RecursiveStagesServiceTest extends SapphireTest
 
             /** @var PrimaryObject|Versioned $primaryItem */
             $primaryItem = PrimaryObject::create();
+            $primaryItem->Title = 'This registers as a change in DataObject::isChanged()';
 
             $this->assertFalse($primaryItem->stagesDifferRecursive(), 'We expect to see no changes on invalid object');
         });
