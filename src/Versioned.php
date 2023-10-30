@@ -11,6 +11,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
@@ -1995,6 +1996,18 @@ SQL
         $this->owner->extend('updateStagesDiffer', $stagesDiffer);
 
         return (bool) $stagesDiffer;
+    }
+
+    /**
+     * Determine if content differs on stages including nested objects
+     * 'owns' configuration drives the relationship traversal
+     */
+    public function stagesDifferRecursive(): bool
+    {
+        /** @var RecursiveStagesInterface $service */
+        $service = Injector::inst()->get(RecursiveStagesInterface::class);
+
+        return $service->stagesDifferRecursive($this->owner);
     }
 
     /**

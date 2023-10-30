@@ -1,0 +1,24 @@
+# Fixture hierarchy
+# -> primary-object-1 (top level publish object, versioned)
+# --> column-1 (non-versioned)
+# ---> group-1 (versioned)
+# ----> child-object-1 (versioned)
+
+SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\PrimaryObject:
+  primary-object-1:
+    Title: 'PrimaryObject1'
+
+SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ColumnObject:
+  column-1:
+    Title: 'Column1'
+    PrimaryObject: =>SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\PrimaryObject.primary-object-1
+
+SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\GroupObject:
+  group-1:
+    Title: 'Group1'
+    Column: =>SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ColumnObject.column-1
+
+SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ChildObject:
+  child-object-1:
+    Title: 'Item1'
+    Group: =>SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\GroupObject.group-1
