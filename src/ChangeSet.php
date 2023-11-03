@@ -214,6 +214,22 @@ class ChangeSet extends DataObject
 
         if ($item) {
             $item->delete();
+
+            // Get the implicitly included items for this ChangeSet
+            $implicit = $this->calculateImplicit();
+
+            foreach ($this->Changes()->filter(['Added' => ChangeSetItem::IMPLICITLY]) as $changeSetItem) {
+                $objectKey = $this->implicitKey($changeSetItem);
+
+                // If a ChangeSetItem exists, but isn't in $implicit, it's no longer required, so delete it
+                if (!array_key_exists($objectKey, $implicit)) {
+                    $changeSetItem->delete();
+                } else {
+                    // Otherwise it is required, so update ReferencedBy and remove from $implicit
+                    $changeSetItem->ReferencedBy()->setByIDList($implicit[$objectKey]['ReferencedBy']);
+                    unset($implicit[$objectKey]);
+                }
+            }
         }
 
         $this->sync();

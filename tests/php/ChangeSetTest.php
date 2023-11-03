@@ -160,6 +160,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -172,6 +173,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -196,6 +198,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -214,6 +217,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -255,6 +259,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -301,6 +306,7 @@ class ChangeSetTest extends SapphireTest
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
@@ -319,6 +325,7 @@ class ChangeSetTest extends SapphireTest
             [
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
@@ -334,7 +341,7 @@ class ChangeSetTest extends SapphireTest
         $base = $this->objFromFixture(ChangeSetTest\BaseObject::class, 'base');
         $changeSet->addObject($base);
         $changeSet->sync();
-        $this->assertEquals(5, $changeSet->Changes()->count());
+        $this->assertEquals(6, $changeSet->Changes()->count());
 
         // Test un-authenticated user cannot publish
         $this->logOut();
@@ -378,7 +385,7 @@ class ChangeSetTest extends SapphireTest
         $changeSet->addObject($base);
         $changeSet->addObject($mid1);
         $changeSet->sync();
-        $this->assertEquals(5, $changeSet->Changes()->count());
+        $this->assertEquals(6, $changeSet->Changes()->count());
 
         // With model publish permissions only publish is allowed
         $this->assertTrue($changeSet->canPublish());
@@ -434,7 +441,7 @@ class ChangeSetTest extends SapphireTest
         $base = $this->objFromFixture(ChangeSetTest\BaseObject::class, 'base');
         $changeSet->addObject($base);
         $changeSet->sync();
-        $this->assertEquals(5, $changeSet->Changes()->count());
+        $this->assertEquals(6, $changeSet->Changes()->count());
 
         // Check canEdit
         $this->logOut();
@@ -465,7 +472,7 @@ class ChangeSetTest extends SapphireTest
         $base = $this->objFromFixture(ChangeSetTest\BaseObject::class, 'base');
         $changeSet->addObject($base);
         $changeSet->sync();
-        $this->assertEquals(5, $changeSet->Changes()->count());
+        $this->assertEquals(6, $changeSet->Changes()->count());
 
         // Check canDelete
         $this->logOut();
@@ -485,7 +492,7 @@ class ChangeSetTest extends SapphireTest
         $base = $this->objFromFixture(ChangeSetTest\BaseObject::class, 'base');
         $changeSet->addObject($base);
         $changeSet->sync();
-        $this->assertEquals(5, $changeSet->Changes()->count());
+        $this->assertEquals(6, $changeSet->Changes()->count());
 
         // Check canView
         $this->logOut();
@@ -617,6 +624,7 @@ class ChangeSetTest extends SapphireTest
             [
                 ChangeSetTest\BaseObject::class . '.base' => ChangeSetItem::EXPLICITLY,
                 ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::IMPLICITLY,
                 ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
             ]
         );
@@ -734,5 +742,105 @@ class ChangeSetTest extends SapphireTest
         $changeset->publish(true);
 
         $this->assertFalse($changeset->isSyncCalled, 'isSynced is skipped when providing truthy argument to publish');
+    }
+
+    public function testRemoveObject()
+    {
+        $this->publishAllFixtures();
+
+        $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1'); // Item mid2 reference Item end2
+
+        $changeset = new ChangeSet();
+        $changeset->write();
+        $changeset->addObject($mid1);
+        $changeset->publish();
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+            ]
+        );
+
+        $changeset->removeObject($mid1); // Remove mid1
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            []
+        );
+    }
+
+    public function testRemoveObjectsWithReferencesToOneItem()
+    {
+        $this->publishAllFixtures();
+
+        $mid2 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid2'); // Item mid2 reference Item end2
+        $mid3 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid4'); // Item mid4 reference Item end2
+
+        $changeset = new ChangeSet();
+        $changeset->write();
+        $changeset->addObject($mid2);
+        $changeset->addObject($mid3);
+        $changeset->publish();
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid2' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY,
+            ]
+        );
+
+        $changeset->removeObject($mid2); // Remove mid2
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid4' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end2' => ChangeSetItem::IMPLICITLY, // Item end2 is still in ChangeSet
+            ]
+        );
+
+        $changeset->removeObject($mid3); // Remove mid3
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            []
+        );
+    }
+
+    public function testRemoveObjectWithImplicitlyAddedItemOnly()
+    {
+        $this->publishAllFixtures();
+
+        $mid1 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid1'); // Item mid1 reference Item end1
+        $end1 = $this->objFromFixture(ChangeSetTest\EndObject::class, 'end1'); // Item end1
+
+        $changeset = new ChangeSet();
+        $changeset->write();
+        $changeset->addObject($mid1);
+        $changeset->addObject($end1); // Item end1 explicitly added to ChangeSet
+        $changeset->publish();
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\MidObject::class . '.mid1' => ChangeSetItem::EXPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::IMPLICITLY,
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::EXPLICITLY
+            ]
+        );
+
+        $changeset->removeObject($mid1); // Remove mid1
+
+        $this->assertChangeSetLooksLike(
+            $changeset,
+            [
+                ChangeSetTest\EndObject::class . '.end1' => ChangeSetItem::EXPLICITLY // Item end1 is still in ChangeSet
+            ]
+        );
     }
 }
