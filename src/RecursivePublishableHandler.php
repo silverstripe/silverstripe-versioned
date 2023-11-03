@@ -12,7 +12,6 @@ class RecursivePublishableHandler extends Extension
 {
     /**
      * Ensure that non-versioned records are published on save.
-     * @todo Build this action into explicit UX action: https://github.com/silverstripe/silverstripe-versioned/issues/71
      * @param DataObject $record
      */
     public function onAfterSave(DataObject $record)

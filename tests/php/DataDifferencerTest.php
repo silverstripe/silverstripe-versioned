@@ -70,8 +70,7 @@ class DataDifferencerTest extends SapphireTest
         $obj1v2 = Versioned::get_version(DataDifferencerTest\TestObject::class, $obj1->ID, $afterVersion);
         $differ = new DataDifferencer($obj1v1, $obj1v2);
         $obj1Diff = $differ->diffedData();
-        // TODO Using getter would split up field again, bug only caused by simulating
-        // an array-based value in the first place.
+
         $this->assertContainsIgnoreWhitespace('<del>a,b</del><ins>a</ins>', $obj1Diff->getField('Choices'));
     }
 
