@@ -13,6 +13,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataExtension;
@@ -2015,11 +2016,20 @@ SQL
      * @param string $sort
      * @param string $limit
      * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
-     * @param string $having
+     * @param string $having @deprecated 2.2.0 The $having parameter does nothing and will be removed without
+     *               equivalent functionality to replace it
      * @return ArrayList
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
+        if ($having) {
+            Deprecation::withNoReplacement(function () {
+                $message = 'The $having parameter does nothing and will be removed without equivalent'
+                . ' functionality to replace it';
+                Deprecation::notice('2.2.0', $message);
+            });
+        }
+
         /** @var DataObject $owner */
         $owner = $this->owner;
 
@@ -2033,9 +2043,6 @@ SQL
         static::set_stage(static::DRAFT);
 
         $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
-        if ($having) {
-            $list->having($having);
-        }
 
         $query = $list->dataQuery()->query();
 
