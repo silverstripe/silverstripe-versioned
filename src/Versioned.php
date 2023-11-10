@@ -283,7 +283,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @config
      * @var array
      */
-    private static $non_live_permissions = ['CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'];
+    private static $non_live_permissions = ['CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT', 'CAN_DEV_BUILD'];
 
     /**
      * Use PHP's session storage for the "reading mode" and "unsecuredDraftSite",
