@@ -66,7 +66,7 @@ en:
     db_Version: Version
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    Archived: 'Archived {name} {title}'
+    Archived: 'Archived {name} "{title}"'
     BUTTONAPPLYCHANGES: 'Apply changes'
     BUTTONARCHIVEDESC: 'Unpublish and send to archive'
     BUTTONPUBLISHED: Published
@@ -78,7 +78,8 @@ en:
     MODIFIED: Modified
     MoreOptions: 'More options'
     Published: 'Published {name} {link}'
-    Unpublished: 'Unpublished {name} {title}'
+    Unpublished: 'Unpublished {name} "{title}"'
+    PUBLISHEDTOASTMESSAGE: 'Published {type} "{title}"'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Item has not been published yet'
     ADDEDTODRAFTSHORT: Draft
