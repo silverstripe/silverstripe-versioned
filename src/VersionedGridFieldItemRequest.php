@@ -133,7 +133,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         $message = _t(
             __CLASS__ . '.Archived',
-            'Archived {name} {title}',
+            'Archived {name} "{title}"',
             [
                 'name' => $record->i18n_singular_name(),
                 'title' => Convert::raw2xml($title)
@@ -144,7 +144,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         //when an item is deleted, redirect to the parent controller
         $controller = $this->getToplevelController();
         $controller->getRequest()->addHeader('X-Pjax', 'Content'); // Force a content refresh
-
+        $controller->getResponse()->addHeader('X-Status', $message);
         return $controller->redirect($this->getBackLink(), 302); //redirect back to admin section
     }
 
@@ -183,6 +183,18 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         );
         $this->setFormMessage($form, $message);
 
+        $message = _t(
+            __CLASS__ . '.PUBLISHEDTOASTMESSAGE',
+            'Published {type} "{title}"',
+            [
+                'type' => $record->i18n_singular_name(),
+                'title' => Convert::raw2xml($record->Title)
+            ]
+        );
+
+        $controller = $this->getToplevelController();
+        $controller->getResponse()->addHeader('X-Status', $message);
+
         return $this->redirectAfterSave($isNewRecord);
     }
 
@@ -207,13 +219,16 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         $message = _t(
             __CLASS__ . '.Unpublished',
-            'Unpublished {name} {title}',
+            'Unpublished {name} "{title}"',
             [
                 'name' => $record->i18n_singular_name(),
                 'title' => Convert::raw2xml($title)
             ]
         );
         $this->setFormMessage($form, $message);
+
+        $controller = $this->getToplevelController();
+        $controller->getResponse()->addHeader('X-Status', $message);
 
         // Redirect back to edit
         return $this->redirectAfterSave(false);
