@@ -381,7 +381,9 @@ class RecursivePublishable extends DataExtension
         }
 
         // Find table and field to join on
-        $joinField = $schema->getRemoteJoinField(get_class($owner), $relationship, 'has_many', $polymorphic);
+        $hasManyDetails = $schema->getHasManyComponentDetails(get_class($owner), $relationship);
+        $polymorphic = $hasManyDetails['polymorphic'];
+        $joinField = $hasManyDetails['joinField'];
         $joinTable = DataObject::getSchema()->tableForField(
             $joinClass,
             $polymorphic ? "{$joinField}ID" : $joinField
@@ -391,13 +393,20 @@ class RecursivePublishable extends DataExtension
         $targetTable = $versioned->stageTable($joinTable, $targetStage);
         $disowned = new SQLUpdate("\"{$targetTable}\"");
         if ($polymorphic) {
+            $where = [
+                "\"{$targetTable}\".\"{$joinField}ID\"" => $owner->ID,
+                "\"{$targetTable}\".\"{$joinField}Class\"" => get_class($owner),
+            ];
+
+            if ($hasManyDetails['needsRelation']) {
+                $disowned->assign("\"{$joinField}Relation\"", null);
+                $where["\"{$targetTable}\".\"{$joinField}Relation\""] = $relationship;
+            }
+
             $disowned
                 ->assign("\"{$joinField}ID\"", 0)
                 ->assign("\"{$joinField}Class\"", null)
-                ->addWhere([
-                    "\"{$targetTable}\".\"{$joinField}ID\"" => $owner->ID,
-                    "\"{$targetTable}\".\"{$joinField}Class\"" => get_class($owner),
-                ]);
+                ->addWhere($where);
         } else {
             $disowned
                 ->assign("\"{$joinField}\"", 0)
