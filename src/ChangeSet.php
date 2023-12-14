@@ -25,13 +25,13 @@ use SilverStripe\Security\Security;
  * The ChangeSet model tracks several VersionedAndStaged objects for later publication as a single
  * atomic action
  *
- * @method HasManyList Changes()
- * @method Member Owner()
- * @method Member Publisher()
  * @property string $Name
  * @property string $State one of 'open', 'published', or 'reverted'
  * @property bool $IsInferred
  * @property string $LastSynced Last synced date
+ * @method HasManyList<ChangeSetItem> Changes()
+ * @method Member Owner()
+ * @method Member Publisher()
  */
 class ChangeSet extends DataObject
 {
