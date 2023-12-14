@@ -27,10 +27,10 @@ use SilverStripe\Security\Security;
  * @property int $ChangeSetID ID of parent ChangeSet object
  * @property int $VersionBefore
  * @property int $VersionAfter
- * @method ManyManyList ReferencedBy() List of explicit items that require this change
- * @method ManyManyList References() List of implicit items required by this change
- * @method ChangeSet ChangeSet() Parent changeset
- * @method DataObject Object() The object attached to this item
+ * @method ChangeSet ChangeSet()
+ * @method DataObject Object()
+ * @method ManyManyList<ChangeSetItem> ReferencedBy()
+ * @method ManyManyList<ChangeSetItem> References()
  */
 class ChangeSetItem extends DataObject implements Thumbnail
 {
