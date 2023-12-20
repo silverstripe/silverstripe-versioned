@@ -80,6 +80,9 @@ en:
     Published: 'Published {name} {link}'
     Unpublished: 'Unpublished {name} "{title}"'
     PUBLISHEDTOASTMESSAGE: 'Published {type} "{title}"'
+    ROLLEDBACKPERMISSION: 'You do not have permission to roll back this record.'
+    ROLLEDBACKPUB: 'Rolled back to published version.'
+    ROLLEDBACKVERSION: 'Rolled back to version #{version}.'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Item has not been published yet'
     ADDEDTODRAFTSHORT: Draft

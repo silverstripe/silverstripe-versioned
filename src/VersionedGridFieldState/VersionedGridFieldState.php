@@ -225,7 +225,7 @@ class VersionedGridFieldState implements GridField_ColumnProvider
             ];
         }
 
-        if ($record->isModifiedOnDraft()) {
+        if ($record->isModifiedOnDraft() || $record->stagesDifferRecursive()) {
             return [
                 'modified' => [
                     'text' => _t(__CLASS__ . '.MODIFIEDONDRAFTSHORT', 'Modified'),
