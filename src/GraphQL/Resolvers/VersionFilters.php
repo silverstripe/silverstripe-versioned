@@ -43,10 +43,11 @@ class VersionFilters
     }
 
     /**
-     * @param DataList $list
+     * @template T of DataObject
+     * @param DataList<T> $list
      * @param array $versioningArgs
      * @throws InvalidArgumentException
-     * @return DataList
+     * @return DataList<T>
      */
     public function applyToList(DataList $list, array $versioningArgs): DataList
     {

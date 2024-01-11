@@ -10,7 +10,7 @@ use SilverStripe\ORM\DataQuery;
 /**
  * Applies correct stage to tables
  *
- * @property DataQuery $owner
+ * @extends Extension<DataQuery>
  */
 class VersionedTableDataQueryExtension extends Extension
 {
@@ -28,7 +28,6 @@ class VersionedTableDataQueryExtension extends Extension
             return;
         }
 
-        /** @var Versioned $versioned */
         $versioned = Injector::inst()->get(Versioned::class);
         $stage = $versioned->get_stage();
         $updated = $versioned->stageTable($table, $stage);

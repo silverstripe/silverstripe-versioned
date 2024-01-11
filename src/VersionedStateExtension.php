@@ -11,7 +11,8 @@ use SilverStripe\ORM\DataObject;
 /**
  * Persists versioned state between requests via querystring arguments
  *
- * @property RequestHandler|DataObject $owner
+ * @template T of RequestHandler|DataObject
+ * @extends Extension<T>
  */
 class VersionedStateExtension extends Extension
 {

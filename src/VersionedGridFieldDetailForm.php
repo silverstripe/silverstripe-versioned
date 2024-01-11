@@ -5,10 +5,11 @@ namespace SilverStripe\Versioned;
 use SilverStripe\Control\RequestHandler;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\ORM\DataObject;
 
 /**
- * Extends {@see GridFieldDetailForm}
+ * @extends Extension<GridFieldDetailForm>
  */
 class VersionedGridFieldDetailForm extends Extension
 {

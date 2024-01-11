@@ -10,7 +10,7 @@ use SilverStripe\Versioned\VersionedStateExtension;
 /**
  * Decorates TestSession object to update get / post requests with versioned querystring arguments.
  *
- * @property TestSession $owner
+ * @extends VersionedStateExtension<TestSession>
  */
 class VersionedTestSessionExtension extends VersionedStateExtension
 {

@@ -137,7 +137,6 @@ class ChangeSet extends DataObject
 
         DB::get_conn()->withTransaction(function () {
             foreach ($this->Changes() as $change) {
-                /** @var ChangeSetItem $change */
                 $change->publish();
             }
 
@@ -146,7 +145,6 @@ class ChangeSet extends DataObject
             // This is done as a safer alternative to deleting records on live that
             // are deleted on stage.
             foreach ($this->Changes() as $change) {
-                /** @var ChangeSetItem $change */
                 $change->unlinkDisownedObjects();
             }
 
@@ -265,14 +263,12 @@ class ChangeSet extends DataObject
         /** @var string[][] $references List of which explicit items reference each thing in referenced */
         $references = [];
 
-        /** @var ChangeSetItem $item */
         foreach ($this->Changes()->filter(['Added' => ChangeSetItem::EXPLICITLY]) as $item) {
             $explicitKey = $this->implicitKey($item);
             $explicit[$explicitKey] = true;
 
             foreach ($item->findReferenced() as $referee) {
                 try {
-                    /** @var DataObject $referee */
                     $key = $this->implicitKey($referee);
 
                     $referenced[$key] = [
@@ -324,7 +320,6 @@ class ChangeSet extends DataObject
             $implicit = $this->calculateImplicit();
 
             // Adjust the existing implicit ChangeSetItems for this ChangeSet
-            /** @var ChangeSetItem $item */
             foreach ($this->Changes()->filter(['Added' => ChangeSetItem::IMPLICITLY]) as $item) {
                 $objectKey = $this->implicitKey($item);
 
@@ -410,7 +405,6 @@ class ChangeSet extends DataObject
         }
         // Check all explicitly added items
         foreach ($this->Changes()->filter(['Added' => ChangeSetItem::EXPLICITLY]) as $change) {
-            /** @var ChangeSetItem $change */
             if (!$change->canPublish($member)) {
                 return false;
             }
@@ -427,7 +421,6 @@ class ChangeSet extends DataObject
     public function hasChanges()
     {
         // All changes must be publishable
-        /** @var ChangeSetItem $change */
         foreach ($this->Changes() as $change) {
             if ($change->hasChange()) {
                 return true;
@@ -446,7 +439,6 @@ class ChangeSet extends DataObject
     {
         // All changes must be publishable
         foreach ($this->Changes() as $change) {
-            /** @var ChangeSetItem $change */
             if (!$change->canRevert($member)) {
                 return false;
             }
@@ -528,7 +520,6 @@ class ChangeSet extends DataObject
     public function getDetails()
     {
         // Check each change item
-        /** @var ChangeSetItem $change */
         $total = 0;
         $withChanges = 0;
         foreach ($this->Changes() as $change) {

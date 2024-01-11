@@ -2,11 +2,14 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
 
 /**
  * Provides recursive publishable behaviour for LeftAndMain and GridFieldDetailForm_ItemRequest
+ *
+ * @extends Extension<LeftAndMain>
  */
 class RecursivePublishableHandler extends Extension
 {

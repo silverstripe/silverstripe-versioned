@@ -26,10 +26,6 @@ use SilverStripe\View\SSViewer;
  */
 class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 {
-    /**
-     * @param bool $unlinked
-     * @return ArrayList
-     */
     public function Breadcrumbs($unlinked = false)
     {
         $items = parent::Breadcrumbs($unlinked);
@@ -46,7 +42,6 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $this->extend('updateBadge', $badge);
 
         if ($badge) {
-            /** @var ArrayData $lastItem */
             $lastItem = $items->last();
             $lastItem->setField('Extra', $badge);
         }

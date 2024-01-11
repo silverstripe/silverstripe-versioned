@@ -36,8 +36,9 @@ use SilverStripe\View\TemplateGlobalProvider;
  * Note: This extension relies on the object also having the {@see Ownership} extension applied.
  *
  * @property int $Version
- * @property DataObject|RecursivePublishable|Versioned $owner
  * @mixin RecursivePublishable
+ *
+ * @extends DataExtension<DataObject&RecursivePublishable&static>
  */
 class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
 {
@@ -1854,7 +1855,6 @@ SQL
      */
     public function doUnpublish()
     {
-        /** @var DataObject|Versioned $owner */
         $owner = $this->owner;
         // Skip if this record isn't saved
         if (!$owner->isInDB()) {
@@ -1875,7 +1875,6 @@ SQL
             // Re-fetch the current DataObject to ensure we have data from the LIVE stage
             // This is particularly relevant for DataObject's in a modified state so that
             // any delete extensions have the correct database record values
-            /** @var DataObject|Versioned $obj */
             $obj = $owner::get()->byID($owner->ID);
             if (!$obj) {
                 return;
@@ -2005,7 +2004,6 @@ SQL
      */
     public function stagesDifferRecursive(): bool
     {
-        /** @var RecursiveStagesInterface $service */
         $service = Injector::inst()->get(RecursiveStagesInterface::class);
 
         return $service->stagesDifferRecursive($this->owner);
@@ -2018,7 +2016,7 @@ SQL
      * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
      * @param string $having @deprecated 2.2.0 The $having parameter does nothing and will be removed without
      *               equivalent functionality to replace it
-     * @return ArrayList
+     * @return ArrayList<Versioned_Version>
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
@@ -2030,7 +2028,6 @@ SQL
             });
         }
 
-        /** @var DataObject $owner */
         $owner = $this->owner;
 
         // When an object is not yet in the Database, we can't get its versions
@@ -2363,13 +2360,13 @@ SQL
     /**
      * Get a singleton instance of a class in the given stage.
      *
-     * @param string $class The name of the class.
+     * @template T of DataObject
+     * @param class-string<T> $class The name of the class.
      * @param string $stage The name of the stage.
      * @param string $filter A filter to be inserted into the WHERE clause.
      * @param boolean $cache Use caching.
      * @param string $sort A sort expression to be inserted into the ORDER BY clause.
-     *
-     * @return DataObject
+     * @return T&static
      */
     public static function get_one_by_stage($class, $stage, $filter = '', $cache = true, $sort = '')
     {
@@ -2479,7 +2476,6 @@ SQL
             return;
         }
 
-        /** @var Versioned|DataObject $singleton */
         $singleton = DataObject::singleton($class);
         $baseClass = $singleton->baseClass();
         $baseTable = $singleton->baseTable();
@@ -2519,7 +2515,8 @@ SQL
     /**
      * Get a set of class instances by the given stage.
      *
-     * @param string $class The name of the class.
+     * @template T of DataObject
+     * @param class-string<T> $class The name of the class.
      * @param string $stage The name of the stage.
      * @param string $filter A filter to be inserted into the WHERE clause.
      * @param string $sort A sort expression to be inserted into the ORDER BY clause.
@@ -2527,7 +2524,7 @@ SQL
      * @param int $limit A limit on the number of records returned from the database.
      * @param string $containerClass The container class for the result set (default is DataList)
      *
-     * @return DataList A modified DataList designated to the specified stage
+     * @return DataList<T> A modified DataList designated to the specified stage
      */
     public static function get_by_stage(
         $class,
@@ -2657,9 +2654,10 @@ SQL
     /**
      * Return the latest version of the given record.
      *
-     * @param string $class
+     * @template T of DataObject
+     * @param class-string<T> $class
      * @param int $id
-     * @return DataObject
+     * @return T&static
      */
     public static function get_latest_version($class, $id)
     {
@@ -2687,7 +2685,6 @@ SQL
             return false;
         }
 
-        /** @var Versioned|DataObject $version */
         $version = static::get_latest_version($this->owner->baseClass(), $owner->ID);
         return ($version->Version == $owner->Version);
     }
@@ -2826,10 +2823,11 @@ SQL
      *
      * In particular, this will query deleted records as well as active ones.
      *
-     * @param string $class
+     * @template T of DataObject
+     * @param class-string<T> $class
      * @param string $filter
      * @param string $sort
-     * @return DataList
+     * @return DataList<T>
      */
     public static function get_including_deleted($class, $filter = "", $sort = "")
     {
@@ -2851,11 +2849,11 @@ SQL
      * modifications via write() will create a new version, rather than
      * modifying the existing one.
      *
-     * @param string $class
+     * @template T of DataObject
+     * @param class-string<T> $class
      * @param int $id
      * @param int $version
-     *
-     * @return DataObject
+     * @return T&static
      */
     public static function get_version($class, $id, $version)
     {
@@ -2872,10 +2870,11 @@ SQL
     /**
      * Return a list of all versions for a given id.
      *
-     * @param string $class
+     * @template T
+     * @param class-string<T> $class
      * @param int $id
      *
-     * @return DataList
+     * @return DataList<T>
      */
     public static function get_all_versions($class, $id)
     {
@@ -2992,7 +2991,6 @@ SQL
         if (!$this->owner->AuthorID) {
             return null;
         }
-        /** @var Member $member */
         $member = DataObject::get_by_id(Member::class, $this->owner->AuthorID);
         return $member;
     }
@@ -3007,7 +3005,6 @@ SQL
         if (!$this->owner->PublisherID) {
             return null;
         }
-        /** @var Member $member */
         $member = DataObject::get_by_id(Member::class, $this->owner->PublisherID);
         return $member;
     }

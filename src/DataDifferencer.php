@@ -144,9 +144,9 @@ class DataDifferencer extends ViewableData
             // Using relation name instead of database column name, because of FileField etc.
             $setField = is_a($relSpec, Image::class, true) ? $relName : $relField;
             $toTitle = '';
-            /** @var DataObject $relObjTo */
             $relObjTo = null;
             if ($this->toRecord->hasMethod($relName)) {
+                /** @var DataObject $relObjTo */
                 $relObjTo = $this->toRecord->$relName();
                 $toTitle = $this->getObjectDisplay($relObjTo);
             }
@@ -204,6 +204,7 @@ class DataDifferencer extends ViewableData
      *  - Diff: An HTML diff showing the changes
      *  - From: The older version of the field
      *  - To: The newer version of the field
+     * @return ArrayList<ArrayData>
      */
     public function ChangedFields()
     {
