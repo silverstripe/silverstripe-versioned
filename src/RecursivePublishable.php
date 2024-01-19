@@ -17,7 +17,7 @@ use SilverStripe\ORM\SS_List;
  * Provides owns / owned_by and recursive publishing API for all objects.
  * This extension is added to DataObject by default
  *
- * @property DataObject|RecursivePublishable $owner
+ * @extends DataExtension<DataObject&static>
  */
 class RecursivePublishable extends DataExtension
 {
@@ -133,7 +133,6 @@ class RecursivePublishable extends DataExtension
         $changeSetIDs = [];
 
         // Remove all ChangeSetItems matching this record
-        /** @var ChangeSetItem $changeSetItem */
         foreach (ChangeSetItem::get_for_object($this->owner) as $changeSetItem) {
             $changeSetIDs[$changeSetItem->ChangeSetID] = $changeSetItem->ChangeSetID;
             $changeSetItem->delete();
@@ -141,7 +140,6 @@ class RecursivePublishable extends DataExtension
 
         // Sync all affected changesets
         if ($changeSetIDs) {
-            /** @var ChangeSet $changeSet */
             foreach (ChangeSet::get()->byIDs($changeSetIDs) as $changeSet) {
                 $changeSet->sync();
             }
@@ -155,7 +153,7 @@ class RecursivePublishable extends DataExtension
      *
      * @param bool $recursive True if recursive
      * @param ArrayList $list Optional list to add items to
-     * @return ArrayList list of objects
+     * @return ArrayList<DataObject&static> list of objects
      */
     public function findOwned($recursive = true, $list = null)
     {
@@ -191,7 +189,7 @@ class RecursivePublishable extends DataExtension
      *
      * @param bool $recursive True if recursive
      * @param ArrayList $list Optional list to add items to
-     * @return ArrayList list of objects
+     * @return ArrayList<DataObject> list of objects
      */
     public function findOwners($recursive = true, $list = null)
     {
@@ -213,12 +211,11 @@ class RecursivePublishable extends DataExtension
      * @param bool $recursive True if recursive
      * @param ArrayList $list List to add items to
      * @param array $lookup List of reverse lookup rules for owned objects
-     * @return ArrayList list of objects
+     * @return ArrayList<DataObject> list of objects
      */
     public function findOwnersRecursive($recursive, $list, $lookup)
     {
         // First pass: find objects that are explicitly owned_by (e.g. custom relationships)
-        /** @var DataObject $owner */
         $owner = $this->owner;
         $owners = $owner->findRelatedObjects('owned_by', false);
 

@@ -95,11 +95,12 @@ class VersionedResolver
     }
 
     /**
-     * @param DataList $list
+     * @template T of DataObject
+     * @param DataList<T> $list
      * @param array $args
      * @param array $context
      * @param ResolveInfo $info
-     * @return DataList
+     * @return DataList<T>
      * @see VersionedRead
      */
     public static function resolveVersionedRead(DataList $list, array $args, array $context, ResolveInfo $info)

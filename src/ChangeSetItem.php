@@ -211,7 +211,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     /**
      * Get all implicit objects for this change
      *
-     * @return SS_List
+     * @return SS_List<DataObject>
      */
     public function findReferenced()
     {
@@ -231,7 +231,6 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // If changed on stage, include all owned objects for publish
-        /** @var DataObject|RecursivePublishable $draftRecord */
         $draftRecord = $this->getObjectInStage(Versioned::DRAFT);
         if (!$draftRecord) {
             return ArrayList::create();
@@ -375,7 +374,6 @@ class ChangeSetItem extends DataObject implements Thumbnail
         }
 
         // Just get the best version as this object may not even exist on either stage anymore.
-        /** @var Versioned|DataObject $object */
         $object = $this->getObjectLatestVersion();
         if (!$object) {
             return false;

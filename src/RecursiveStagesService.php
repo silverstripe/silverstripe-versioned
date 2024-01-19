@@ -25,7 +25,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
 
     public static function reset(): void
     {
-        /** @var RecursiveStagesInterface $service */
         $service = Injector::inst()->get(RecursiveStagesInterface::class);
 
         if (!$service instanceof RecursiveStagesService) {
@@ -116,7 +115,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         $identifiers = Versioned::withVersionedMode(function () use ($object, $stage): array {
             Versioned::set_stage($stage);
 
-            /** @var DataObject $stagedObject */
             $stagedObject = DataObject::get_by_id($object->ClassName, $object->ID);
 
             if ($stagedObject === null) {
@@ -154,7 +152,6 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
      */
     protected function getOwnedObjects(DataObject $object): array
     {
-        /** @var DataObject|Versioned $object */
         if (!$object->hasExtension(RecursivePublishable::class)) {
             return [];
         }
