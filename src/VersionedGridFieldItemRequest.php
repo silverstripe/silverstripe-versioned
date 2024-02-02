@@ -4,6 +4,7 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Control\PjaxResponseNegotiator;
 use SilverStripe\Core\Convert;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
@@ -15,6 +16,7 @@ use SilverStripe\Forms\TabSet;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBField;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\View\ArrayData;
 use SilverStripe\View\SSViewer;
@@ -229,6 +231,51 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         return $this->redirectAfterSave(false);
     }
 
+    public function doRollback($data, $form): HTTPResponse|DBHTMLText
+    {
+        $version = $this->getRequest()->param('VersionID');
+        $this->extend('onBeforeRollback', $data['Version']);
+
+        /** @var Versioned|RecursivePublishable|DataObject $record */
+        $record = $this->getRecord();
+
+        // Check permission
+        if (!$record->canEdit()) {
+            return $this->httpError(
+                403,
+                _t(
+                    __CLASS__ . '.ROLLEDBACKPERMISSION',
+                    "You do not have permission to roll back this record."
+                )
+            );
+        }
+
+        if ($version) {
+            $record->rollbackRecursive($version);
+            $message = _t(
+                __CLASS__ . '.ROLLEDBACKVERSION',
+                "Rolled back to version #{version}.",
+                ['version' => $version]
+            );
+        } else {
+            $record->doRevertToLive();
+            $record->publishRecursive();
+            $message = _t(
+                __CLASS__ . '.ROLLEDBACKPUB',
+                "Rolled back to published version."
+            );
+        }
+
+        $this->setFormMessage($form, $message);
+
+        $controller = $this->getToplevelController();
+        $controller->getResponse()->addHeader('X-ControllerURL', $this->Link('edit'));
+        $controller->getResponse()->addHeader('X-Pjax', 'Content');
+        $controller->getResponse()->addHeader('X-Status', $message);
+
+        return $this->redirectAfterSave(false);
+    }
+
     /**
      * @param Form $form
      * @param string $message
@@ -287,7 +334,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // Get status of the object
         $isOnDraft = $record->isOnDraft();
         $isPublished = $record->isPublished();
-        $stagesDiffer = $record->stagesDiffer();
+        $stagesDiffer = $record->stagesDiffer || $record->stagesDifferRecursive();
 
         // Check permissions
         $canPublish = $record->canPublish();
@@ -355,6 +402,18 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
                 $actionPublish->setTitle(_t(self::class . '.BUTTONSAVEPUBLISH', 'Publish'));
                 $actionPublish->removeExtraClass($noChangesClasses);
             }
+        }
+
+        // "rollback"
+        if ($isOnDraft && $isPublished && $canEdit && $stagesDiffer) {
+            $moreOptions->push(
+                FormAction::create('doRollback', _t(__CLASS__.'.BUTTONCANCELDRAFT', 'Cancel draft changes'))
+                    ->setDescription(_t(
+                        'SilverStripe\\CMS\\Model\\SiteTree.BUTTONCANCELDRAFTDESC',
+                        'Delete your draft and revert to the currently published page'
+                    ))
+                    ->addExtraClass('btn-secondary')
+            );
         }
 
         // "unpublish" action
