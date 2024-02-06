@@ -28,9 +28,15 @@ sl:
     STATE_OPEN: Aktivno
     STATE_PUBLISHED: Objavljeno
     STATE_REVERTED: Povrnjeno
+    db_Description: Opis
+    db_IsInferred: Izpeljan
+    db_LastSynced: 'Nazadnje posodobljeno'
     db_Name: Naziv
     db_PublishDate: 'Datum objave'
     db_State: Stanje
+    has_many_Changes: Spremembe
+    has_one_Owner: Lastnik
+    has_one_Publisher: Objavitelj
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Nizi sprememb'
     PLURALS:
@@ -39,6 +45,13 @@ sl:
       other: '{count} nizov sprememb'
       two: '{count} niza sprememb'
     SINGULARNAME: 'Preoblikuj niz sprememb'
+    belongs_many_many_References: Navedbe
+    db_Added: Dodano
+    db_VersionAfter: 'Naslednja različica'
+    db_VersionBefore: 'Predhodnja različica'
+    has_one_ChangeSet: 'Niz sprememb'
+    has_one_Object: Objekt
+    many_many_ReferencedBy: 'Referenca za'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arhiviraj
     ArchivePermissionsFailure: 'Nimate pravic za arhiviranje'
@@ -58,6 +71,7 @@ sl:
     RESTORE_TO_ROOT: 'Obnovi v osnutek na prvem nivoju'
     RESTORE_TO_ROOT_DESC: 'Obnovi arhivirano različico v obliki osnutka na prvem nivoju'
   SilverStripe\Versioned\Versioned:
+    db_Version: Različica
     has_many_Versions: Različice
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Arhivirano {name} {title}'
