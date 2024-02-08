@@ -22,14 +22,12 @@ fr:
     PUBLISH_DATE: 'Date de publication'
     SINGULARNAME: Campagne
     STATE: Statut
-    STATE_OPEN: Active
     STATE_PUBLISHED: Publié
     STATE_REVERTED: Revenu
     db_Name: Nom
     db_PublishDate: 'Date de publication'
     db_State: Statut
   SilverStripe\Versioned\GridFieldArchiveAction:
-    Archive: Archive
     Delete: Effacer
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Rétablir le brouillon'
@@ -41,8 +39,6 @@ fr:
     RESTORE_DESC: 'Rétablir la version archivée en tant que brouillon'
     RESTORE_SUCCESS: 'Le {model} "{id}" a été rétabli avec succès.'
     RESTORE_TO_ROOT: 'Rétablir le brouillon à la racine'
-  SilverStripe\Versioned\Versioned:
-    has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: '{name} {title} archivé'
     BUTTONAPPLYCHANGES: 'Appliquer les modifications'
