@@ -7,7 +7,6 @@ de:
     ITEMS_TOTAL:
       one: '1 insgesamt'
       other: '{count} insgesamt'
-    NAME: Name
     PLURALNAME: Kampagnen
     PLURALS:
       one: 'Eine Kampagne'
@@ -22,7 +21,6 @@ de:
     STATE_OPEN: Aktiv
     STATE_PUBLISHED: Veröffentlicht
     STATE_REVERTED: 'Rückgängig gemacht'
-    db_Name: Name
     db_PublishDate: Veröffentlichungsdatum
     db_State: Bundesland
   SilverStripe\Versioned\ChangeSetItem:

@@ -4,9 +4,6 @@ da:
     ITEMS_CHANGES:
       one: '{total} (1 ændring)'
       other: '{total} ({count} ændringer)'
-    ITEMS_TOTAL:
-      one: '1 total'
-      other: '{count} total'
     NAME: Navn
     PLURALNAME: Kampagner
     PLURALS:
@@ -25,12 +22,6 @@ da:
     db_Name: Navn
     db_PublishDate: 'Udgivelses dato'
     db_State: Tilstand
-  SilverStripe\Versioned\ChangeSetItem:
-    PLURALNAME: 'Change Set Items'
-    PLURALS:
-      one: 'A Change Set Item'
-      other: '{count} Change Set Items'
-    SINGULARNAME: 'Change Set Item'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arkiver
   SilverStripe\Versioned\RecursivePublishable:
