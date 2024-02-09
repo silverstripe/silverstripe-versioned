@@ -77,9 +77,9 @@ en:
     DRAFT: Draft
     MODIFIED: Modified
     MoreOptions: 'More options'
+    PUBLISHEDTOASTMESSAGE: 'Published {type} "{title}"'
     Published: 'Published {name} {link}'
     Unpublished: 'Unpublished {name} "{title}"'
-    PUBLISHEDTOASTMESSAGE: 'Published {type} "{title}"'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Item has not been published yet'
     ADDEDTODRAFTSHORT: Draft
