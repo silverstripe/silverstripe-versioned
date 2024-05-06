@@ -16,29 +16,33 @@ fr:
       one: 'Une campagne'
       other: '{count} Campagnes'
     PUBLISHED_DATE_BY: '{date} par {name}'
-    PUBLISHED_TODAY: 'Aujourd''hui {time}'
-    PUBLISHED_TODAY_BY: 'Aujourd''hui {time} par {name}'
+    PUBLISHED_TODAY: "Aujourd'hui {time}"
+    PUBLISHED_TODAY_BY: "Aujourd'hui {time} par {name}"
     PUBLISHER_NAME: 'Publié par'
     PUBLISH_DATE: 'Date de publication'
     SINGULARNAME: Campagne
     STATE: Statut
+    STATE_OPEN: Active
     STATE_PUBLISHED: Publié
     STATE_REVERTED: Revenu
     db_Name: Nom
     db_PublishDate: 'Date de publication'
     db_State: Statut
   SilverStripe\Versioned\GridFieldArchiveAction:
+    Archive: Archive
     Delete: Effacer
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Rétablir le brouillon'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Généré par la publication de ''{title}'' le {created}'
+    INFERRED_TITLE: "Généré par la publication de '{title}' le {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Rétablir le brouillon'
     RESTORE_CHANGEDLOCATION: 'Le {model} "{id}" a été rétabli à la racine car son emplacement originel n''a pas pu être trouvé.'
     RESTORE_DESC: 'Rétablir la version archivée en tant que brouillon'
     RESTORE_SUCCESS: 'Le {model} "{id}" a été rétabli avec succès.'
     RESTORE_TO_ROOT: 'Rétablir le brouillon à la racine'
+  SilverStripe\Versioned\Versioned:
+    has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: '{name} {title} archivé'
     BUTTONAPPLYCHANGES: 'Appliquer les modifications'
@@ -50,16 +54,16 @@ fr:
     BUTTONUNPUBLISHDESC: 'Retirer cette entrée du site publié'
     DRAFT: Brouillon
     MODIFIED: Modifié
-    MoreOptions: 'Plus d''options'
+    MoreOptions: "Plus d'options"
     Published: '{name} {link} publié'
     Unpublished: '{name} {title} dépublié'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
-    ADDEDTODRAFTHELP: 'L''élément n''a pas encore été publié'
+    ADDEDTODRAFTHELP: "L'élément n'a pas encore été publié"
     ADDEDTODRAFTSHORT: Brouillon
-    ARCHIVEDPAGEHELP: 'L''élément est retiré des brouillons et en ligne'
+    ARCHIVEDPAGEHELP: "L'élément est retiré des brouillons et en ligne"
     ARCHIVEDPAGESHORT: Archivé
-    MODIFIEDONDRAFTHELP: 'L''élément a des changements non publiés'
+    MODIFIEDONDRAFTHELP: "L'élément a des changements non publiés"
     MODIFIEDONDRAFTSHORT: Modifié
-    ONLIVEONLYSHORTHELP: 'L''élément est publié, mais a été effacé des brouillons'
+    ONLIVEONLYSHORTHELP: "L'élément est publié, mais a été effacé des brouillons"
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Vous devez vous identifier avec votre mot de passe CMS pour voir le contenu brouillon ou archivé. <a href="{link}">Cliquez ici pour revenir au site publié.</a>'

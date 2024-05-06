@@ -12,7 +12,7 @@ cs:
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archiv
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Generováno vydavatelem ''{title}'' v {created}'
+    INFERRED_TITLE: "Generováno vydavatelem '{title}' v {created}"
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Verze
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
