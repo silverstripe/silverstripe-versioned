@@ -59,7 +59,7 @@ sl:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Obnovi v osnutek'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Ustvarjeno z objavo ''{title}'', {created}'
+    INFERRED_TITLE: "Ustvarjeno z objavo '{title}', {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Obnovi v osnutek'
     RESTORE_CHANGEDLOCATION: '{model} "{id}" smo obnovili na prvem nivoju, ker izvorna lokacija ni znana.'

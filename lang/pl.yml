@@ -46,7 +46,7 @@ pl:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Przywróć do wersji roboczej'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Wygenerowano przez opublikowanie ''{title}'' w {created}'
+    INFERRED_TITLE: "Wygenerowano przez opublikowanie '{title}' w {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Przywróć do wersji roboczej'
     RESTORE_CHANGEDLOCATION: 'Przywrócono {model} "{id}" do najwyższego poziomu, ponieważ nie można znaleźć oryginalnej lokalizacji.'

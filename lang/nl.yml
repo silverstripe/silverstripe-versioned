@@ -38,7 +38,7 @@ nl:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Terugzetten als concept'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Gegenereerd bij het publiceren van ''{title}'' op {created}'
+    INFERRED_TITLE: "Gegenereerd bij het publiceren van '{title}' op {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Terugzetten als concept'
     RESTORE_CHANGEDLOCATION: '{model} "{id}" hersteld als root-item, doordat originele locatie niet meer bestond.'

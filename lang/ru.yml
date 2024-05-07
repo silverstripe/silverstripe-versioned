@@ -22,7 +22,7 @@ ru:
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Архив
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Сгенерировано автоматически при публикации ''{title}'' в {created}'
+    INFERRED_TITLE: "Сгенерировано автоматически при публикации '{title}' в {created}"
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Версии
   SilverStripe\Versioned\VersionedGridFieldItemRequest:

@@ -27,7 +27,7 @@ sv:
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arkiv
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Skapad genom publicering av ''{title}'' {created}'
+    INFERRED_TITLE: "Skapad genom publicering av '{title}' {created}"
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
