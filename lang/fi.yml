@@ -38,7 +38,7 @@ fi:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Palauta vedokseksi'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Luonut: julkaisun ''{title}'' » {created}'
+    INFERRED_TITLE: "Luonut: julkaisun '{title}' » {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Palauta vedokseksi'
     RESTORE_CHANGEDLOCATION: 'Plautettiin {model} "{id}" päätasolle, koska alkuperäistä sijaintia ei löytynyt.'

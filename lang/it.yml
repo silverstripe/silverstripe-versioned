@@ -42,13 +42,13 @@ it:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Ripristina in bozza'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Generato dalla pubblicazione di ''{title}'' il {created}'
+    INFERRED_TITLE: "Generato dalla pubblicazione di '{title}' il {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Ripristina in bozza'
     RESTORE_CHANGEDLOCATION: 'Ripristinato il {model} "{id}" al livello più alto in quanto la posizione originale non può essere trovata.'
     RESTORE_DESC: 'Ripristina la versione archiviata in bozza'
-    RESTORE_FALIURE_PERMISSION: 'Autorizzazione insufficiente per ripristinare l''elemento'
-    RESTORE_FALIURE_RECORD: 'Impossibile ripristinare l''elemento'
+    RESTORE_FALIURE_PERMISSION: "Autorizzazione insufficiente per ripristinare l'elemento"
+    RESTORE_FALIURE_RECORD: "Impossibile ripristinare l'elemento"
     RESTORE_FALIURE_STATE: 'Questo articolo esiste già e non può essere ripristinato'
     RESTORE_SUCCESS: 'Ripristinato con successo il {model} "{id}"'
     RESTORE_TO_ROOT: 'Ripristina la bozza al livello superiore'
@@ -70,13 +70,13 @@ it:
     Published: 'Pubblicato {name} {link}'
     Unpublished: 'Nascosto {name} {title}'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
-    ADDEDTODRAFTHELP: 'L''elemento non è stato ancora pubblicato'
+    ADDEDTODRAFTHELP: "L'elemento non è stato ancora pubblicato"
     ADDEDTODRAFTSHORT: Bozza
-    ARCHIVEDPAGEHELP: 'L''elemento è rimosso dalla bozza e dal vivo'
+    ARCHIVEDPAGEHELP: "L'elemento è rimosso dalla bozza e dal vivo"
     ARCHIVEDPAGESHORT: Archiviato
-    MODIFIEDONDRAFTHELP: 'L''elemento ha modifiche non pubblicate'
+    MODIFIEDONDRAFTHELP: "L'elemento ha modifiche non pubblicate"
     MODIFIEDONDRAFTSHORT: Modificato
     ONLIVEONLYSHORT: 'Solo live'
-    ONLIVEONLYSHORTHELP: 'L''elemento è pubblicato, ma è stato cancellato dalla bozza'
+    ONLIVEONLYSHORTHELP: "L'elemento è pubblicato, ma è stato cancellato dalla bozza"
   SilverStripe\Versioned\VersionedHTTPMiddleware:
     DRAFT_SITE_ACCESS_RESTRICTION: 'Devi effettuare l''accesso al CMS per poter vedere il sito bozza o il contenuto archiviato. <a href="{link}">Premere qui per tornare al sito pubblicato.</a>'

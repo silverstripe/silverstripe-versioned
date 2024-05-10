@@ -36,7 +36,7 @@ de:
   SilverStripe\Versioned\GridFieldRestoreAction:
     RESTORE: 'Als Entwurf wiederherstellen'
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Generiert durch Veröffentlichung von ''{title}'' am {created}'
+    INFERRED_TITLE: "Generiert durch Veröffentlichung von '{title}' am {created}"
   SilverStripe\Versioned\RestoreAction:
     RESTORE: 'Als Entwurf wiederherstellen'
     RESTORE_CHANGEDLOCATION: '{model} "{id}" auf höchster Ebene wiederhergestellt da ursprünglicher Platz nicht gefunden werden konnte.'

@@ -25,7 +25,7 @@ da:
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Arkiver
   SilverStripe\Versioned\RecursivePublishable:
-    INFERRED_TITLE: 'Genereret ved udgivelse af ''{title}'' den {created}'
+    INFERRED_TITLE: "Genereret ved udgivelse af '{title}' den {created}"
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
