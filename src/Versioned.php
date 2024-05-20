@@ -313,7 +313,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @param SQLSelect $query
      * @param DataQuery $dataQuery
      */
-    public function augmentDataQueryCreation(SQLSelect &$query, DataQuery &$dataQuery)
+    protected function augmentDataQueryCreation(SQLSelect &$query, DataQuery &$dataQuery)
     {
         // Convert reading mode to dataquery params and assign
         $args = ReadingMode::toDataQueryParams(Versioned::get_reading_mode());
@@ -405,7 +405,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * @param array $params
      */
-    public function updateInheritableQueryParams(&$params)
+    protected function updateInheritableQueryParams(&$params)
     {
         // Skip if versioned isn't set
         if (!isset($params['Versioned.mode'])) {
@@ -455,7 +455,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @param DataQuery|null $dataQuery
      * @throws InvalidArgumentException
      */
-    public function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
+    protected function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
     {
         if (!$dataQuery) {
             return;
@@ -896,7 +896,7 @@ SQL
      * @param DataQuery $dataQuery
      * @param DataObject $dataObject
      */
-    public function augmentLoadLazyFields(SQLSelect &$query, DataQuery &$dataQuery = null, $dataObject)
+    protected function augmentLoadLazyFields(SQLSelect &$query, DataQuery &$dataQuery = null, $dataObject)
     {
         // The VersionedMode local variable ensures that this decorator only applies to
         // queries that have originated from the Versioned object, and have the Versioned
@@ -917,7 +917,7 @@ SQL
         }
     }
 
-    public function augmentDatabase()
+    protected function augmentDatabase()
     {
         $owner = $this->owner;
         $class = get_class($owner);
@@ -1257,7 +1257,7 @@ SQL
         $this->owner->extend('onAfterVersionDelete');
     }
 
-    public function augmentWrite(&$manipulation)
+    protected function augmentWrite(&$manipulation)
     {
         // get Version number from base data table on write
         $version = null;
@@ -1348,7 +1348,7 @@ SQL
     /**
      *
      */
-    public function onAfterWrite()
+    protected function onAfterWrite()
     {
         $this->setNextWriteWithoutVersion(false);
     }
@@ -1416,7 +1416,7 @@ SQL
      * If a write was skipped, then we need to ensure that we don't leave a
      * migrateVersion() value lying around for the next write.
      */
-    public function onAfterSkippedWrite()
+    protected function onAfterSkippedWrite()
     {
         $this->setMigratingVersion(null);
     }
@@ -1887,7 +1887,7 @@ SQL
         return true;
     }
 
-    public function onAfterDelete()
+    protected function onAfterDelete()
     {
         // Create deleted record for current stage
         $this->createDeletedVersion(static::get_stage());
@@ -2452,7 +2452,7 @@ SQL
      * @param array $options A map of hints about what should be cached. "numChildrenMethod" and
      *                       "childrenMethod" are allowed keys.
      */
-    public function onPrepopulateTreeDataCache($recordList = null, array $options = [])
+    protected function onPrepopulateTreeDataCache($recordList = null, array $options = [])
     {
         $idList = is_array($recordList) ? $recordList :
             ($recordList instanceof DataList ? $recordList->column('ID') : null);
@@ -2888,7 +2888,7 @@ SQL
     /**
      * @param array $labels
      */
-    public function updateFieldLabels(&$labels)
+    protected function updateFieldLabels(&$labels)
     {
         $labels['Versions'] = _t(__CLASS__ . '.has_many_Versions', 'Versions', 'Past Versions of this record');
     }
@@ -2896,7 +2896,7 @@ SQL
     /**
      * @param FieldList $fields
      */
-    public function updateCMSFields(FieldList $fields)
+    protected function updateCMSFields(FieldList $fields)
     {
         // remove the version field from the CMS as this should be left
         // entirely up to the extension (not the cms user).
@@ -2909,7 +2909,7 @@ SQL
      * @param DataObject $source Record this was duplicated from
      * @param bool $doWrite
      */
-    public function onBeforeDuplicate($source, $doWrite)
+    protected function onBeforeDuplicate($source, $doWrite)
     {
         $this->owner->Version = 0;
     }
@@ -2925,7 +2925,7 @@ SQL
      *
      * @return string
      */
-    public function cacheKeyComponent()
+    protected function cacheKeyComponent()
     {
         return 'versionedmode-' . static::get_reading_mode();
     }

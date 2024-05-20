@@ -13,7 +13,7 @@ use SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState;
  */
 class VersionedGridFieldStateExtension extends Extension
 {
-    public function updateConfig()
+    protected function updateConfig()
     {
         $owner = $this->getOwner();
         if (!$owner->getComponentByType(VersionedGridFieldState::class)) {

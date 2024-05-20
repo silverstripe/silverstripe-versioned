@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
+use ReflectionMethod;
 
 /**
  * @internal Only test the right values are returned, not that the cache is actually used.
@@ -100,7 +101,12 @@ class VersionedNumberCacheTest extends SapphireTest
      */
     public function testPrepopulatedVersionNumberCache($stage, $ID, $cache, $expected)
     {
-        TestObject::singleton()->onPrepopulateTreeDataCache();
+        $owner = TestObject::singleton();
+        $ext = new Versioned();
+        $ext->setOwner($owner);
+        $method = new ReflectionMethod(Versioned::class, 'onPrepopulateTreeDataCache');
+        $method->setAccessible(true);
+        $method->invoke($ext);
         $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
         $this->assertEquals(self::$expectedVersions[$expected], $actual);
     }

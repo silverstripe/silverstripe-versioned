@@ -432,7 +432,7 @@ class RecursivePublishable extends DataExtension
      * @param bool $doWrite
      * @param array|null|false $relations
      */
-    public function onBeforeDuplicate($original, &$doWrite, &$relations)
+    protected function onBeforeDuplicate($original, &$doWrite, &$relations)
     {
         // If relations to duplicate are declared (or forced off) don't rewrite
         if ($relations || $relations === false) {
@@ -457,7 +457,7 @@ class RecursivePublishable extends DataExtension
      * Make sure to flush cached data in case the data changes
      * Extension point in @see DataObject::onAfterWrite()
      */
-    public function onAfterWrite(): void
+    protected function onAfterWrite(): void
     {
         RecursiveStagesService::reset();
     }
@@ -466,7 +466,7 @@ class RecursivePublishable extends DataExtension
      * Make sure to flush cached data in case the data changes
      * Extension point in @see DataObject::onAfterDelete()
      */
-    public function onAfterDelete(): void
+    protected function onAfterDelete(): void
     {
         RecursiveStagesService::reset();
     }

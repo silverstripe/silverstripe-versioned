@@ -13,7 +13,7 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
  */
 class VersionedGridFieldArchiveExtension extends Extension
 {
-    public function updateConfig()
+    protected function updateConfig()
     {
         $owner = $this->getOwner();
         $owner->addComponent(new GridFieldArchiveAction(), GridFieldDeleteAction::class);
