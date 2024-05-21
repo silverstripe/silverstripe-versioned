@@ -72,7 +72,7 @@ class TestObject extends DataObject implements TestOnly
         return true;
     }
 
-    public function onAfterPublish($original)
+    protected function onAfterPublish($original)
     {
         if (self::$setNameWithoutVersionAfterPublish !== null) {
             $this->Name = self::$setNameWithoutVersionAfterPublish;
@@ -80,7 +80,7 @@ class TestObject extends DataObject implements TestOnly
         }
     }
 
-    public function onAfterDelete()
+    protected function onAfterDelete()
     {
         parent::onAfterDelete();
         self::$nameValueOfObjectJustDeleted = $this->Name;

@@ -20,7 +20,7 @@ class VersionedGridFieldDetailForm extends Extension
      * @param RequestHandler $requestHandler
      * @param string $assignedClass Name of class explicitly assigned to this component
      */
-    public function updateItemRequestClass(&$class, $gridField, $record, $requestHandler, $assignedClass = null)
+    protected function updateItemRequestClass(&$class, $gridField, $record, $requestHandler, $assignedClass = null)
     {
         // Avoid overriding explicitly assigned class name if set using setItemRequestClass()
         if ($assignedClass) {

@@ -83,7 +83,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
         ]
     ];
 
-    public function onBeforeWrite()
+    protected function onBeforeWrite()
     {
         // Make sure ObjectClass refers to the base data class in the case of old or wrong code
         $this->ObjectClass = $this->getSchema()->baseDataClass($this->ObjectClass);

@@ -17,7 +17,7 @@ class RecursivePublishableHandler extends Extension
      * Ensure that non-versioned records are published on save.
      * @param DataObject $record
      */
-    public function onAfterSave(DataObject $record)
+    protected function onAfterSave(DataObject $record)
     {
         // Assume that any versioned record has an explicit publish already
         if (!$record->hasExtension(Versioned::class)) {
