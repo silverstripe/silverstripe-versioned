@@ -122,7 +122,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * @var null
      */
-    protected static $default_reading_mode = self::DEFAULT_MODE;
+    protected static $default_reading_mode = Versioned::DEFAULT_MODE;
 
     /**
      * Field used to hold the migrating version
@@ -147,9 +147,9 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      * @var array
      */
     private static $non_virtual_fields = [
-        self::MIGRATING_VERSION,
-        self::NEXT_WRITE_WITHOUT_VERSIONED,
-        self::DELETE_WRITES_VERSION_DISABLED,
+        Versioned::MIGRATING_VERSION,
+        Versioned::NEXT_WRITE_WITHOUT_VERSIONED,
+        Versioned::DELETE_WRITES_VERSION_DISABLED,
     ];
 
     /**
@@ -302,7 +302,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      */
     public static function reset()
     {
-        self::$reading_mode = '';
+        Versioned::$reading_mode = '';
         Controller::curr()->getRequest()->getSession()->clear('readingMode');
     }
 
@@ -329,7 +329,7 @@ class Versioned extends DataExtension implements TemplateGlobalProvider, Resetta
      *
      * @var string $mode One of "StagedVersioned" or "Versioned".
      */
-    public function __construct($mode = self::STAGEDVERSIONED)
+    public function __construct($mode = Versioned::STAGEDVERSIONED)
     {
         if (!in_array($mode, [static::STAGEDVERSIONED, static::VERSIONED])) {
             throw new InvalidArgumentException("Invalid mode: {$mode}");
@@ -1300,8 +1300,8 @@ SQL
             } else {
                 // All writes are to draft, only live affect both
                 $stages = !$this->hasStages() || static::get_stage() === static::LIVE
-                    ? [self::DRAFT, self::LIVE]
-                    : [self::DRAFT];
+                    ? [Versioned::DRAFT, Versioned::LIVE]
+                    : [Versioned::DRAFT];
                 $this->augmentWriteVersioned($manipulation, $class, $table, $id, $stages, false);
             }
 
@@ -1360,7 +1360,7 @@ SQL
      */
     public function getNextWriteWithoutVersion()
     {
-        return $this->owner->getField(self::NEXT_WRITE_WITHOUT_VERSIONED);
+        return $this->owner->getField(Versioned::NEXT_WRITE_WITHOUT_VERSIONED);
     }
 
     /**
@@ -1371,7 +1371,7 @@ SQL
      */
     public function setNextWriteWithoutVersion($flag)
     {
-        return $this->owner->setField(self::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
+        return $this->owner->setField(Versioned::NEXT_WRITE_WITHOUT_VERSIONED, $flag);
     }
 
     /**
@@ -1381,7 +1381,7 @@ SQL
      */
     public function getDeleteWritesVersion()
     {
-        return !$this->owner->getField(self::DELETE_WRITES_VERSION_DISABLED);
+        return !$this->owner->getField(Versioned::DELETE_WRITES_VERSION_DISABLED);
     }
 
     /**
@@ -1392,7 +1392,7 @@ SQL
      */
     public function setDeleteWritesVersion($flag)
     {
-        return $this->owner->setField(self::DELETE_WRITES_VERSION_DISABLED, !$flag);
+        return $this->owner->setField(Versioned::DELETE_WRITES_VERSION_DISABLED, !$flag);
     }
 
     /**
@@ -1646,7 +1646,7 @@ SQL
         $owner = $this->owner;
 
         // Bypass if site is unsecured
-        if (!self::get_draft_site_secured()) {
+        if (!Versioned::get_draft_site_secured()) {
             return true;
         }
 
@@ -1706,7 +1706,7 @@ SQL
      * @param Member $member
      * @return bool
      */
-    public function canViewStage($stage = self::LIVE, $member = null)
+    public function canViewStage($stage = Versioned::LIVE, $member = null)
     {
         return static::withVersionedMode(function () use ($stage, $member) {
             Versioned::set_stage($stage);
@@ -1807,7 +1807,7 @@ SQL
         // get the last published version
         $original = null;
         if ($this->isPublished()) {
-            $original = self::get_by_stage($owner->baseClass(), self::LIVE)
+            $original = Versioned::get_by_stage($owner->baseClass(), Versioned::LIVE)
                 ->byID($owner->ID);
         }
 
@@ -1961,7 +1961,7 @@ SQL
      */
     public function getMigratingVersion()
     {
-        return $this->owner->getField(self::MIGRATING_VERSION);
+        return $this->owner->getField(Versioned::MIGRATING_VERSION);
     }
 
     /**
@@ -1972,7 +1972,7 @@ SQL
      */
     public function setMigratingVersion($version)
     {
-        return $this->owner->setField(self::MIGRATING_VERSION, $version);
+        return $this->owner->setField(Versioned::MIGRATING_VERSION, $version);
     }
 
     /**
@@ -2231,7 +2231,7 @@ SQL
      */
     public static function set_reading_mode($mode)
     {
-        self::$reading_mode = $mode;
+        Versioned::$reading_mode = $mode;
     }
 
     /**
@@ -2241,7 +2241,7 @@ SQL
      */
     public static function get_reading_mode()
     {
-        return self::$reading_mode;
+        return Versioned::$reading_mode;
     }
 
     /**
@@ -2307,7 +2307,7 @@ SQL
      */
     public static function set_default_reading_mode($mode)
     {
-        self::$default_reading_mode = $mode;
+        Versioned::$default_reading_mode = $mode;
     }
 
     /**
@@ -2317,7 +2317,7 @@ SQL
      */
     public static function get_default_reading_mode()
     {
-        return self::$default_reading_mode ?: self::DEFAULT_MODE;
+        return Versioned::$default_reading_mode ?: Versioned::DEFAULT_MODE;
     }
 
     /**
@@ -2332,7 +2332,7 @@ SQL
             return (bool)static::$is_draft_site_secured;
         }
         // Config default
-        return (bool)Config::inst()->get(self::class, 'draft_site_secured');
+        return (bool)Config::inst()->get(Versioned::class, 'draft_site_secured');
     }
 
     /**
@@ -2351,7 +2351,7 @@ SQL
      * @param string $date New reading archived date.
      * @param string $stage Set stage
      */
-    public static function reading_archived_date($date, $stage = self::DRAFT)
+    public static function reading_archived_date($date, $stage = Versioned::DRAFT)
     {
         ReadingMode::validateStage($stage);
         Versioned::set_reading_mode('Archive.' . $date . '.' . $stage);
@@ -2413,9 +2413,9 @@ SQL
 
         // cached call
         if ($cache) {
-            if (isset(self::$cache_versionnumber[$baseClass][$stage][$id])) {
-                return self::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
-            } elseif (isset(self::$cache_versionnumber[$baseClass][$stage]['_complete'])) {
+            if (isset(Versioned::$cache_versionnumber[$baseClass][$stage][$id])) {
+                return Versioned::$cache_versionnumber[$baseClass][$stage][$id] ?: null;
+            } elseif (isset(Versioned::$cache_versionnumber[$baseClass][$stage]['_complete'])) {
                 // if the cache was marked as "complete" then we know the record is missing, just return null
                 // this is used for treeview optimisation to avoid unnecessary re-requests for draft pages
                 return null;
@@ -2430,16 +2430,16 @@ SQL
 
         // cache value (if required)
         if ($cache) {
-            if (!isset(self::$cache_versionnumber[$baseClass])) {
-                self::$cache_versionnumber[$baseClass] = [];
+            if (!isset(Versioned::$cache_versionnumber[$baseClass])) {
+                Versioned::$cache_versionnumber[$baseClass] = [];
             }
 
-            if (!isset(self::$cache_versionnumber[$baseClass][$stage])) {
-                self::$cache_versionnumber[$baseClass][$stage] = [];
+            if (!isset(Versioned::$cache_versionnumber[$baseClass][$stage])) {
+                Versioned::$cache_versionnumber[$baseClass][$stage] = [];
             }
 
             // Internally store nulls as 0
-            self::$cache_versionnumber[$baseClass][$stage][$id] = $version ?: 0;
+            Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version ?: 0;
         }
 
         return $version ?: null;
@@ -2456,8 +2456,8 @@ SQL
     {
         $idList = is_array($recordList) ? $recordList :
             ($recordList instanceof DataList ? $recordList->column('ID') : null);
-        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
-        self::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
+        Versioned::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
+        Versioned::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
     }
 
     /**
@@ -2498,13 +2498,13 @@ SQL
         // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
         // no subsequent call is necessary
         } else {
-            self::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
+            Versioned::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
         }
 
         $versions = DB::prepared_query("SELECT \"ID\", \"Version\" FROM \"$stageTable\" $filter", $parameters)->map();
 
         foreach ($versions as $id => $version) {
-            self::$cache_versionnumber[$baseClass][$stage][$id] = $version;
+            Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
         }
 
         $className = $class instanceof DataObject ? $class->ClassName : $class;
@@ -2560,7 +2560,7 @@ SQL
 
         // Fix the version number cache (in case you go delete from stage and then check ExistsOnLive)
         $baseClass = $owner->baseClass();
-        self::$cache_versionnumber[$baseClass][$stage][$owner->ID] = null;
+        Versioned::$cache_versionnumber[$baseClass][$stage][$owner->ID] = null;
     }
 
     /**
@@ -2638,7 +2638,7 @@ SQL
     public function rollbackSingle($version)
     {
         // Validate $version and safely cast
-        if (isset($version) && !is_numeric($version) && $version !== self::LIVE) {
+        if (isset($version) && !is_numeric($version) && $version !== Versioned::LIVE) {
             throw new InvalidArgumentException("Invalid rollback source version $version");
         }
         if (isset($version) && is_numeric($version)) {
@@ -2647,7 +2647,7 @@ SQL
         // Copy version between stage
         $owner = $this->owner;
         $owner->invokeWithExtensions('onBeforeRollbackSingle', $version);
-        $owner->copyVersionToStage($version, self::DRAFT);
+        $owner->copyVersionToStage($version, Versioned::DRAFT);
         $owner->invokeWithExtensions('onAfterRollbackSingle', $version);
     }
 
@@ -2916,7 +2916,7 @@ SQL
 
     public function flushCache()
     {
-        self::$cache_versionnumber = [];
+        Versioned::$cache_versionnumber = [];
         $this->versionModifiedCache = [];
     }
 

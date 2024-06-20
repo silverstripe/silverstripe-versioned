@@ -129,7 +129,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Unversioned classes have no change type
         if (!$this->isVersioned()) {
-            return self::CHANGE_NONE;
+            return ChangeSetItem::CHANGE_NONE;
         }
 
         // Get change versions
@@ -153,13 +153,13 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Version comparisons
         if ($draftVersion == $liveVersion) {
-            $type = self::CHANGE_NONE;
+            $type = ChangeSetItem::CHANGE_NONE;
         } elseif (!$liveVersion) {
-            $type = self::CHANGE_CREATED;
+            $type = ChangeSetItem::CHANGE_CREATED;
         } elseif (!$draftVersion) {
-            $type = self::CHANGE_DELETED;
+            $type = ChangeSetItem::CHANGE_DELETED;
         } else {
-            $type = self::CHANGE_MODIFIED;
+            $type = ChangeSetItem::CHANGE_MODIFIED;
         }
         $this->extend('updateChangeType', $type, $draftVersion, $liveVersion);
         return $type;
@@ -402,7 +402,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     {
         // No action for unversiond objects so no action to deny
         // Implicitly added items allow publish
-        if (!$this->isVersioned() || $this->Added === self::IMPLICITLY) {
+        if (!$this->isVersioned() || $this->Added === ChangeSetItem::IMPLICITLY) {
             return true;
         }
 

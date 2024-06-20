@@ -28,14 +28,14 @@ class ReadingMode
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;
-                self::validateStage($archiveStage);
+                ReadingMode::validateStage($archiveStage);
                 return [
                     'Versioned.mode' => 'archive',
                     'Versioned.date' => $parts[1],
                     'Versioned.stage' => $archiveStage,
                 ];
             case 'Stage':
-                self::validateStage($parts[1]);
+                ReadingMode::validateStage($parts[1]);
                 return [
                     'Versioned.mode' => 'stage',
                     'Versioned.stage' => $parts[1],
@@ -133,13 +133,13 @@ class ReadingMode
         switch ($parts[0]) {
             case 'Archive':
                 $archiveStage = isset($parts[2]) ? $parts[2] : Versioned::DRAFT;
-                self::validateStage($archiveStage);
+                ReadingMode::validateStage($archiveStage);
                 return [
                     'archiveDate' => $parts[1],
                     'stage' => $archiveStage,
                 ];
             case 'Stage':
-                self::validateStage($parts[1]);
+                ReadingMode::validateStage($parts[1]);
                 return [
                     'stage' => $parts[1],
                 ];

@@ -39,7 +39,7 @@ class VersionedDataObject implements ModelTypePlugin, SchemaUpdater
      */
     public function getIdentifier(): string
     {
-        return self::IDENTIFIER;
+        return VersionedDataObject::IDENTIFIER;
     }
 
     /**

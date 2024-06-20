@@ -83,7 +83,7 @@ class VersionedResolver
             }
 
             // Get all versions
-            return self::getVersionsList($object);
+            return VersionedResolver::getVersionsList($object);
         };
     }
 

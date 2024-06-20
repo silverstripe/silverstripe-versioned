@@ -31,7 +31,7 @@ class UnpublishOnDelete implements ModelMutationPlugin
      */
     public function getIdentifier(): string
     {
-        return self::IDENTIFIER;
+        return UnpublishOnDelete::IDENTIFIER;
     }
 
     public function apply(ModelMutation $mutation, Schema $schema, array $config = []): void

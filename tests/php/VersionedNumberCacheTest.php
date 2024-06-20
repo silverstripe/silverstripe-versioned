@@ -37,7 +37,7 @@ class VersionedNumberCacheTest extends SapphireTest
         // Initialise our dummy object
         $obj = TestObject::create(['Title' => 'Initial version']);
         $obj->write();
-        self::$publishedID = $obj->ID;
+        VersionedNumberCacheTest::$publishedID = $obj->ID;
 
         // Create our live version
         $obj->Title = 'This will be our live version';
@@ -53,9 +53,9 @@ class VersionedNumberCacheTest extends SapphireTest
         // This object won't ne publish
         $draftOnly = TestObject::create(['Title' => 'Draft Only object']);
         $draftOnly->write();
-        self::$draftOnlyID = $draftOnly->ID;
+        VersionedNumberCacheTest::$draftOnlyID = $draftOnly->ID;
 
-        self::$expectedVersions = [
+        VersionedNumberCacheTest::$expectedVersions = [
             'liveVersion' => $liveVersion,
             'draftVersion' => $draftVersion,
             'null' => null
@@ -86,13 +86,13 @@ class VersionedNumberCacheTest extends SapphireTest
      */
     public function testVersionNumberCache($stage, $ID, $cache, $expected)
     {
-        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
-        $this->assertEquals(self::$expectedVersions[$expected], $actual);
+        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, VersionedNumberCacheTest::${$ID}, $cache);
+        $this->assertEquals(VersionedNumberCacheTest::$expectedVersions[$expected], $actual);
 
         if ($cache) {
             // When cahing is eanbled, try re-accessing version number to make sure the cache returns the same value
-            $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
-            $this->assertEquals(self::$expectedVersions[$expected], $actual);
+            $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, VersionedNumberCacheTest::${$ID}, $cache);
+            $this->assertEquals(VersionedNumberCacheTest::$expectedVersions[$expected], $actual);
         }
     }
 
@@ -107,7 +107,7 @@ class VersionedNumberCacheTest extends SapphireTest
         $method = new ReflectionMethod(Versioned::class, 'onPrepopulateTreeDataCache');
         $method->setAccessible(true);
         $method->invoke($ext);
-        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, self::${$ID}, $cache);
-        $this->assertEquals(self::$expectedVersions[$expected], $actual);
+        $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, VersionedNumberCacheTest::${$ID}, $cache);
+        $this->assertEquals(VersionedNumberCacheTest::$expectedVersions[$expected], $actual);
     }
 }

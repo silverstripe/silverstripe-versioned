@@ -264,7 +264,7 @@ class RecursivePublishable extends DataExtension
         array_shift($classes); // skip DataObject
         foreach ($classes as $class) {
             // Ensure this class is RecursivePublishable
-            if (!DataObject::has_extension($class, self::class)) {
+            if (!DataObject::has_extension($class, RecursivePublishable::class)) {
                 continue;
             }
 

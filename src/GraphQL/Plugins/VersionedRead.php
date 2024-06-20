@@ -25,7 +25,7 @@ class VersionedRead implements ModelQueryPlugin
      */
     public function getIdentifier(): string
     {
-        return self::IDENTIFIER;
+        return VersionedRead::IDENTIFIER;
     }
 
     /**

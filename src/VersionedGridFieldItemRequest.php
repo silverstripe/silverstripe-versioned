@@ -307,7 +307,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $rootTabSet = TabSet::create('ActionMenus');
         $moreOptions = Tab::create(
             'MoreOptions',
-            _t(self::class . '.MoreOptions', 'More options', 'Expands a view for more buttons')
+            _t(VersionedGridFieldItemRequest::class . '.MoreOptions', 'More options', 'Expands a view for more buttons')
         );
 
         $moreOptions->addExtraClass('popover-actions-simulate');
@@ -329,7 +329,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $actionSave = ($majorActions) ? $majorActions->fieldByName('action_doSave') : null;
         if ($canEdit && $isOnDraft && $actionSave !== null) {
             $actionSave
-                ->setTitle(_t(self::class . '.BUTTONSAVED', 'Saved'))
+                ->setTitle(_t(VersionedGridFieldItemRequest::class . '.BUTTONSAVED', 'Saved'))
                 ->removeExtraClass('btn-primary font-icon-save font-icon-rocket')
                 ->addExtraClass('btn-outline-primary font-icon-tick')
                 ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-save')
@@ -340,19 +340,19 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         // "publish" action
         if ($canPublish && $isOnDraft) {
             // "publish", as with "save", it supports an alternate state to show when action is needed.
-            $actionPublish = FormAction::create('doPublish', _t(self::class . '.BUTTONPUBLISHED', 'Published'))
+            $actionPublish = FormAction::create('doPublish', _t(VersionedGridFieldItemRequest::class . '.BUTTONPUBLISHED', 'Published'))
                 ->addExtraClass($noChangesClasses)
                 ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-rocket')
                 ->setAttribute('data-btn-alternate-remove', $noChangesClasses)
                 ->setUseButtonTag(true)
-                ->setAttribute('data-text-alternate', _t(self::class . '.BUTTONSAVEPUBLISH', 'Publish'));
+                ->setAttribute('data-text-alternate', _t(VersionedGridFieldItemRequest::class . '.BUTTONSAVEPUBLISH', 'Publish'));
 
             $actions->insertAfter('action_doSave', $actionPublish);
 
             // Set up the initial state of the button to reflect the state of the underlying record object.
             if ($stagesDiffer) {
                 $actionPublish->addExtraClass('btn-primary font-icon-rocket');
-                $actionPublish->setTitle(_t(self::class . '.BUTTONSAVEPUBLISH', 'Publish'));
+                $actionPublish->setTitle(_t(VersionedGridFieldItemRequest::class . '.BUTTONSAVEPUBLISH', 'Publish'));
                 $actionPublish->removeExtraClass($noChangesClasses);
             }
         }
@@ -361,10 +361,10 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if ($isPublished && $isOnDraft && $canUnpublish) {
             $actionUnpublish = FormAction::create(
                 'doUnpublish',
-                _t(self::class . '.BUTTONUNPUBLISH', 'Unpublish')
+                _t(VersionedGridFieldItemRequest::class . '.BUTTONUNPUBLISH', 'Unpublish')
             )
                 ->setDescription(
-                    _t(self::class . '.BUTTONUNPUBLISHDESC', 'Remove this record from the published site')
+                    _t(VersionedGridFieldItemRequest::class . '.BUTTONUNPUBLISHDESC', 'Remove this record from the published site')
                 )
                 ->addExtraClass('btn-secondary');
 
@@ -386,7 +386,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
             $actionArchive = FormAction::create('doArchive', $title)
                 ->addExtraClass('delete btn btn-secondary')
-                ->setDescription(_t(self::class . '.BUTTONARCHIVEDESC', 'Unpublish and send to archive'));
+                ->setDescription(_t(VersionedGridFieldItemRequest::class . '.BUTTONARCHIVEDESC', 'Unpublish and send to archive'));
 
             $moreOptions->push($actionArchive);
         }

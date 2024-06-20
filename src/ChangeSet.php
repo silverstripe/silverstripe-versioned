@@ -623,11 +623,11 @@ class ChangeSet extends DataObject
     public function getStateLabel()
     {
         switch ($this->State) {
-            case self::STATE_OPEN:
+            case ChangeSet::STATE_OPEN:
                 return _t(__CLASS__.'.STATE_OPEN', 'Active');
-            case self::STATE_PUBLISHED:
+            case ChangeSet::STATE_PUBLISHED:
                 return _t(__CLASS__.'.STATE_PUBLISHED', 'Published');
-            case self::STATE_REVERTED:
+            case ChangeSet::STATE_REVERTED:
                 return _t(__CLASS__.'.STATE_REVERTED', 'Reverted');
             default:
                 return null;

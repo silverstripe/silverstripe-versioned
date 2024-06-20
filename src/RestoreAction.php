@@ -57,7 +57,7 @@ class RestoreAction
             );
         }
 
-        $changedLocation = self::shouldRestoreToRoot($item);
+        $changedLocation = RestoreAction::shouldRestoreToRoot($item);
 
         $archivedItem = Versioned::get_latest_version($classname, $id);
 
@@ -69,7 +69,7 @@ class RestoreAction
                 ->byID($archivedItem->ID);
         }
 
-        $message = self::getRestoreMessage($item, $restoredItem, $changedLocation);
+        $message = RestoreAction::getRestoreMessage($item, $restoredItem, $changedLocation);
 
         return $message;
     }

@@ -31,6 +31,6 @@ class FakeDataObjectStub extends DataObject implements TestOnly
 
     public function rollbackRecursive($rollbackVersion)
     {
-        self::$rollbackCalled = true;
+        FakeDataObjectStub::$rollbackCalled = true;
     }
 }
