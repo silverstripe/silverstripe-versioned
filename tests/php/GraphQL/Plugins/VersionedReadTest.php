@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\Versioned\Tests\GraphQL\Legacy\Plugins;
+namespace SilverStripe\Versioned\Tests\GraphQL\Plugins;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;

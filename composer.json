@@ -33,10 +33,7 @@
     },
     "autoload": {
         "psr-4": {
-            "SilverStripe\\Versioned\\": [
-                "src/",
-                "_legacy/"
-            ],
+            "SilverStripe\\Versioned\\": "src/",
             "SilverStripe\\Versioned\\Tests\\": "tests/php/"
         }
     },
