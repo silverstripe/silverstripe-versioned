@@ -20,7 +20,7 @@ class ProxyCacheFactory extends DefaultCacheFactory
      */
     protected $containerClass = null;
 
-    public function create($service, array $args = [])
+    public function create(string $service, array $args = []): CacheInterface
     {
         $backend = parent::create($service, $args);
 
