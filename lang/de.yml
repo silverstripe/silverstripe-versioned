@@ -21,14 +21,24 @@ de:
     STATE_OPEN: Aktiv
     STATE_PUBLISHED: Veröffentlicht
     STATE_REVERTED: 'Rückgängig gemacht'
+    db_Description: Beschreibung
+    db_IsInferred: 'Wird abgeleitet'
+    db_LastSynced: 'Zuletzt synchronisiert'
     db_PublishDate: Veröffentlichungsdatum
     db_State: Bundesland
+    has_many_Changes: Änderungen
+    has_one_Owner: Besitzer
+    has_one_Publisher: Veröffentlicher
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Änderungssatz Elemente'
     PLURALS:
       one: 'Ein Änderungssatz Element'
       other: '{count} Änderungssatz Elemente'
     SINGULARNAME: 'Änderungssatz Element'
+    db_Added: Hinzugefügt
+    db_VersionAfter: 'Version danach'
+    db_VersionBefore: 'Version davor'
+    has_one_Object: Objekt
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archiv
     ArchivePermissionsFailure: 'Keine Berechtigung zum archivieren'
@@ -50,7 +60,7 @@ de:
   SilverStripe\Versioned\Versioned:
     has_many_Versions: Versionen
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    Archived: '{name} {title} archiviert'
+    Archived: 'Archiviert {name} "{title}"'
     BUTTONAPPLYCHANGES: 'Änderungen anwenden'
     BUTTONARCHIVEDESC: 'Veröffentlichung zurücknehmen und archivieren'
     BUTTONPUBLISHED: Veröffentlicht
@@ -61,8 +71,9 @@ de:
     DRAFT: Entwurf
     MODIFIED: Bearbeitet
     MoreOptions: 'Weitere Optionen'
+    PUBLISHEDTOASTMESSAGE: 'Veröffentlicht {type} "{title}"'
     Published: '{name} {link} veröffentlicht'
-    Unpublished: 'Veröffentlichung von {name} {link} zurückgenommen'
+    Unpublished: 'Veröffentlichung zurückgenommen {name} "{title}"'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Element wurde noch nicht veröffentlicht'
     ADDEDTODRAFTSHORT: Entwurf
