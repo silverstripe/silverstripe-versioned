@@ -5,7 +5,6 @@ namespace SilverStripe\Versioned;
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Convert;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
@@ -119,8 +118,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     {
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
-        if (!$canArchive) {
+        if (!$record->canDelete()) {
             return $this->httpError(403);
         }
 
@@ -295,7 +293,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $canPublish = $record->canPublish();
         $canUnpublish = $record->canUnpublish();
         $canEdit = $record->canEdit();
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
+        $canDelete = $record->canDelete();
 
         // "save", supports an alternate state that is still clickable, but notifies the user that the action is not needed.
         $noChangesClasses = 'btn-outline-primary font-icon-tick';
@@ -379,7 +377,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         }
 
         // "archive" action
-        if (($isOnDraft || $isPublished) && $canArchive) {
+        if (($isOnDraft || $isPublished) && $canDelete) {
             // Replace "delete" action
             $actions->removeByName('action_doDelete');
             $title = $isPublished
