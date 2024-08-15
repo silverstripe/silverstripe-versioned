@@ -3,6 +3,7 @@
 namespace SilverStripe\Versioned;
 
 use SilverStripe\Control\Controller;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridField_ActionMenuItem;
 use SilverStripe\Forms\GridField\GridField_ActionProvider;
@@ -176,7 +177,8 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
                 return;
             }
 
-            if (!$item->canArchive()) {
+            $canArchive = Deprecation::withNoReplacement(fn() => $item->canArchive());
+            if (!$canArchive) {
                 throw new ValidationException(
                     _t(__CLASS__ . '.ArchivePermissionsFailure', "No archive permissions")
                 );
@@ -196,7 +198,11 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
     public function getArchiveAction($gridField, $record)
     {
         /* @var DataObject|Versioned $record */
-        if (!$record->hasMethod('canArchive') || !$record->canArchive()) {
+        if (!$record->hasMethod('canArchive')) {
+            return null;
+        }
+        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
+        if (!$canArchive) {
             return null;
         }
 

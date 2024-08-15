@@ -1498,16 +1498,18 @@ SQL
      *
      * @param Member $member
      * @return bool
+     * @deprecated 5.3.0 Use canDelete() instead.
      */
     public function canArchive($member = null)
     {
+        Deprecation::notice('5.3.0', 'Use canDelete() instead.');
         if (!$member) {
             $member = Security::getCurrentUser();
         }
 
         // Standard mechanism for accepting permission changes from extensions
         $owner = $this->owner;
-        $extended = $owner->extendedCan('canArchive', $member);
+        $extended = Deprecation::withNoReplacement(fn() => $owner->extendedCan('canArchive', $member));
         if ($extended !== null) {
             return $extended;
         }
@@ -1530,8 +1532,12 @@ SQL
         return true;
     }
 
+    /**
+     * @deprecated 5.3.0 Will be removed without equivalent functionality.
+     */
     protected function extendCanArchive()
     {
+        Deprecation::notice('5.3.0', 'Will be removed without equivalent functionality.');
         // Prevent canArchive() extending itself
         return null;
     }
