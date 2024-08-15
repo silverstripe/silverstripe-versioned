@@ -3,7 +3,6 @@
 namespace SilverStripe\Versioned;
 
 use SilverStripe\Control\Controller;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridField_ActionMenuItem;
 use SilverStripe\Forms\GridField\GridField_ActionProvider;
@@ -12,6 +11,7 @@ use SilverStripe\Forms\GridField\GridField_FormAction;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
+use SilverStripe\View\ViewableData;
 
 /**
  * This class is a {@link GridField} component that replaces the delete action
@@ -177,8 +177,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
                 return;
             }
 
-            $canArchive = Deprecation::withNoReplacement(fn() => $item->canArchive());
-            if (!$canArchive) {
+            if (!$item->canDelete()) {
                 throw new ValidationException(
                     _t(__CLASS__ . '.ArchivePermissionsFailure', "No archive permissions")
                 );
@@ -192,17 +191,13 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      * Returns the GridField_FormAction if archive can be performed
      *
      * @param GridField $gridField
-     * @param DataObject $record
+     * @param ViewableData $record
      * @return GridField_FormAction|null
      */
     public function getArchiveAction($gridField, $record)
     {
-        /* @var DataObject|Versioned $record */
-        if (!$record->hasMethod('canArchive')) {
-            return null;
-        }
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
-        if (!$canArchive) {
+        /** @var ViewableData|Versioned $record */
+        if (!$record->has_extension(Versioned::class) || !$record->canDelete()) {
             return null;
         }
 

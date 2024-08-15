@@ -1494,51 +1494,19 @@ SQL
 
     /**
      * Check if the current user is allowed to archive this record.
-     * If extended, ensure that both canDelete and canUnpublish are extended also
      *
-     * @param Member $member
-     * @return bool
-     * @deprecated 5.3.0 Use canDelete() instead.
+     * We're intentionally using the canDelete check for archiving,
+     * since there's no concept of "deleting" a versioned record
+     * and having separate permission checks was confusing and easy
+     * to forget.
      */
-    public function canArchive($member = null)
+    public function canDelete($member = null): ?bool
     {
-        Deprecation::notice('5.3.0', 'Use canDelete() instead.');
-        if (!$member) {
-            $member = Security::getCurrentUser();
-        }
-
-        // Standard mechanism for accepting permission changes from extensions
-        $owner = $this->owner;
-        $extended = Deprecation::withNoReplacement(fn() => $owner->extendedCan('canArchive', $member));
-        if ($extended !== null) {
-            return $extended;
-        }
-
-        // Admin permissions allow
-        if (Permission::checkMember($member, "ADMIN")) {
-            return true;
-        }
-
-        // Check if this record can be deleted from stage
-        if (!$owner->canDelete($member)) {
+        // If the user isn't allowed to unpublish, they're definitely
+        // not allowed to archive live content.
+        if ($this->hasStages() && $this->isPublished() && !$this->getOwner()->canUnpublish($member)) {
             return false;
         }
-
-        // Check if we can delete from live
-        if (!$owner->canUnpublish($member)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @deprecated 5.3.0 Will be removed without equivalent functionality.
-     */
-    protected function extendCanArchive()
-    {
-        Deprecation::notice('5.3.0', 'Will be removed without equivalent functionality.');
-        // Prevent canArchive() extending itself
         return null;
     }
 
@@ -1827,7 +1795,7 @@ SQL
     /**
      * Removes the record from both live and stage
      *
-     * User code should call {@see canArchive()} prior to invoking this method.
+     * User code should call {@see canDelete()} prior to invoking this method.
      *
      * @return bool Success
      */
