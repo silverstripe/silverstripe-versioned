@@ -531,18 +531,10 @@ class ChangeSetItem extends DataObject implements Thumbnail
         return $links;
     }
 
-    /**
-     * Get edit link for this item
-     *
-     * @return string
-     */
-    public function CMSEditLink()
+    public function CMSEditLink(): ?string
     {
         $link = $this->getObjectInStage(Versioned::DRAFT);
-        if ($link instanceof CMSPreviewable) {
-            return $link->CMSEditLink();
-        }
-        return null;
+        return $link->CMSEditLink();
     }
 
     /**
