@@ -23,6 +23,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Versioned\GraphQL\Resolvers\VersionedResolver;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\View\ViewableData;
+use SilverStripe\Dev\Deprecation;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -32,6 +33,7 @@ if (!interface_exists(OperationCreator::class)) {
 
 /**
  * Scaffolds a generic update operation for DataObjects.
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
  */
 abstract class AbstractPublishOperationCreator implements OperationCreator
 {
@@ -40,6 +42,13 @@ abstract class AbstractPublishOperationCreator implements OperationCreator
 
     const ACTION_PUBLISH = 'publish';
     const ACTION_UNPUBLISH = 'unpublish';
+
+    public function __construct()
+    {
+        Deprecation::withNoReplacement(function () {
+            Deprecation::notice('5.3.0', 'Will be moved to the silverstripe/graphql module', Deprecation::SCOPE_CLASS);
+        });
+    }
 
     /**
      * @param SchemaModelInterface $model

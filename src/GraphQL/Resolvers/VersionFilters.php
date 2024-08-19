@@ -8,9 +8,20 @@ use SilverStripe\ORM\RelationList;
 use SilverStripe\Versioned\Versioned;
 use InvalidArgumentException;
 use DateTime;
+use SilverStripe\Dev\Deprecation;
 
+/**
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
+ */
 class VersionFilters
 {
+    public function __construct()
+    {
+        Deprecation::withNoReplacement(function () {
+            Deprecation::notice('5.3.0', 'Will be moved to the silverstripe/graphql module', Deprecation::SCOPE_CLASS);
+        });
+    }
+
     /**
      * Use this as a fallback where resolver results aren't queried as a DataList,
      * but rather use DataObject::get_one(). Example: SiteTree::get_by_link().

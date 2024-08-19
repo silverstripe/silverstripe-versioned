@@ -15,6 +15,7 @@ use SilverStripe\Versioned\Versioned;
 use Exception;
 use Closure;
 use SilverStripe\View\ViewableData;
+use SilverStripe\Dev\Deprecation;
 
 // GraphQL dependency is optional in versioned,
 // and the following implementation relies on existence of this class (in GraphQL v4)
@@ -22,9 +23,19 @@ if (!interface_exists(ModelMutationPlugin::class)) {
     return;
 }
 
+/**
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
+ */
 class UnpublishOnDelete implements ModelMutationPlugin
 {
     const IDENTIFIER = 'unpublishOnDelete';
+
+    public function __construct()
+    {
+        Deprecation::withNoReplacement(function () {
+            Deprecation::notice('5.3.0', 'Will be moved to the silverstripe/graphql module', Deprecation::SCOPE_CLASS);
+        });
+    }
 
     /**
      * @return string
