@@ -1589,7 +1589,7 @@ SQL
      * @param Member $member
      * @return bool|null
      */
-    public function canView($member = null)
+    protected function canView($member = null)
     {
         // Invoke default version-gnostic canView
         if ($this->owner->canViewVersioned($member) === false) {
@@ -2888,7 +2888,7 @@ SQL
         $this->owner->Version = 0;
     }
 
-    public function flushCache()
+    protected function onFlushCache()
     {
         Versioned::$cache_versionnumber = [];
         $this->versionModifiedCache = [];

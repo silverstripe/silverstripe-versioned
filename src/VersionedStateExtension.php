@@ -30,7 +30,7 @@ class VersionedStateExtension extends Extension
      *
      * @param string $link
      */
-    public function updateLink(&$link)
+    protected function updateLink(&$link)
     {
         // Skip if link already contains reading mode
         if ($this->hasVersionedQuery($link)) {
