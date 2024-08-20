@@ -7,7 +7,7 @@ use InvalidArgumentException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLUpdate;
@@ -17,9 +17,9 @@ use SilverStripe\ORM\SS_List;
  * Provides owns / owned_by and recursive publishing API for all objects.
  * This extension is added to DataObject by default
  *
- * @extends DataExtension<DataObject&static>
+ * @extends Extension<DataObject&static>
  */
-class RecursivePublishable extends DataExtension
+class RecursivePublishable extends Extension
 {
     /**
      * List of relationships on this object that are "owned" by this object.
