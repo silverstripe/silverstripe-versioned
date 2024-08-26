@@ -112,7 +112,7 @@ class DataDifferencer extends ViewableData
             if (!($toField instanceof DBField)) {
                 continue;
             }
-            $toValue = $toField->forTemplate();
+            $toValue = $toField?->forTemplate();
 
             // Show only to value
             if (!$this->fromRecord) {
@@ -125,7 +125,7 @@ class DataDifferencer extends ViewableData
             if (!($fromField instanceof DBField)) {
                 continue;
             }
-            $fromValue = $fromField->forTemplate();
+            $fromValue = $fromField?->forTemplate();
 
             // Show changes between the two, if any exist
             if ($fromValue != $toValue) {
@@ -193,7 +193,7 @@ class DataDifferencer extends ViewableData
         }
 
         // Format title
-        return $object->obj('Title')->forTemplate();
+        return $object->obj('Title')?->forTemplate();
     }
 
     /**
