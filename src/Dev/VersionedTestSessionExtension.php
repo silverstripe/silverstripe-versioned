@@ -19,7 +19,7 @@ class VersionedTestSessionExtension extends VersionedStateExtension
      *
      * @param string $url
      */
-    public function updateLink(&$url)
+    protected function updateLink(&$url)
     {
         $session = $this->owner->session();
         if (!$session) {
