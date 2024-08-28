@@ -16,7 +16,6 @@ use SilverStripe\Core\Resettable;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
@@ -38,9 +37,9 @@ use SilverStripe\View\TemplateGlobalProvider;
  * @property int $Version
  * @mixin RecursivePublishable
  *
- * @extends DataExtension<DataObject&RecursivePublishable&static>
+ * @extends Extension<DataObject&RecursivePublishable&static>
  */
-class Versioned extends DataExtension implements TemplateGlobalProvider, Resettable
+class Versioned extends Extension implements TemplateGlobalProvider, Resettable
 {
     /**
      * Versioning mode for this object.

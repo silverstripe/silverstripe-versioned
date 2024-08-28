@@ -3,10 +3,10 @@
 namespace SilverStripe\Versioned\Tests\VersionableExtensionsTest;
 
 use SilverStripe\Dev\TestOnly;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Versioned\VersionableExtension;
 
-class TestExtension extends DataExtension implements VersionableExtension, TestOnly
+class TestExtension extends Extension implements VersionableExtension, TestOnly
 {
     public function isVersionedTable($table)
     {
