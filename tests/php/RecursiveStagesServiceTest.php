@@ -8,6 +8,7 @@ use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ColumnObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\GroupObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\PrimaryObject;
 use SilverStripe\Versioned\Versioned;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class RecursiveStagesServiceTest extends SapphireTest
 {
@@ -51,9 +52,7 @@ class RecursiveStagesServiceTest extends SapphireTest
         });
     }
 
-    /**
-     * @dataProvider objectsProvider
-     */
+    #[DataProvider('objectsProvider')]
     public function testStageDiffersRecursive(string $class, string $identifier, bool $delete, bool $expected): void
     {
         Versioned::withVersionedMode(function () use ($class, $identifier, $delete, $expected): void {
@@ -81,7 +80,7 @@ class RecursiveStagesServiceTest extends SapphireTest
         });
     }
 
-    public function objectsProvider(): array
+    public static function objectsProvider(): array
     {
         return [
             'primary object (versioned, update)' => [
