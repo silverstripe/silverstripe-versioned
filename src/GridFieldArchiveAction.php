@@ -10,8 +10,8 @@ use SilverStripe\Forms\GridField\GridField_ColumnProvider;
 use SilverStripe\Forms\GridField\GridField_FormAction;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ValidationException;
-use SilverStripe\View\ViewableData;
+use SilverStripe\Core\Validation\ValidationException;
+use SilverStripe\Model\ModelData;
 
 /**
  * This class is a {@link GridField} component that replaces the delete action
@@ -191,12 +191,12 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
      * Returns the GridField_FormAction if archive can be performed
      *
      * @param GridField $gridField
-     * @param ViewableData $record
+     * @param ModelData $record
      * @return GridField_FormAction|null
      */
     public function getArchiveAction($gridField, $record)
     {
-        /** @var ViewableData|Versioned $record */
+        /** @var ModelData|Versioned $record */
         if (!$record->has_extension(Versioned::class) || !$record->canDelete()) {
             return null;
         }
