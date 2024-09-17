@@ -177,7 +177,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
                 return;
             }
 
-            $canArchive = Deprecation::withNoReplacement(fn() => $item->canArchive());
+            $canArchive = Deprecation::withSuppressedNotice(fn() => $item->canArchive());
             if (!$canArchive) {
                 throw new ValidationException(
                     _t(__CLASS__ . '.ArchivePermissionsFailure', "No archive permissions")
@@ -201,7 +201,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
         if (!$record->hasMethod('canArchive')) {
             return null;
         }
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
+        $canArchive = Deprecation::withSuppressedNotice(fn() => $record->canArchive());
         if (!$canArchive) {
             return null;
         }

@@ -119,7 +119,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
     {
         /** @var Versioned|DataObject $record */
         $record = $this->getRecord();
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
+        $canArchive = Deprecation::withSuppressedNotice(fn() => $record->canArchive());
         if (!$canArchive) {
             return $this->httpError(403);
         }
@@ -295,7 +295,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $canPublish = $record->canPublish();
         $canUnpublish = $record->canUnpublish();
         $canEdit = $record->canEdit();
-        $canArchive = Deprecation::withNoReplacement(fn() => $record->canArchive());
+        $canArchive = Deprecation::withSuppressedNotice(fn() => $record->canArchive());
 
         // "save", supports an alternate state that is still clickable, but notifies the user that the action is not needed.
         $noChangesClasses = 'btn-outline-primary font-icon-tick';
