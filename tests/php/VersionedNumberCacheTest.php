@@ -6,6 +6,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use ReflectionMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * @internal Only test the right values are returned, not that the cache is actually used.
@@ -68,7 +69,7 @@ class VersionedNumberCacheTest extends SapphireTest
         TestObject::singleton()->flushCache();
     }
 
-    public function cacheDataProvider()
+    public static function cacheDataProvider()
     {
         return [
             [Versioned::DRAFT, 'publishedID', false, 'draftVersion'],
@@ -81,9 +82,7 @@ class VersionedNumberCacheTest extends SapphireTest
     }
 
 
-    /**
-     * @dataProvider cacheDataProvider
-     */
+    #[DataProvider('cacheDataProvider')]
     public function testVersionNumberCache($stage, $ID, $cache, $expected)
     {
         $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, VersionedNumberCacheTest::${$ID}, $cache);
@@ -96,9 +95,7 @@ class VersionedNumberCacheTest extends SapphireTest
         }
     }
 
-    /**
-     * @dataProvider cacheDataProvider
-     */
+    #[DataProvider('cacheDataProvider')]
     public function testPrepopulatedVersionNumberCache($stage, $ID, $cache, $expected)
     {
         $owner = TestObject::singleton();

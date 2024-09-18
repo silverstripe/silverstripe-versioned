@@ -192,9 +192,9 @@ class GridFieldArchiveActionTest extends SapphireTest
     protected function createGridField()
     {
         $mock = $this->getMockBuilder(Controller::class)
-            ->setMethods(['Link'])
+            ->onlyMethods(['Link'])
             ->getMock();
-        $mock->method('Link')->will($this->returnValue('Test'));
+        $mock->method('Link')->willReturn('Test');
         $form = new Form(
             $mock,
             'TestForm',

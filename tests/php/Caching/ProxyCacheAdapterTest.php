@@ -174,7 +174,7 @@ class ProxyCacheAdapterTest extends SapphireTest
     {
         $methods = ['get', 'set', 'has', 'delete', 'getMultiple', 'setMultiple', 'clear', 'deleteMultiple'];
         $mock = $this->getMockBuilder(CacheInterface::class)
-            ->setMethods($methods)
+            ->onlyMethods($methods)
             ->getMock();
 
         return $mock;

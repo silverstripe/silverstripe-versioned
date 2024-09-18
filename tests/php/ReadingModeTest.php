@@ -5,17 +5,17 @@ namespace SilverStripe\Versioned\Tests;
 use InvalidArgumentException;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\ReadingMode;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ReadingModeTest extends SapphireTest
 {
     /**
-     * @dataProvider provideReadingModes()
-     *
      * @param string $readingMode
      * @param array $dataQuery
      * @param array $queryStringArray
      * @param string $queryString
      */
+    #[DataProvider('provideReadingModes')]
     public function testToDataQueryParams($readingMode, $dataQuery, $queryStringArray, $queryString)
     {
         $this->assertEquals(
@@ -25,13 +25,12 @@ class ReadingModeTest extends SapphireTest
         );
     }
     /**
-     * @dataProvider provideReadingModes()
-     *
      * @param string $readingMode
      * @param array $dataQuery
      * @param array $queryStringArray
      * @param string $queryString
      */
+    #[DataProvider('provideReadingModes')]
     public function testFromDataQueryParameters($readingMode, $dataQuery, $queryStringArray, $queryString)
     {
         $this->assertEquals(
@@ -42,13 +41,12 @@ class ReadingModeTest extends SapphireTest
     }
 
     /**
-     * @dataProvider provideReadingModes()
-     *
      * @param string $readingMode
      * @param array $dataQuery
      * @param array $queryStringArray
      * @param string $queryString
      */
+    #[DataProvider('provideReadingModes')]
     public function testToQueryString($readingMode, $dataQuery, $queryStringArray, $queryString)
     {
         $this->assertEquals(
@@ -59,13 +57,12 @@ class ReadingModeTest extends SapphireTest
     }
 
     /**
-     * @dataProvider provideReadingModes()
-     *
      * @param string $readingMode
      * @param array $dataQuery
      * @param array $queryStringArray
      * @param string $queryString
      */
+    #[DataProvider('provideReadingModes')]
     public function testFromQueryString($readingMode, $dataQuery, $queryStringArray, $queryString)
     {
         $this->assertEquals(
@@ -88,7 +85,7 @@ class ReadingModeTest extends SapphireTest
      *  - query string (string)
      * @return array
      */
-    public function provideReadingModes()
+    public static function provideReadingModes()
     {
         return [
             // Draft
@@ -147,16 +144,16 @@ class ReadingModeTest extends SapphireTest
     }
 
     /**
-     * @dataProvider provideTestInvalidStage
      * @param string $stage
      */
+    #[DataProvider('provideTestInvalidStage')]
     public function testInvalidStage($stage)
     {
         $this->expectException(\InvalidArgumentException::class);
         ReadingMode::validateStage($stage);
     }
 
-    public function provideTestInvalidStage()
+    public static function provideTestInvalidStage()
     {
         return [
             [''],
