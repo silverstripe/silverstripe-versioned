@@ -1509,7 +1509,7 @@ SQL
 
         // Standard mechanism for accepting permission changes from extensions
         $owner = $this->owner;
-        $extended = Deprecation::withNoReplacement(fn() => $owner->extendedCan('canArchive', $member));
+        $extended = Deprecation::withSuppressedNotice(fn() => $owner->extendedCan('canArchive', $member));
         if ($extended !== null) {
             return $extended;
         }
@@ -2027,7 +2027,7 @@ SQL
     public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
         if ($having) {
-            Deprecation::withNoReplacement(function () {
+            Deprecation::withSuppressedNotice(function () {
                 $message = 'The $having parameter does nothing and will be removed without equivalent'
                 . ' functionality to replace it';
                 Deprecation::notice('2.2.0', $message);
