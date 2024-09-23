@@ -6,11 +6,11 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
 use SilverStripe\View\Parsers\HtmlDiff;
-use SilverStripe\View\ViewableData;
+use SilverStripe\Model\ModelData;
 
 /**
  * Utility class to render views of the differences between two data objects (or two versions of the
@@ -45,7 +45,7 @@ use SilverStripe\View\ViewableData;
  * $diff->ignoreFields('AuthorID', 'Status');
  * </code>
  */
-class DataDifferencer extends ViewableData
+class DataDifferencer extends ModelData
 {
     protected $fromRecord;
     protected $toRecord;

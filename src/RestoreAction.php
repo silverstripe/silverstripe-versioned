@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned;
 
 use SilverStripe\ORM\Hierarchy\Hierarchy;
-use SilverStripe\ORM\ValidationException;
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Versioned\Versioned;
 
 /**

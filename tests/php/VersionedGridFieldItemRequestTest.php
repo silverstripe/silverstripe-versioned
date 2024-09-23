@@ -9,7 +9,7 @@ use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedOwner;

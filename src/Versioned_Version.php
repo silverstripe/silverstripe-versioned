@@ -4,16 +4,16 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Security\Member;
-use SilverStripe\View\ViewableData;
+use SilverStripe\Model\ModelData;
 
 /**
  * Represents a single version of a record.
  *
  * @see Versioned
  */
-class Versioned_Version extends ViewableData
+class Versioned_Version extends ModelData
 {
     /**
      * @var array
