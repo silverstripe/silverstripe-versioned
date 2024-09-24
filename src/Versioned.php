@@ -1994,7 +1994,7 @@ SQL
     public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
     {
         if ($having) {
-            Deprecation::withNoReplacement(function () {
+            Deprecation::withSuppressedNotice(function () {
                 $message = 'The $having parameter does nothing and will be removed without equivalent'
                 . ' functionality to replace it';
                 Deprecation::notice('2.2.0', $message);
