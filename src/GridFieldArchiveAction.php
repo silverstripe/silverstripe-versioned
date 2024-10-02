@@ -153,7 +153,7 @@ class GridFieldArchiveAction implements GridField_ColumnProvider, GridField_Acti
         $field = $this->getArchiveAction($gridField, $record);
 
         if ($field) {
-            return $field->Field();
+            return $field->renderField();
         }
 
         return null;

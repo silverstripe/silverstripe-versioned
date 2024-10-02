@@ -67,7 +67,7 @@ class GridFieldRestoreActionTest extends SapphireTest
         if (Security::getCurrentUser()) {
             Security::setCurrentUser(null);
         }
-        $content = new CSSContentParser($this->gridField->FieldHolder());
+        $content = new CSSContentParser($this->gridField->renderFieldHolder());
         // Check that there are content
         $this->assertEquals(4, count($content->getBySelector('.ss-gridfield-item') ?? []));
         // Make sure that there are no restore buttons
@@ -81,7 +81,7 @@ class GridFieldRestoreActionTest extends SapphireTest
     public function testShowRestoreButtonsWithAdminPermission()
     {
         $this->logInWithPermission('ADMIN');
-        $content = new CSSContentParser($this->gridField->FieldHolder());
+        $content = new CSSContentParser($this->gridField->renderFieldHolder());
         $restoreButtons = $content->getBySelector('.action-restore');
         $this->assertEquals(3, count($restoreButtons ?? []), 'Restore buttons should show when logged in.');
     }
