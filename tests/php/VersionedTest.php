@@ -6,6 +6,8 @@ use DateTime;
 use InvalidArgumentException;
 use ReflectionMethod;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+use LogicException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -1699,5 +1701,95 @@ class VersionedTest extends SapphireTest
 
         $obj->doUnpublish();
         $this->assertEquals('First name', VersionedTest\TestObject::$nameValueOfObjectJustDeleted);
+    }
+
+    public static function provideUpdateStatusFlags(): array
+    {
+        return [
+            'new record no status' => [
+                'status' => 'new',
+                'expected' => [],
+            ],
+            'saved to draft' => [
+                'status' => 'draft',
+                'expected' => [
+                    'addedtodraft' => [
+                        'text' => 'Draft',
+                        'title' => 'Item has not been published yet',
+                    ],
+                ],
+            ],
+            'saved and published' => [
+                'status' => 'published',
+                'expected' => [],
+            ],
+            'published but deleted on draft' => [
+                'status' => 'published only',
+                'expected' => [
+                    'removedfromdraft' => [
+                        'text' => 'On live only',
+                        'title' => 'Item is published, but has been deleted from draft',
+                    ],
+                ],
+            ],
+            'published but modified on draft' => [
+                'status' => 'modified',
+                'expected' => [
+                    'modified' => [
+                        'text' => 'Modified',
+                        'title' => 'Item has unpublished changes',
+                    ],
+                ],
+            ],
+            'archived' => [
+                'status' => 'archived',
+                'expected' => [
+                    'archived' => [
+                        'text' => 'Archived',
+                        'title' => 'Item is removed from draft and live',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideUpdateStatusFlags')]
+    public function testUpdateStatusFlags(string $status, array $expected): void
+    {
+        /** @var VersionedTest\TestObject&Versioned */
+        $record = new VersionedTest\TestObject();
+
+        switch ($status) {
+            case 'new':
+                // no-op
+                break;
+            case 'draft':
+                $record->write();
+                break;
+            case 'published':
+                $record->write();
+                $record->publishSingle();
+                break;
+            case 'published only':
+                $record->write();
+                $record->publishSingle();
+                $record->deleteFromStage(Versioned::DRAFT);
+                break;
+            case 'modified':
+                $record->write();
+                $record->publishSingle();
+                $record->Name = 'modified record';
+                $record->write();
+                break;
+            case 'archived':
+                $record->write();
+                $record->publishSingle();
+                $record->doArchive();
+                break;
+            default:
+                throw new LogicException("Status $status not accounted for");
+        }
+
+        $this->assertSame($expected, $record->getStatusFlags());
     }
 }

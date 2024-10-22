@@ -2981,4 +2981,42 @@ SQL
         $member = DataObject::get_by_id(Member::class, $this->owner->PublisherID);
         return $member;
     }
+
+    protected function updateStatusFlags(array &$flags): void
+    {
+        if ($this->isOnLiveOnly()) {
+            $flags['removedfromdraft'] = [
+                'text' => _t(__CLASS__ . '.FLAG_ONLIVEONLY_SHORT', 'On live only'),
+                'title' => _t(
+                    __CLASS__ . '.FLAG_ONLIVEONLYSHORT_HELP',
+                    'Item is published, but has been deleted from draft'
+                ),
+            ];
+            return;
+        }
+
+        if ($this->isArchived()) {
+            $flags['archived'] = [
+                'text' => _t(__CLASS__ . '.FLAG_ARCHIVED_SHORT', 'Archived'),
+                'title' => _t(__CLASS__ . '.FLAG_ARCHIVED_HELP', 'Item is removed from draft and live'),
+            ];
+            return;
+        }
+
+        if ($this->isOnDraftOnly()) {
+            $flags['addedtodraft'] = [
+                'text' => _t(__CLASS__ . '.FLAG_ADDEDTODRAFT_SHORT', 'Draft'),
+                'title' => _t(__CLASS__ . '.FLAG_ADDEDTODRAFT_HELP', 'Item has not been published yet')
+            ];
+            return;
+        }
+
+        if ($this->isModifiedOnDraft()) {
+            $flags['modified'] = [
+                'text' => _t(__CLASS__ . '.FLAG_MODIFIEDONDRAFT_SHORT', 'Modified'),
+                'title' => _t(__CLASS__ . '.FLAG_MODIFIEDONDRAFT_HELP', 'Item has unpublished changes'),
+            ];
+            return;
+        }
+    }
 }
