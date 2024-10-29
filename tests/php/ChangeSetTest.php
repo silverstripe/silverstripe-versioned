@@ -7,13 +7,13 @@ use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\ChangeSetItem;
+use SilverStripe\Versioned\Staged\ChangeSet;
+use SilverStripe\Versioned\Staged\ChangeSetItem;
 use SilverStripe\Versioned\Tests\ChangeSetTest\BaseObject;
 use SilverStripe\Versioned\Tests\ChangeSetTest\ChangeSetSyncStub;
 use SilverStripe\Versioned\Tests\ChangeSetTest\MidObject;
 use SilverStripe\Versioned\Tests\ChangeSetTest\Permissions;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * Test {@see ChangeSet} and {@see ChangeSetItem} models

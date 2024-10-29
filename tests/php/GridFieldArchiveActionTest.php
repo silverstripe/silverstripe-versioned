@@ -12,10 +12,10 @@ use SilverStripe\Forms\GridField\GridField_FormAction;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText;
-use SilverStripe\Versioned\GridFieldArchiveAction;
+use SilverStripe\Versioned\Versioned\GridFieldArchiveAction;
 use SilverStripe\Versioned\Tests\ChangeSetTest\UnversionedObject;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class GridFieldArchiveActionTest extends SapphireTest
 {

@@ -16,7 +16,7 @@ use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedOw
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedOwner;
 use SilverStripe\Versioned\Tests\VersionedGridFieldTest\TestController;
-use SilverStripe\Versioned\VersionedGridFieldItemRequest;
+use SilverStripe\Versioned\Versioned\VersionedGridFieldItemRequest;
 
 class VersionedGridFieldItemRequestTest extends SapphireTest
 {

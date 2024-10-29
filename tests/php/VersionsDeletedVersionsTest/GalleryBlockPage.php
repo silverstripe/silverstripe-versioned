@@ -5,8 +5,8 @@ namespace SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Versioned\RecursivePublishable;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Staged\RecursivePublishable;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @property string $Title

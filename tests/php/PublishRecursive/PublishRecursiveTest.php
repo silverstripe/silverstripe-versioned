@@ -4,8 +4,8 @@ namespace SilverStripe\Versioned\Tests\PublishRecursive;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\Versioned\RecursivePublishable;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Staged\RecursivePublishable;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class PublishRecursiveTest extends SapphireTest
 {

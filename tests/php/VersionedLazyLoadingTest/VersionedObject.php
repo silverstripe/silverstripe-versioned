@@ -4,7 +4,7 @@ namespace SilverStripe\Versioned\Tests\VersionedLazyLoadingTest;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @mixin Versioned

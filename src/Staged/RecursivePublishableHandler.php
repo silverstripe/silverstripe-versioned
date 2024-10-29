@@ -1,0 +1,29 @@
+<?php
+
+namespace SilverStripe\Versioned\Staged;
+
+use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Core\Extension;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Mode\Versioned;
+
+/**
+ * Provides recursive publishable behaviour for LeftAndMain and GridFieldDetailForm_ItemRequest
+ *
+ * @extends Extension<LeftAndMain>
+ */
+class RecursivePublishableHandler extends Extension
+{
+    /**
+     * Ensure that non-versioned records are published on save.
+     * @param DataObject $record
+     */
+    protected function onAfterSave(DataObject $record)
+    {
+        // Assume that any versioned record has an explicit publish already
+        if (!$record->hasExtension(Versioned::class)) {
+            /** @var RecursivePublishable|DataObject $record */
+            $record->publishRecursive();
+        }
+    }
+}

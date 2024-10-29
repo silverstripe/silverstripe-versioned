@@ -5,14 +5,14 @@ namespace SilverStripe\Versioned\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLSelect;
-use SilverStripe\Versioned\RecursivePublishable;
+use SilverStripe\Versioned\Staged\RecursivePublishable;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyOfficeLocation;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\CompanyPage;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlock;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlockItem;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\GalleryBlockPage;
 use SilverStripe\Versioned\Tests\VersionsDeletedVersionsTest\OfficeLocation;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class VersionedDeletedVersionsTest extends SapphireTest
 {

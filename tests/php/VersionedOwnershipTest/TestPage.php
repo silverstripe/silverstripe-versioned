@@ -5,8 +5,8 @@ namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\RecursivePublishable;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Staged\RecursivePublishable;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * Page which owns a lits of banners

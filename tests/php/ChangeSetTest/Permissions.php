@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Tests\ChangeSetTest;
 
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 use SilverStripe\Security\Permission;
 
 /**

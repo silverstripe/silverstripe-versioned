@@ -2,7 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
-use SilverStripe\Versioned\ChangeSetItem;
+use SilverStripe\Versioned\Staged\ChangeSetItem;
 use SilverStripe\Dev\SapphireTest;
 
 class ChangeSetItemTest extends SapphireTest

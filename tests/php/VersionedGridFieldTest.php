@@ -4,7 +4,7 @@ namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Dev\CSSContentParser;
 use SilverStripe\Dev\FunctionalTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class VersionedGridFieldTest extends FunctionalTest
 {

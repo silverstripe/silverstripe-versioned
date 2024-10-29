@@ -6,7 +6,7 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\Forms\ListboxField;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @property string $Choices

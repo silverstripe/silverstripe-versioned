@@ -5,7 +5,7 @@ namespace SilverStripe\Versioned\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\Tests\ManyManyThroughListTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @see ManyManyThroughListTest

@@ -3,20 +3,20 @@ Name: versionedextension
 ---
 SilverStripe\Core\Injector\Injector:
   # Versioning only
-  SilverStripe\Versioned\Versioned.versioned:
-    class: SilverStripe\Versioned\Versioned
+  SilverStripe\Versioned\Mode\Versioned.versioned:
+    class: SilverStripe\Versioned\Mode\Versioned
     constructor:
       mode: Versioned
   # Staging and Versioning
-  SilverStripe\Versioned\Versioned.stagedversioned:
-    class: SilverStripe\Versioned\Versioned
+  SilverStripe\Versioned\Mode\Versioned.stagedversioned:
+    class: SilverStripe\Versioned\Mode\Versioned
     constructor:
       mode: StagedVersioned
   # Default is alias for .stagedversioned
-  SilverStripe\Versioned\Versioned: '%$SilverStripe\Versioned\Versioned.stagedversioned'
+  SilverStripe\Versioned\Mode\Versioned: '%$SilverStripe\Versioned\Mode\Versioned.stagedversioned'
 ---
 Name: versioned-table
 ---
 SilverStripe\ORM\DataQuery:
   extensions:
-    - SilverStripe\Versioned\VersionedTableDataQueryExtension
+    - SilverStripe\Versioned\Staged\VersionedTableDataQueryExtension

@@ -4,8 +4,8 @@ namespace SilverStripe\Versioned\Tests\VersionedOwnershipTest;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\RecursivePublishable;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Staged\RecursivePublishable;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * Banner which doesn't declare its belongs_many_many, but owns an Image

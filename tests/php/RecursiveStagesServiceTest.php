@@ -7,7 +7,7 @@ use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ChildObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\ColumnObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\GroupObject;
 use SilverStripe\Versioned\Tests\RecursiveStagesServiceTest\PrimaryObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class RecursiveStagesServiceTest extends SapphireTest

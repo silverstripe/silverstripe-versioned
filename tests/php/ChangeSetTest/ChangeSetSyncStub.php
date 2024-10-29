@@ -2,7 +2,7 @@
 namespace SilverStripe\Versioned\Tests\ChangeSetTest;
 
 use SilverStripe\Dev\TestOnly;
-use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\Staged\ChangeSet;
 
 class ChangeSetSyncStub extends ChangeSet implements TestOnly
 {

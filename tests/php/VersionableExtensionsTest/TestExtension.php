@@ -4,7 +4,7 @@ namespace SilverStripe\Versioned\Tests\VersionableExtensionsTest;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\Core\Extension;
-use SilverStripe\Versioned\VersionableExtension;
+use SilverStripe\Versioned\Versioned\VersionableExtension;
 
 class TestExtension extends Extension implements VersionableExtension, TestOnly
 {

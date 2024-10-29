@@ -2,8 +2,8 @@
 
 namespace SilverStripe\Versioned\Tests;
 
-use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\ChangeSetItem;
+use SilverStripe\Versioned\Staged\ChangeSet;
+use SilverStripe\Versioned\Staged\ChangeSetItem;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Attachment;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Banner;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Image;
@@ -11,7 +11,7 @@ use SilverStripe\Versioned\Tests\VersionedOwnershipTest\Related;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\RelatedMany;
 use SilverStripe\Versioned\Tests\VersionedOwnershipTest\TestPage;
 use SilverStripe\Versioned\Tests\VersionedTest\Subclass;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Dev\SapphireTest;

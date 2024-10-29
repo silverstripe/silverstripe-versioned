@@ -8,7 +8,7 @@ use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Image;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\DataDifferencer;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class DataDifferencerTest extends SapphireTest
 {

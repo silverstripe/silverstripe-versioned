@@ -3,13 +3,13 @@ Name: versionedstate
 ---
 SilverStripe\Control\RequestHandler:
   extensions:
-    - SilverStripe\Versioned\VersionedStateExtension
+    - SilverStripe\Versioned\Mode\VersionedStateExtension
 SilverStripe\ORM\DataObject:
   extensions:
-    - SilverStripe\Versioned\VersionedStateExtension
+    - SilverStripe\Versioned\Mode\VersionedStateExtension
 ---
 Name: versionedstate-test
 ---
 SilverStripe\Dev\TestSession:
   extensions:
-    - SilverStripe\Versioned\Dev\VersionedTestSessionExtension
+    - SilverStripe\Versioned\Mode\Dev\VersionedTestSessionExtension

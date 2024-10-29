@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Tests\VersionedTableTest;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class VersionedTableTest extends SapphireTest
 {

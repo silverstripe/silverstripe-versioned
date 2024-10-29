@@ -5,7 +5,7 @@ namespace SilverStripe\Versioned\Tests\VersionedTest;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Permission;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @mixin Versioned

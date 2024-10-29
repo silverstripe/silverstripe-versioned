@@ -17,9 +17,9 @@ use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\Security\SecurityToken;
-use SilverStripe\Versioned\GridFieldRestoreAction;
+use SilverStripe\Versioned\Versioned\GridFieldRestoreAction;
 use SilverStripe\Versioned\Tests\VersionedTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class GridFieldRestoreActionTest extends SapphireTest
 {

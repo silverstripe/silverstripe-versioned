@@ -6,7 +6,7 @@ use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedObject;
 use SilverStripe\Versioned\Tests\VersionedManyManyThroughListTest\VersionedItem;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @property string $Title

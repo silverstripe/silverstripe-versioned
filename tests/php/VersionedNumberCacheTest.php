@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Tests;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 use SilverStripe\Versioned\Tests\VersionedTest\TestObject;
 use ReflectionMethod;
 use PHPUnit\Framework\Attributes\DataProvider;

@@ -2,7 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests\Caching;
 
-use SilverStripe\Versioned\Caching\ProxyCacheFactory;
+use SilverStripe\Versioned\Mode\Caching\ProxyCacheFactory;
 
 class ProxyCacheFactoryFake extends ProxyCacheFactory
 {

@@ -7,7 +7,7 @@ use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Versioned\Tests\UnstagedStagedRelationTest\StagedObject;
 use SilverStripe\Versioned\Tests\UnstagedStagedRelationTest\UnstagedObject;
 use SilverStripe\Versioned\Tests\UnstagedStagedRelationTest\UnstagedStagedThroughObject;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class UnstagedStagedRelationTest extends SapphireTest
 {

@@ -22,8 +22,8 @@ use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\IdentityStore;
-use SilverStripe\Versioned\ChangeSet;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Staged\ChangeSet;
+use SilverStripe\Versioned\Mode\Versioned;
 
 class VersionedTest extends SapphireTest
 {

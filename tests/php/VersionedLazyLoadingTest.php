@@ -9,7 +9,7 @@ use SilverStripe\Versioned\Tests\VersionedLazyLoadingTest\VersionedObject;
 use SilverStripe\Versioned\Tests\VersionedLazyLoadingTest\VersionedSubObject;
 use SilverStripe\Versioned\Tests\VersionedTest\Subclass;
 use SilverStripe\Versioned\Tests\VersionedTest;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * Based on code refactored from

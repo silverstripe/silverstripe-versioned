@@ -2,7 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests\VersionedLazyLoadingTest;
 
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @mixin Versioned

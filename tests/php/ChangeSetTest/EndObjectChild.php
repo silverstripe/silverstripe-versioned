@@ -3,7 +3,7 @@
 namespace SilverStripe\Versioned\Tests\ChangeSetTest;
 
 use SilverStripe\Dev\TestOnly;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\Mode\Versioned;
 
 /**
  * @mixin Versioned
