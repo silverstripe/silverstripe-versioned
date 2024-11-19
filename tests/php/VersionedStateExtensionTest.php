@@ -2,7 +2,11 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use SilverStripe\Admin\AdminController;
 use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Session;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Versioned\VersionedStateExtension;
@@ -63,18 +67,21 @@ class VersionedStateExtensionTest extends SapphireTest
         $this->assertEquals('item/myobject', $obj1Live->Link());
     }
 
-    public function testDontUpdateLeftAndMainLinks()
+    public function testDontUpdateAdminLinks()
     {
-        if (!class_exists(LeftAndMain::class)) {
-            $this->markTestSkipped('silverstripe/cms not installed');
+        if (!class_exists(AdminController::class)) {
+            $this->markTestSkipped('silverstripe/admin not installed');
             return;
         }
 
+        $request = new HTTPRequest('', '');
+        $request->setSession(new Session([]));
+        Injector::inst()->registerService($request, HTTPRequest::class);
         $controller = new LeftAndMain();
 
-        $liveClientConfig = $controller->getClientConfig();
+        $liveClientConfig = $controller->getCombinedClientConfig();
         Versioned::set_stage(Versioned::DRAFT);
-        $stageClientConfig = $controller->getClientConfig();
+        $stageClientConfig = $controller->getCombinedClientConfig();
 
         $this->assertEquals(
             $liveClientConfig,
