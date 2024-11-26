@@ -12,11 +12,8 @@ use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
-use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\Core\Validation\ValidationResult;
-use SilverStripe\Model\ArrayData;
 use SilverStripe\View\SSViewer;
 
 /**
@@ -26,29 +23,6 @@ use SilverStripe\View\SSViewer;
  */
 class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 {
-    public function Breadcrumbs($unlinked = false)
-    {
-        $items = parent::Breadcrumbs($unlinked);
-        $status = $this->getRecordStatus();
-        $badge = null;
-        if ($status) {
-            // Generate badge
-            $badge = DBField::create_field('HTMLFragment', sprintf(
-                '<span class="badge version-status version-status--%s">%s</span>',
-                $status['class'],
-                $status['title']
-            ));
-        }
-        $this->extend('updateBadge', $badge);
-
-        if ($badge) {
-            $lastItem = $items->last();
-            $lastItem->setField('Extra', $badge);
-        }
-
-        return $items;
-    }
-
     /**
      * @return FieldList
      */
@@ -242,38 +216,6 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $backForm = $controller->getEditForm();
             $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         }
-    }
-
-    /**
-     * Return list of class / title to add on the end of record status in breadcrumbs
-     *
-     * @return array|null
-     */
-    protected function getRecordStatus()
-    {
-        /** @var DataObject|Versioned $record */
-        $record = $this->record;
-
-        // No status if un-versioned
-        if (!$this->record->hasExtension(Versioned::class)) {
-            return null;
-        }
-
-        if ($record->isOnDraftOnly()) {
-            return [
-                'class' => 'addedtodraft',
-                'title' => _t(__CLASS__ . '.DRAFT', 'Draft')
-            ];
-        }
-
-        if ($record->isModifiedOnDraft()) {
-            return [
-                'class' => 'modified',
-                'title' => _t(__CLASS__ . '.MODIFIED', 'Modified')
-            ];
-        }
-
-        return null;
     }
 
     /**
