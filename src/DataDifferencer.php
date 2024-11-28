@@ -59,7 +59,7 @@ class DataDifferencer extends ModelData
      * @param DataObject $fromRecord
      * @param DataObject $toRecord
      */
-    public function __construct(DataObject $fromRecord = null, DataObject $toRecord = null)
+    public function __construct(?DataObject $fromRecord = null, ?DataObject $toRecord = null)
     {
         $this->fromRecord = $fromRecord;
         $this->toRecord = $toRecord;
