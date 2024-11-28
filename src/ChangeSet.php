@@ -35,9 +35,9 @@ use SilverStripe\Security\Security;
  */
 class ChangeSet extends DataObject
 {
-    private static $singular_name = 'Campaign';
+    private static $singular_name = 'Changeset';
 
-    private static $plural_name = 'Campaigns';
+    private static $plural_name = 'Changesets';
 
     /** An active changeset */
     const STATE_OPEN = 'open';
@@ -98,7 +98,7 @@ class ChangeSet extends DataObject
 
     /**
      * Default permission to require for publishers.
-     * Publishers must either be able to use the campaign admin, or have all admin access.
+     * Publishers must have access to all admin access.
      *
      * Also used as default permission for ChangeSetItem default permission.
      *
@@ -106,7 +106,6 @@ class ChangeSet extends DataObject
      * @var array
      */
     private static $required_permission = [
-        'CMS_ACCESS_CampaignAdmin',
         'CMS_ACCESS_LeftAndMain'
     ];
 
@@ -635,7 +634,7 @@ class ChangeSet extends DataObject
     }
 
     /**
-     * Gets the full name of the user who last published this campaign
+     * Gets the full name of the user who last published this ChangeSet
      *
      * @return string
      */
