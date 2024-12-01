@@ -895,7 +895,7 @@ SQL
      * @param DataQuery $dataQuery
      * @param DataObject $dataObject
      */
-    protected function augmentLoadLazyFields(SQLSelect &$query, ?DataQuery &$dataQuery = null, $dataObject)
+    protected function augmentLoadLazyFields(SQLSelect &$query, ?DataQuery &$dataQuery, $dataObject)
     {
         // The VersionedMode local variable ensures that this decorator only applies to
         // queries that have originated from the Versioned object, and have the Versioned
