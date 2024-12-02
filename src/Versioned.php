@@ -454,7 +454,7 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
      * @param DataQuery|null $dataQuery
      * @throws InvalidArgumentException
      */
-    protected function augmentSQL(SQLSelect $query, DataQuery $dataQuery = null)
+    protected function augmentSQL(SQLSelect $query, ?DataQuery $dataQuery = null)
     {
         if (!$dataQuery) {
             return;
@@ -895,7 +895,7 @@ SQL
      * @param DataQuery $dataQuery
      * @param DataObject $dataObject
      */
-    protected function augmentLoadLazyFields(SQLSelect &$query, DataQuery &$dataQuery = null, $dataObject)
+    protected function augmentLoadLazyFields(SQLSelect &$query, ?DataQuery &$dataQuery, $dataObject)
     {
         // The VersionedMode local variable ensures that this decorator only applies to
         // queries that have originated from the Versioned object, and have the Versioned
