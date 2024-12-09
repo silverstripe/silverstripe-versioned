@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned;
 
+use SilverStripe\Core\Convert;
 use SilverStripe\ORM\Hierarchy\Hierarchy;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Versioned\Versioned;
@@ -86,7 +87,7 @@ class RestoreAction
     public static function getRestoreMessage($originalItem, $restoredItem, $changedLocation = false)
     {
         $restoredID = $restoredItem->Title ?: $restoredItem->ID;
-        $restoredType = strtolower($restoredItem->i18n_singular_name() ?? '');
+        $restoredType = Convert::raw2xml(strtolower($restoredItem->i18n_singular_name() ?? ''));
 
         if (method_exists($restoredItem, 'CMSEditLink') &&
         $restoredItem->CMSEditLink()) {
