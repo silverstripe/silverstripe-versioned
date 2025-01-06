@@ -1987,20 +1987,10 @@ SQL
      * @param string $sort
      * @param string $limit
      * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
-     * @param string $having @deprecated 2.2.0 The $having parameter does nothing and will be removed without
-     *               equivalent functionality to replace it
      * @return ArrayList<Versioned_Version>
      */
-    public function Versions($filter = "", $sort = "", $limit = "", $join = "", $having = "")
+    public function Versions($filter = "", $sort = "", $limit = "", $join = "")
     {
-        if ($having) {
-            Deprecation::withSuppressedNotice(function () {
-                $message = 'The $having parameter does nothing and will be removed without equivalent'
-                . ' functionality to replace it';
-                Deprecation::notice('2.2.0', $message);
-            });
-        }
-
         $owner = $this->owner;
 
         // When an object is not yet in the Database, we can't get its versions

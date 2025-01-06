@@ -4,7 +4,6 @@ namespace SilverStripe\Versioned;
 
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\FieldType\DBField;
