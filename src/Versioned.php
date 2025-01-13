@@ -13,7 +13,6 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataList;
@@ -1986,7 +1985,6 @@ SQL
      * @param string $filter
      * @param string $sort
      * @param string $limit
-     * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
      * @return ArrayList<Versioned_Version>
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "")
@@ -2002,7 +2000,7 @@ SQL
         $oldMode = static::get_reading_mode();
         static::set_stage(static::DRAFT);
 
-        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $join, $limit);
+        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $limit);
 
         $query = $list->dataQuery()->query();
 
@@ -2483,7 +2481,6 @@ SQL
      * @param string $stage The name of the stage.
      * @param string $filter A filter to be inserted into the WHERE clause.
      * @param string $sort A sort expression to be inserted into the ORDER BY clause.
-     * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
      * @param int $limit A limit on the number of records returned from the database.
      * @param string $containerClass The container class for the result set (default is DataList)
      *
@@ -2494,12 +2491,11 @@ SQL
         $stage,
         $filter = '',
         $sort = '',
-        $join = '',
         $limit = null,
         $containerClass = DataList::class
     ) {
         ReadingMode::validateStage($stage);
-        $result = DataObject::get($class, $filter, $sort, $join, $limit, $containerClass);
+        $result = DataObject::get($class, $filter, $sort, $limit, $containerClass);
         return $result->setDataQueryParam([
             'Versioned.mode' => 'stage',
             'Versioned.stage' => $stage
