@@ -104,8 +104,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             __CLASS__ . '.Archived',
             'Archived {name} "{title}"',
             [
-                'name' => $record->i18n_singular_name(),
-                'title' => $title
+                'name' => Convert::raw2xml($record->i18n_singular_name()),
+                'title' => Convert::raw2xml($title)
             ]
         );
         $this->setFormMessage($form, $message);
@@ -146,7 +146,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             __CLASS__ . '.Published',
             'Published {name} {link}',
             [
-                'name' => $record->i18n_singular_name(),
+                'name' => Convert::raw2xml($record->i18n_singular_name()),
                 'link' => $link
             ]
         );
@@ -190,8 +190,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             __CLASS__ . '.Unpublished',
             'Unpublished {name} "{title}"',
             [
-                'name' => $record->i18n_singular_name(),
-                'title' => $title
+                'name' => Convert::raw2xml($record->i18n_singular_name()),
+                'title' => Convert::raw2xml($title)
             ]
         );
         $this->setFormMessage($form, $message);
