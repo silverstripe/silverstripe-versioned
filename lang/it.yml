@@ -25,9 +25,15 @@ it:
     STATE_OPEN: Attiva
     STATE_PUBLISHED: Pubblicata
     STATE_REVERTED: Ripristinata
+    db_Description: Descrizione
+    db_IsInferred: 'È dedotto'
+    db_LastSynced: 'Ultima sincronizzazione'
     db_Name: Nome
     db_PublishDate: 'Data pubblicazione'
     db_State: Stato
+    has_many_Changes: Modifiche
+    has_one_Owner: Proprietario
+    has_one_Publisher: Editore
   SilverStripe\Versioned\ChangeSetItem:
     PLURALNAME: 'Elementi del Gruppo Modifiche'
     PLURALS:
@@ -35,6 +41,13 @@ it:
       one: 'Un Elemento del Gruppo Modifiche'
       other: '{count} Elementi del Gruppo Modifiche'
     SINGULARNAME: 'Elemento del Gruppo Modifiche'
+    belongs_many_many_References: Riferimenti
+    db_Added: Aggiunto
+    db_VersionAfter: 'Versione dopo'
+    db_VersionBefore: 'Versione prima'
+    has_one_ChangeSet: 'Gruppo modifiche'
+    has_one_Object: Oggetto
+    many_many_ReferencedBy: 'Riferito da'
   SilverStripe\Versioned\GridFieldArchiveAction:
     Archive: Archivio
     ArchivePermissionsFailure: 'Nessuna autorizzazione di archiviazione'
@@ -54,9 +67,10 @@ it:
     RESTORE_TO_ROOT: 'Ripristina la bozza al livello superiore'
     RESTORE_TO_ROOT_DESC: 'Ripristina la versione archiviata in bozza come elemento di livello superiore'
   SilverStripe\Versioned\Versioned:
+    db_Version: Versione
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    Archived: 'Pubblicato {name} {title}'
+    Archived: 'Archiviato {name} "{title}"'
     BUTTONAPPLYCHANGES: 'Applica i cambiamenti'
     BUTTONARCHIVEDESC: 'Nascondi e archivia'
     BUTTONPUBLISHED: Pubblicato
@@ -67,8 +81,9 @@ it:
     DRAFT: Bozza
     MODIFIED: Modificato
     MoreOptions: 'Più opzioni'
+    PUBLISHEDTOASTMESSAGE: 'Pubblicato {type} "{title}"'
     Published: 'Pubblicato {name} {link}'
-    Unpublished: 'Nascosto {name} {title}'
+    Unpublished: 'Nascosto {name} "{title}"'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: "L'elemento non è stato ancora pubblicato"
     ADDEDTODRAFTSHORT: Bozza
