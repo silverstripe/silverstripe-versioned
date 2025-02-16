@@ -1091,10 +1091,11 @@ class VersionedTest extends SapphireTest
 
     protected function setUp(): void
     {
-        if (!static::$defaultController && Controller::has_curr()) {
-            static::$defaultController = Controller::curr();
+        $controller = Controller::curr();
+        if (!static::$defaultController && $controller) {
+            static::$defaultController = $controller;
         }
-        if (!Controller::has_curr() && static::$defaultController) {
+        if (!$controller && static::$defaultController) {
             static::$defaultController->pushCurrent();
         }
         parent::setUp();
