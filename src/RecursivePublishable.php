@@ -56,6 +56,9 @@ class RecursivePublishable extends DataExtension
      */
     public function publishRecursive()
     {
+        $this->publishRecursiveWithoutChangeSet($this->owner);
+
+        return true;
         $now = DBDatetime::now()->Rfc2822();
 
         return DBDatetime::withFixedNow($now, function () {
@@ -96,6 +99,79 @@ class RecursivePublishable extends DataExtension
             return $result;
         });
     }
+
+    /**
+     * @param DataObject|Versioned $model
+     * @return void
+     * @throws Exception
+     */
+    public function publishRecursiveWithoutChangeSet(DataObject $model): void
+    {
+        if (!$model->hasExtension(Versioned::class)) {
+            // Model can't be published
+            return;
+        }
+
+        if (!$model->isInDB()) {
+            // Model isn't saved in the DB so we can't publish it
+            return;
+        }
+
+        $modelsToPublish = $this->findModelsToPublish($model);
+        $now = DBDatetime::now()->Rfc2822();
+
+        DBDatetime::withFixedNow($now, static function () use ($model, $modelsToPublish): void {
+            // get the last published version
+            $original = $model->isPublished()
+                ? Versioned::get_by_stage($model->baseClass(), Versioned::LIVE)->byID($model->ID)
+                : null;
+
+            $model->invokeWithExtensions('onBeforePublishRecursive', $original);
+
+            /** @var DataObject|Versioned $modelToPublish */
+            foreach ($modelsToPublish as $modelToPublish) {
+                $modelToPublish->publishSingle();
+            }
+
+            $model->invokeWithExtensions('onAfterPublishRecursive', $original);
+        });
+    }
+
+    private function findModelsToPublish(DataObject $model): array
+    {
+        $models = [
+            $model,
+        ];
+
+        $modelsToPublish = [];
+
+        /** @var DataObject|Versioned $model */
+        while ($model = array_shift($models)) {
+            // We won't be inspecting any models that aren't saved in the DB
+            if (!$model->isInDB()) {
+                continue;
+            }
+
+            // Mark model as needing publishing in case it needs to be published
+            if ($model->hasExtension(Versioned::class) && (!$model->isPublished() || $model->stagesDiffer())) {
+                $modelsToPublish[]= $model;
+            }
+
+            // Discover and add owned models for inspection
+            $relatedModels = $model
+                // We intentionally avoid "true" recursive traversal here as it's not performant
+                // (often the cause of memory usage spikes and longer execution time due to deeper stack depth)
+                // Instead we use "stack based" recursive traversal approach for better performance
+                // which avoids the nested method calls
+                ->findOwned(false)
+                ->toArray();
+            $models = array_merge($models, $relatedModels);
+        }
+
+        // Return the list in the reverse order, bottom first so we get to publish the root model as the last step
+        return array_reverse($modelsToPublish);
+    }
+
 
     /**
      * Rollback all related objects on this stage.
