@@ -42,6 +42,7 @@ class VersionedTest extends SapphireTest
         VersionedTest\PublicViaExtension::class,
         VersionedTest\CustomTable::class,
         VersionedTest\ChangeSetTestObject::class,
+        VersionedTest\NoFixtureModel::class,
     ];
 
     public function testUniqueIndexes()
@@ -217,8 +218,10 @@ class VersionedTest extends SapphireTest
 
     /**
      * Test Versioned::get_including_deleted()
+     * This test seems to be testing edge cases and some rippling effects.
+     * See testGetIncludingDeleted for a pure test of results from get_including_deleted()
      */
-    public function testGetIncludingDeleted()
+    public function testGetIncludingDeletedWithOtherStuff()
     {
         // Get all ids of pages
         $allPageIDs = DataObject::get(VersionedTest\TestObject::class)
@@ -1792,5 +1795,313 @@ class VersionedTest extends SapphireTest
         }
 
         $this->assertSame($expected, $record->getStatusFlags());
+    }
+
+    public static function provideGetByStage(): array
+    {
+        return [
+            'draft only' => [
+                'stage' => Versioned::DRAFT,
+                'expected' => [
+                    'draft only1',
+                    'draft only2',
+                    'published1',
+                    'published2',
+                    'modified1',
+                    'modified2',
+                ],
+            ],
+            'published' => [
+                'stage' => Versioned::LIVE,
+                'expected' => [
+                    'published1',
+                    'published2',
+                    'published3',
+                    'published4',
+                    'deleted on draft1',
+                    'deleted on draft2',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideGetByStage')]
+    public function testGetByStage(string $stage, array $expected): void
+    {
+        $this->prepareRecordsForVersionTests();
+        $results = Versioned::get_by_stage(VersionedTest\NoFixtureModel::class, $stage);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public static function provideUpdateListToAlsoIncludeStage(): array
+    {
+        return [
+            'draft ends with 1' => [
+                'stage' => Versioned::DRAFT,
+                'filter' => [
+                    'Title:EndsWith' => '1',
+                ],
+                'expected' => [
+                    'draft only1',
+                    'published1',
+                    'modified1',
+                ],
+            ],
+            'draft ends with 2' => [
+                'stage' => Versioned::DRAFT,
+                'filter' => [
+                    'Title:EndsWith:not' => '1',
+                ],
+                'expected' => [
+                    'draft only2',
+                    'published2',
+                    'modified2',
+                ],
+            ],
+            'live ends with 1' => [
+                'stage' => Versioned::LIVE,
+                'filter' => [
+                    'Title:EndsWith' => '1',
+                ],
+                'expected' => [
+                    'published1',
+                    'deleted on draft1',
+                ],
+            ],
+            'live ends with 2' => [
+                'stage' => Versioned::LIVE,
+                'filter' => [
+                    'Title:EndsWith:not' => '1',
+                ],
+                'expected' => [
+                    'published2',
+                    'published3',
+                    'published4',
+                    'deleted on draft2',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideUpdateListToAlsoIncludeStage')]
+    public function testUpdateListToAlsoIncludeStage(string $stage, array $filter, array $expected): void
+    {
+        $this->prepareRecordsForVersionTests();
+        $list = VersionedTest\NoFixtureModel::get()->filter($filter);
+        $results = Versioned::updateListToAlsoIncludeStage($list, $stage);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public function testGetIncludingDeleted(): void
+    {
+        // @TODO make sure this is at least as robust as the old test with this name
+        $expected = [
+            'draft only1',
+            'draft only2',
+            'published1',
+            'published2',
+            'modified1',
+            'modified2',
+            'archived1',
+            'archived2',
+            'deleted on draft1',
+            'deleted on draft2',
+        ];
+
+        $this->prepareRecordsForVersionTests();
+        $results = Versioned::get_including_deleted(VersionedTest\NoFixtureModel::class);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public static function provideUpdateListToAlsoIncludeDeleted(): array
+    {
+        return [
+            [
+                'filter' => [
+                    'Title:EndsWith' => '1',
+                ],
+                'expected' => [
+                    'draft only1',
+                    'published1',
+                    'modified1',
+                    'archived1',
+                    'deleted on draft1',
+                ],
+            ],
+            [
+                'filter' => [
+                    'Title:EndsWith:not' => '1',
+                ],
+                'expected' => [
+                    'draft only2',
+                    'published2',
+                    'modified2',
+                    'archived2',
+                    'deleted on draft2',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideUpdateListToAlsoIncludeDeleted')]
+    public function testUpdateListToAlsoIncludeDeleted(array $filter, array $expected): void
+    {
+        $this->prepareRecordsForVersionTests();
+        $list = VersionedTest\NoFixtureModel::get()->filter($filter);
+        $results = Versioned::updateListToAlsoIncludeDeleted($list);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public function testGetRemovedFromDraft(): void
+    {
+        $expected = [
+            'archived1',
+            'archived2',
+            'deleted on draft1',
+            'deleted on draft2',
+        ];
+
+        $this->prepareRecordsForVersionTests();
+        $results = Versioned::getRemovedFromDraft(VersionedTest\NoFixtureModel::class);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public static function provideUpdateListToOnlyIncludeRemovedFromDraft(): array
+    {
+        return [
+            [
+                'filter' => [
+                    'Title:EndsWith' => '1',
+                ],
+                'expected' => [
+                    'archived1',
+                    'deleted on draft1',
+                ],
+            ],
+            [
+                'filter' => [
+                    'Title:EndsWith:not' => '1',
+                ],
+                'expected' => [
+                    'archived2',
+                    'deleted on draft2',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideUpdateListToOnlyIncludeRemovedFromDraft')]
+    public function testUpdateListToOnlyIncludeRemovedFromDraft(array $filter, array $expected): void
+    {
+        $this->prepareRecordsForVersionTests();
+        $list = VersionedTest\NoFixtureModel::get()->filter($filter);
+        $results = Versioned::updateListToOnlyIncludeRemovedFromDraft($list);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public function testGetArchivedOnly(): void
+    {
+        $expected = [
+            'archived1',
+            'archived2',
+        ];
+
+        $this->prepareRecordsForVersionTests();
+        $results = Versioned::getArchivedOnly(VersionedTest\NoFixtureModel::class);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+
+    public static function provideUpdateListToOnlyIncludeArchived(): array
+    {
+        return [
+            [
+                'filter' => [
+                    'Title:EndsWith' => '1',
+                ],
+                'expected' => [
+                    'archived1',
+                ],
+            ],
+            [
+                'filter' => [
+                    'Title:EndsWith:not' => '1',
+                ],
+                'expected' => [
+                    'archived2',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('provideUpdateListToOnlyIncludeArchived')]
+    public function testUpdateListToOnlyIncludeArchived(array $filter, array $expected): void
+    {
+        $this->prepareRecordsForVersionTests();
+        $list = VersionedTest\NoFixtureModel::get()->filter($filter);
+        $results = Versioned::updateListToOnlyIncludeArchived($list);
+        $this->assertSame($expected, $results->column('Title'));
+    }
+
+    /**
+     * Prepares records in a bunch of different versioned states.
+     *
+     * We avoid using fixtures here because we're interested explicitly in how records in version tables interact with these methods.
+     * Using fixtures would mean we have to perform most of these operations in PHP anyway, with a little less control since some steps
+     * would be done before we get to touch the records.
+     */
+    private function prepareRecordsForVersionTests(): void
+    {
+        // Make some records that will only be on draft
+        $draftRecord1 = new VersionedTest\NoFixtureModel();
+        $draftRecord1->Title = 'draft only1';
+        $draftRecord1->write();
+        $draftRecord2 = new VersionedTest\NoFixtureModel();
+        $draftRecord2->Title = 'draft only2';
+        $draftRecord2->write();
+        // Make some records that will be published (live)
+        $publishedRecord1 = new VersionedTest\NoFixtureModel();
+        $publishedRecord1->Title = 'published1';
+        $publishedRecord1->write();
+        $publishedRecord1->publishSingle();
+        $publishedRecord2 = new VersionedTest\NoFixtureModel();
+        $publishedRecord2->Title = 'published2';
+        $publishedRecord2->write();
+        $publishedRecord2->publishSingle();
+        // Make some records to be "modified on draft"
+        $modifiedRecord1 = new VersionedTest\NoFixtureModel();
+        $modifiedRecord1->Title = 'published3';
+        $modifiedRecord1->write();
+        $modifiedRecord1->publishSingle();
+        $modifiedRecord1->Title = 'modified1';
+        $modifiedRecord1->write();
+        $modifiedRecord2 = new VersionedTest\NoFixtureModel();
+        $modifiedRecord2->Title = 'published4';
+        $modifiedRecord2->write();
+        $modifiedRecord2->publishSingle();
+        $modifiedRecord2->Title = 'modified2';
+        $modifiedRecord2->write();
+        // Make some records to be archived
+        $archivedRecord1 = new VersionedTest\NoFixtureModel();
+        $archivedRecord1->Title = 'archived1';
+        $archivedRecord1->write();
+        $archivedRecord1->publishSingle();
+        $archivedRecord1->doArchive();
+        $archivedRecord2 = new VersionedTest\NoFixtureModel();
+        $archivedRecord2->Title = 'archived2';
+        $archivedRecord2->write();
+        $archivedRecord2->publishSingle();
+        $archivedRecord2->doArchive();
+        // Make some records to be on LIVE but not on DRAFT
+        $noDraftRecord1 = new VersionedTest\NoFixtureModel();
+        $noDraftRecord1->Title = 'deleted on draft1';
+        $noDraftRecord1->write();
+        $noDraftRecord1->publishSingle();
+        $noDraftRecord1->deleteFromStage(Versioned::DRAFT);
+        $noDraftRecord2 = new VersionedTest\NoFixtureModel();
+        $noDraftRecord2->Title = 'deleted on draft2';
+        $noDraftRecord2->write();
+        $noDraftRecord2->publishSingle();
+        $noDraftRecord2->deleteFromStage(Versioned::DRAFT);
     }
 }

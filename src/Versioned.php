@@ -474,6 +474,12 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
             case 'archive':
                 $this->augmentSQLVersionedArchive($query, $dataQuery);
                 break;
+            case 'archive_only':
+                $this->augmentSQLVersionedArchiveOnly($query, $dataQuery);
+                break;
+            case 'removed_from_draft':
+                $this->augmentSQLVersionedRemovedFromDraft($query, $dataQuery);
+                break;
             case 'latest_version_single':
                 $this->augmentSQLVersionedLatestSingle($query, $dataQuery);
                 break;
@@ -742,6 +748,42 @@ SQL
             20,
             $params
         );
+    }
+
+    /**
+     * Only include records which are archived - that is they have been removed from both the draft and live stages.
+     */
+    protected function augmentSQLVersionedArchiveOnly(SQLSelect $query, DataQuery $dataQuery): void
+    {
+        $baseTable = $this->baseTable();
+        $liveTable = $this->stageTable($baseTable, Versioned::LIVE);
+
+        $query->addLeftJoin(
+            $liveTable,
+            "\"{$baseTable}\".\"ID\" = \"{$liveTable}\".\"ID\""
+        );
+        $query->addWhere("\"{$liveTable}\".\"ID\" IS NULL");
+
+        $this->augmentSQLVersionedRemovedFromDraft($query, $dataQuery);
+    }
+
+    /**
+     * Only include records which are removed from draft - these might be archived but might also still be in the live stage.
+     */
+    protected function augmentSQLVersionedRemovedFromDraft(SQLSelect $query, DataQuery $dataQuery): void
+    {
+        $baseTable = $this->baseTable();
+
+        // Join a temporary alias BaseTable_Draft, renaming this on execution to BaseTable
+        // See Versioned::augmentSQLVersioned() For reference on this alias
+        $query->addLeftJoin(
+            "{$baseTable}_Draft",
+            "\"{$baseTable}\".\"ID\" = \"{$baseTable}_Draft\".\"ID\""
+        );
+
+        $query->addWhere("\"{$baseTable}_Draft\".\"ID\" IS NULL");
+
+        $this->augmentSQLVersionedLatest($query, $dataQuery);
     }
 
     /**
@@ -2479,24 +2521,29 @@ SQL
      * @template T of DataObject
      * @param class-string<T> $class The name of the class.
      * @param string $stage The name of the stage.
-     * @param string $filter A filter to be inserted into the WHERE clause.
-     * @param string $sort A sort expression to be inserted into the ORDER BY clause.
-     * @param int $limit A limit on the number of records returned from the database.
      * @param string $containerClass The container class for the result set (default is DataList)
      *
      * @return DataList<T> A modified DataList designated to the specified stage
      */
     public static function get_by_stage(
-        $class,
-        $stage,
-        $filter = '',
-        $sort = '',
-        $limit = null,
-        $containerClass = DataList::class
-    ) {
-        ReadingMode::validateStage($stage);
+        string $class,
+        string $stage,
+        string|array $filter = '',
+        string|array|null $sort = '',
+        string|array|null $limit = null,
+        string $containerClass = DataList::class
+    ): DataList {
         $result = DataObject::get($class, $filter, $sort, $limit, $containerClass);
-        return $result->setDataQueryParam([
+        return static::updateListToAlsoIncludeStage($result, $stage);
+    }
+
+    /**
+     * Update an existing DataList to include records for a given stage.
+     */
+    public static function updateListToAlsoIncludeStage(DataList $list, string $stage): DataList
+    {
+        ReadingMode::validateStage($stage);
+        return $list->setDataQueryParam([
             'Versioned.mode' => 'stage',
             'Versioned.stage' => $stage
         ]);
@@ -2784,11 +2831,11 @@ SQL
      *
      * @template T of DataObject
      * @param class-string<T> $class
-     * @param string $filter
-     * @param string $sort
+     * @param string $filter Explicitly used in where clause as raw SQL - use with caution!
+     * @param string $sort Explicitly used in orderBy clause as raw SQL - use with caution!
      * @return DataList<T>
      */
-    public static function get_including_deleted($class, $filter = "", $sort = "")
+    public static function get_including_deleted(string $class, string|array $filter = '', string $sort = ''): DataList
     {
         $list = DataList::create($class);
         if (!empty($filter)) {
@@ -2797,8 +2844,78 @@ SQL
         if (!empty($sort)) {
             $list = $list->orderBy($sort);
         }
-        $list = $list->setDataQueryParam("Versioned.mode", "latest_versions");
-        return $list;
+        return static::updateListToAlsoIncludeDeleted($list);
+    }
+
+    /**
+     * Update a DataList to query the latest version of each record stored in the (class)_Versions tables.
+     *
+     * In particular, this will query deleted records as well as active ones.
+     */
+    public static function updateListToAlsoIncludeDeleted(DataList $list): DataList
+    {
+        return $list->setDataQueryParam('Versioned.mode', 'latest_versions');
+    }
+
+    /**
+     * Return the equivalent of a DataList::create() call, querying only records which have been removed
+     * from draft. This includes archived records and records which were published but have no draft record.
+     *
+     * @template T of DataObject
+     * @param class-string<T> $class
+     * @param string $where Explicitly used in where clause as raw SQL - use with caution!
+     * @param string $orderBy Explicitly used in orderBy clause as raw SQL - use with caution!
+     * @return DataList<T>
+     */
+    public static function getRemovedFromDraft(string $class, string|array $where = '', string $orderBy = ''): DataList
+    {
+        $list = DataList::create($class);
+        if (!empty($where)) {
+            $list = $list->where($where);
+        }
+        if (!empty($orderBy)) {
+            $list = $list->orderBy($orderBy);
+        }
+        return static::updateListToOnlyIncludeRemovedFromDraft($list);
+    }
+
+    /**
+     * Update a DataList to query only records which have been removed from draft.
+     * This includes archived records and records which were published but have no draft record.
+     */
+    public static function updateListToOnlyIncludeRemovedFromDraft(DataList $list): DataList
+    {
+        return $list->setDataQueryParam('Versioned.mode', 'removed_from_draft');
+    }
+
+    /**
+     * Return the equivalent of a DataList::create() call, querying only records which are archived
+     * (i.e. removed in both draft and live)
+     *
+     * @template T of DataObject
+     * @param class-string<T> $class
+     * @param string $where Explicitly used in where clause as raw SQL - use with caution!
+     * @param string $orderBy Explicitly used in orderBy clause as raw SQL - use with caution!
+     * @return DataList<T>
+     */
+    public static function getArchivedOnly(string $class, string|array $where = '', string $orderBy = ''): DataList
+    {
+        $list = DataList::create($class);
+        if (!empty($where)) {
+            $list = $list->where($where);
+        }
+        if (!empty($orderBy)) {
+            $list = $list->orderBy($orderBy);
+        }
+        return static::updateListToOnlyIncludeArchived($list);
+    }
+
+    /**
+     * Update a DataList to query only records which are archived (i.e. removed in both draft and live)
+     */
+    public static function updateListToOnlyIncludeArchived(DataList $list): DataList
+    {
+        return $list->setDataQueryParam('Versioned.mode', 'archive_only');
     }
 
     /**
