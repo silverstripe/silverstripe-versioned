@@ -5,6 +5,7 @@ namespace SilverStripe\Versioned\Tests;
 use BadMethodCallException;
 use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
+use SilverStripe\CampaignAdmin\AddToCampaignHandler;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\ChangeSet;
@@ -351,6 +352,21 @@ class ChangeSetTest extends SapphireTest
         $this->logInWithPermission('PERM_canPublish');
         $this->assertTrue($changeSet->canPublish());
 
+        if (class_exists(AddToCampaignHandler::class)) {
+            // Test user with the necessary minimum permissions can login
+            $this->logInWithPermission(
+                [
+                    'CMS_ACCESS_CampaignAdmin',
+                    'PERM_canPublish'
+                ]
+            );
+            $this->assertTrue($changeSet->canPublish());
+
+            // campaign admin only permission doesn't grant publishing rights
+            $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+            $this->assertFalse($changeSet->canPublish());
+        }
+
         // Test that you can still publish a changeset, even if canPublish()
         // returns false (e.g. externally rather than internally enforced)
         $changeSet->publish();
@@ -435,6 +451,10 @@ class ChangeSetTest extends SapphireTest
         $this->assertFalse($changeSet->canEdit());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canEdit());
+        if (class_exists(AddToCampaignHandler::class)) {
+            $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+            $this->assertTrue($changeSet->canEdit());
+        }
     }
 
     public function testCanCreate()
@@ -444,6 +464,10 @@ class ChangeSetTest extends SapphireTest
         $this->assertFalse(ChangeSet::singleton()->canCreate());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse(ChangeSet::singleton()->canCreate());
+        if (class_exists(AddToCampaignHandler::class)) {
+            $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+            $this->assertTrue(ChangeSet::singleton()->canCreate());
+        }
     }
 
     public function testCanDelete()
@@ -462,6 +486,10 @@ class ChangeSetTest extends SapphireTest
         $this->assertFalse($changeSet->canDelete());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canDelete());
+        if (class_exists(AddToCampaignHandler::class)) {
+            $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+            $this->assertTrue($changeSet->canDelete());
+        }
     }
 
     public function testCanView()
@@ -480,6 +508,10 @@ class ChangeSetTest extends SapphireTest
         $this->assertFalse($changeSet->canView());
         $this->logInWithPermission('SomeWrongPermission');
         $this->assertFalse($changeSet->canView());
+        if (class_exists(AddToCampaignHandler::class)) {
+            $this->logInWithPermission('CMS_ACCESS_CampaignAdmin');
+            $this->assertTrue($changeSet->canView());
+        }
     }
 
     public function testPublish()
