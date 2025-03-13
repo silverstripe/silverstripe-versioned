@@ -2212,16 +2212,17 @@ SQL
             $request->getSession()->set('readingMode', $mode);
         }
 
+        // This cookie is for the silverstripe/staticpublishqueue module
         if (!headers_sent() && !Director::is_cli()) {
             if (Versioned::get_stage() === static::LIVE) {
                 // clear the cookie if it's set
                 if (Cookie::get('bypassStaticCache')) {
-                    Cookie::force_expiry('bypassStaticCache', null, null, false, true /* httponly */);
+                    Cookie::force_expiry('bypassStaticCache', httpOnly: true, sameSite: Cookie::SAMESITE_STRICT);
                 }
             } else {
                 // set the cookie if it's cleared
                 if (!Cookie::get('bypassStaticCache')) {
-                    Cookie::set('bypassStaticCache', '1', 0, null, null, false, true /* httponly */);
+                    Cookie::set('bypassStaticCache', '1', 0, httpOnly: true, sameSite: Cookie::SAMESITE_STRICT);
                 }
             }
         }
