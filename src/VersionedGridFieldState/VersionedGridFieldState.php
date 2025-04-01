@@ -7,8 +7,12 @@ use SilverStripe\Forms\GridField\GridField_ColumnProvider;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Core\Convert;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\View\HTML;
 
+/**
+ * @deprecated 2.4.0 Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns
+ */
 class VersionedGridFieldState implements GridField_ColumnProvider
 {
     /**
@@ -26,6 +30,11 @@ class VersionedGridFieldState implements GridField_ColumnProvider
 
     public function __construct($versionedLabelFields = ['Name', 'Title'])
     {
+        Deprecation::noticeWithNoReplacment(
+            '2.4.0',
+            'Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns',
+            scope: Deprecation::SCOPE_CLASS
+        );
         $this->setVersionedLabelFields($versionedLabelFields);
     }
 
