@@ -2920,8 +2920,12 @@ SQL
         $this->owner->Version = 0;
     }
 
+    /**
+     * @deprecated 2.4.0 Will be renamed to onFlushCache()
+     */
     public function flushCache()
     {
+        Deprecation::noticeWithNoReplacment('2.4.0', 'Will be renamed to onFlushCache()');
         Versioned::$cache_versionnumber = [];
         $this->versionModifiedCache = [];
     }
