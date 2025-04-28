@@ -2031,18 +2031,112 @@ SQL
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "")
     {
-        $owner = $this->owner;
+        $id = $this->getOwner()->ID;
+        $owner = $this->getOwner();
+        $baseDataClass = DataObject::getSchema()->baseDataClass($owner);
+        return $this->innerVersions($baseDataClass, $id, $owner, $filter, $sort, $limit, $join);
+    }
 
-        // When an object is not yet in the Database, we can't get its versions
-        if (!$owner->isInDB()) {
-            return ArrayList::create();
+    /**
+     * In-memory cache of $recordID => ArrayList(<versions>)
+     */
+    private static array $versions_cache = [];
+
+    /**
+     * @internal
+     */
+    private static bool $useVersionsCache = false;
+
+    /**
+     * Ensure the versions cache is used when calling the callable
+     */
+    public static function withUseVersionsCache(callable $func): mixed
+    {
+        Versioned::$useVersionsCache = true;
+        $ret = $func();
+        Versioned::$useVersionsCache = false;
+        return $ret;
+    }
+
+    /**
+     * Generate a key for $versions_cache
+     */
+    private static function generateKey(
+        int $id,
+        string $filter,
+        string $sort,
+        string $limit,
+        string $join
+    ): string {
+        return $id . '_' . md5($filter . $sort . $limit . $join);
+    }
+
+    /**
+     * Prepopulate an in-memory cache using an efficient `WHERE "ID" IN (<ids>)` SQL query
+     */
+    public static function prepopulateVersionsCache(
+        string $baseDataClass,
+        array $ids,
+        string $filter = '',
+        string $sort = '',
+        string $limit = '',
+        string $join = '',
+    ): void {
+        Versioned::withUseVersionsCache(
+            fn() => Versioned::innerVersions($baseDataClass, $ids, null, $filter, $sort, $limit, $join)
+        );
+    }
+
+    /**
+     * Shared internal logic which allows passing either a single ID for Versions()
+     * or passing an array of IDs for prepopulateVersionsCache()
+     *
+     * @return ArrayList<Versioned_Version>|array<ArrayList<Versioned_Version>> an ArrayList when $idOrIds is an int, an array when $idOrIds is an array
+     */
+    private static function innerVersions(
+        string $baseDataClass,
+        int|array $idOrIds,
+        ?DataObject $owner = null,
+        mixed $filter = '',
+        mixed $sort = '',
+        mixed $limit = '',
+        mixed $join = '',
+    ): ArrayList|array {
+        // Do not attempt to cache anything where $filter etc are not strings
+        $useCache = Versioned::$useVersionsCache && is_string($filter) && is_string($sort)
+            && is_string($limit) && is_string($join);
+        $arrayReturn = [];
+        if ($useCache) {
+            if (is_int($idOrIds)) {
+                $key = Versioned::generateKey($idOrIds, $filter, $sort, $limit, $join);
+                if (array_key_exists($key, Versioned::$versions_cache)) {
+                    return Versioned::$versions_cache[$key];
+                }
+            } else {
+                foreach ($idOrIds as $id) {
+                    $key = Versioned::generateKey($id, $filter, $sort, $limit, $join);
+                    if (array_key_exists($key, Versioned::$versions_cache)) {
+                        $arrayReturn[$id] = Versioned::$versions_cache[$key];
+                    }
+                }
+                // From this point only fetch uncached IDs
+                $idOrIds = array_diff($idOrIds, array_keys($arrayReturn));
+            }
+        }
+        if (is_int($idOrIds)) {
+            // When an object is not yet in the Database, we can't get its versions
+            if (!$owner || !$owner->isInDB()) {
+                return ArrayList::create();
+            }
+        } elseif (empty($idOrIds)) {
+            return $arrayReturn;
         }
 
         // Make sure the table names are not postfixed (e.g. _Live)
         $oldMode = static::get_reading_mode();
         static::set_stage(static::DRAFT);
 
-        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $limit);
+        $list = DataObject::get($baseDataClass, $filter, $sort, $limit);
 
         $query = $list->dataQuery()->query();
 
@@ -2063,22 +2157,52 @@ SQL
         foreach (Config::inst()->get(static::class, 'db_for_versions_table') as $name => $type) {
             $query->selectField(sprintf('"%s_Versions"."%s"', $baseTable, $name), $name);
         }
-
-        $query->addWhere([
-            "\"{$baseTable}_Versions\".\"RecordID\" = ?" => $owner->ID
-        ]);
+        if (is_int($idOrIds)) {
+            $query->addWhere([
+                "\"{$baseTable}_Versions\".\"RecordID\" = ?" => $idOrIds
+            ]);
+        } else {
+            $in = implode(', ', array_fill(0, count($idOrIds), '?'));
+            $query->addWhere([
+                "\"{$baseTable}_Versions\".\"RecordID\" IN ($in)" => $idOrIds
+            ]);
+        }
         $query->setOrderBy(($sort) ? $sort
             : "\"{$baseTable}_Versions\".\"LastEdited\" DESC, \"{$baseTable}_Versions\".\"Version\" DESC");
-
         $records = $query->execute();
-        $versions = new ArrayList();
-
+        $versions = ArrayList::create();
         foreach ($records as $record) {
             $versions->push(new Versioned_Version($record));
         }
-
+        if (is_array($idOrIds)) {
+            $versionsArray = $versions->toArray();
+            foreach ($idOrIds as $id) {
+                $vers = array_filter($versionsArray, fn($ver) => (int) $ver->RecordID === $id);
+                $list = ArrayList::create($vers);
+                $arrayReturn[$id] = $list;
+            }
+        }
+        if ($useCache) {
+            if (is_int($idOrIds)) {
+                $key = Versioned::generateKey($idOrIds, $filter, $sort, $limit, $join);
+                Versioned::$versions_cache[$key] = $versions;
+            } else {
+                $versionsArray = $versions->toArray();
+                foreach ($arrayReturn as $id => $list) {
+                    $key = Versioned::generateKey($id, $filter, $sort, $limit, $join);
+                    if (array_key_exists($key, Versioned::$versions_cache)) {
+                        continue;
+                    }
+                    Versioned::$versions_cache[$key] = $list;
+                }
+            }
+        }
         Versioned::set_reading_mode($oldMode);
-        return $versions;
+        if (is_int($idOrIds)) {
+            return $versions;
+        } else {
+            return $arrayReturn;
+        }
     }
 
     /**
