@@ -2509,8 +2509,21 @@ SQL
 
         $versions = DB::prepared_query("SELECT \"ID\", \"Version\" FROM \"$stageTable\" $filter", $parameters)->map();
 
-        foreach ($versions as $id => $version) {
-            Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
+        if ($idList) {
+            foreach ($idList as $id) {
+                $version = 0;
+                foreach ($versions as $vid => $val) {
+                    if ($id === $vid) {
+                        $version = $val;
+                        break;
+                    }
+                }
+                Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
+            }
+        } else {
+            foreach ($versions as $id => $version) {
+                Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
+            }
         }
 
         $className = $class instanceof DataObject ? $class->ClassName : $class;
