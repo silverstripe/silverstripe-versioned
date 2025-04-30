@@ -26,7 +26,7 @@ if (!interface_exists(OperationCreator::class)) {
  *
  * copy[TypeName]ToStage(ID!, FromVersion!, FromStage!, ToStage!)
  *
- * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module in a future major release
  */
 class CopyToStageCreator implements OperationCreator
 {

@@ -1533,11 +1533,11 @@ SQL
     }
 
     /**
-     * @deprecated 5.3.0 Will be removed without equivalent functionality.
+     * @deprecated 5.3.0 Will be removed without equivalent functionality in a future major release.
      */
     protected function extendCanArchive()
     {
-        Deprecation::notice('5.3.0', 'Will be removed without equivalent functionality.');
+        Deprecation::notice('5.3.0', 'Will be removed without equivalent functionality in a future major release.');
         // Prevent canArchive() extending itself
         return null;
     }
@@ -2020,7 +2020,7 @@ SQL
      * @param string $sort
      * @param string $limit
      * @param string $join Deprecated, use leftJoin($table, $joinClause) instead
-     * @param string $having @deprecated 2.2.0 The $having parameter does nothing and will be removed without
+     * @param string $having @deprecated 2.2.0 The $having parameter does nothing and will be removed without in a future major release
      *               equivalent functionality to replace it
      * @return ArrayList<Versioned_Version>
      */
