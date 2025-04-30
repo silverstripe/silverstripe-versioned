@@ -250,11 +250,11 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
      * Return list of class / title to add on the end of record status in breadcrumbs
      *
      * @return array|null
-     * @deprecated 2.4.0 Will be replaced with SilverStripe\Versioned\Versioned::updateStatusFlags()
+     * @deprecated 2.4.0 Will be replaced with SilverStripe\Versioned\Versioned::updateStatusFlags() in a future major release
      */
     protected function getRecordStatus()
     {
-        Deprecation::noticeWithNoReplacment('2.4.0', 'Will be replaced with SilverStripe\Versioned\Versioned::updateStatusFlags()');
+        Deprecation::noticeWithNoReplacment('2.4.0', 'Will be replaced with SilverStripe\Versioned\Versioned::updateStatusFlags() in a future major release');
         /** @var DataObject|Versioned $record */
         $record = $this->record;
 

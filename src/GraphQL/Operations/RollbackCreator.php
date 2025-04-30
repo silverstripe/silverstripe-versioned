@@ -25,7 +25,7 @@ if (!interface_exists(OperationCreator::class)) {
  *
  * rollback[TypeName](ID!, ToVersion!)
  *
- * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module in a future major release
  */
 class RollbackCreator implements OperationCreator
 {

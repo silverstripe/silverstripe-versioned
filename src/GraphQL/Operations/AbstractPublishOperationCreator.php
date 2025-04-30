@@ -33,7 +33,7 @@ if (!interface_exists(OperationCreator::class)) {
 
 /**
  * Scaffolds a generic update operation for DataObjects.
- * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module
+ * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module in a future major release
  */
 abstract class AbstractPublishOperationCreator implements OperationCreator
 {
