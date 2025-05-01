@@ -11,7 +11,7 @@ use SilverStripe\Dev\Deprecation;
 use SilverStripe\View\HTML;
 
 /**
- * @deprecated 2.4.0 Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns
+ * @deprecated 2.4.0 Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns in a future major release
  */
 class VersionedGridFieldState implements GridField_ColumnProvider
 {
@@ -32,7 +32,7 @@ class VersionedGridFieldState implements GridField_ColumnProvider
     {
         Deprecation::noticeWithNoReplacment(
             '2.4.0',
-            'Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns',
+            'Will be replaced with functionality in SilverStripe\Forms\GridField\GridFieldDataColumns in a future major release',
             scope: Deprecation::SCOPE_CLASS
         );
         $this->setVersionedLabelFields($versionedLabelFields);

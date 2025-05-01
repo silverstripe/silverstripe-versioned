@@ -11,7 +11,7 @@ use SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState;
  * Decorates a GridFieldConfig with gridfield publishing state
  *
  * @extends Extension<GridFieldConfig>
- * @deprecated 2.4.0 Will be removed without equivalent functionality to replace it
+ * @deprecated 2.4.0 Will be removed without equivalent functionality to replace it in a future major release
  */
 class VersionedGridFieldStateExtension extends Extension
 {
