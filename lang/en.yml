@@ -8,16 +8,16 @@ en:
       one: '1 total'
       other: '{count} total'
     NAME: Name
-    PLURALNAME: Campaigns
+    PLURALNAME: Changesets
     PLURALS:
-      one: 'A Campaign'
-      other: '{count} Campaigns'
+      one: 'A Changeset'
+      other: '{count} Changesets'
     PUBLISHED_DATE_BY: '{date} by {name}'
     PUBLISHED_TODAY: 'Today {time}'
     PUBLISHED_TODAY_BY: 'Today {time} by {name}'
     PUBLISHER_NAME: 'Published by'
     PUBLISH_DATE: 'Publish date'
-    SINGULARNAME: Campaign
+    SINGULARNAME: Changeset
     STATE: State
     STATE_OPEN: Active
     STATE_PUBLISHED: Published
@@ -63,6 +63,14 @@ en:
     RESTORE_TO_ROOT: 'Restore to draft at top level'
     RESTORE_TO_ROOT_DESC: 'Restore the archived version to draft as a top level item'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Item has not been published yet'
+    FLAG_ADDEDTODRAFT_SHORT: Draft
+    FLAG_ARCHIVED_HELP: 'Item is removed from draft and live'
+    FLAG_ARCHIVED_SHORT: Archived
+    FLAG_MODIFIEDONDRAFT_HELP: 'Item has unpublished changes'
+    FLAG_MODIFIEDONDRAFT_SHORT: Modified
+    FLAG_ONLIVEONLYSHORT_HELP: 'Item is published, but has been deleted from draft'
+    FLAG_ONLIVEONLY_SHORT: 'On live only'
     db_Version: Version
     has_many_Versions: Versions
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
