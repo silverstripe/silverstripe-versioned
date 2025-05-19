@@ -27,6 +27,14 @@ da:
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: "Genereret ved udgivelse af '{title}' den {created}"
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Elementet er endnu ikke blevet udgivet'
+    FLAG_ADDEDTODRAFT_SHORT: Kladde
+    FLAG_ARCHIVED_HELP: 'Elementet er fjernet fra kladde og udgivet'
+    FLAG_ARCHIVED_SHORT: Arkiverede
+    FLAG_MODIFIEDONDRAFT_HELP: 'Elementet har ændringer der ikke er udgivet'
+    FLAG_MODIFIEDONDRAFT_SHORT: Modificeret
+    FLAG_ONLIVEONLYSHORT_HELP: 'Elementet er udgivet, men er slettet fra kladden'
+    FLAG_ONLIVEONLY_SHORT: 'Kun på udgivet'
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Arkiverede {name} {title}'

@@ -58,6 +58,14 @@ de:
     RESTORE_TO_ROOT: 'Als Entwurf auf oberster Ebene wiederherstellen'
     RESTORE_TO_ROOT_DESC: 'Archivierte Version als Entwurf auf oberster Ebene wiederherstellen'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Element wurde noch nicht veröffentlicht'
+    FLAG_ADDEDTODRAFT_SHORT: Entwurf
+    FLAG_ARCHIVED_HELP: 'Element ist als Entwurf und Live entfernt'
+    FLAG_ARCHIVED_SHORT: Archiviert
+    FLAG_MODIFIEDONDRAFT_HELP: 'Element hat unveröffentlichte Änderungen'
+    FLAG_MODIFIEDONDRAFT_SHORT: Bearbeitet
+    FLAG_ONLIVEONLYSHORT_HELP: 'Element wurde veröffentlicht, aber Entwurf wurde gelöscht'
+    FLAG_ONLIVEONLY_SHORT: 'Nur auf Live'
     has_many_Versions: Versionen
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Archiviert {name} "{title}"'

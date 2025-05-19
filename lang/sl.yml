@@ -71,6 +71,14 @@ sl:
     RESTORE_TO_ROOT: 'Obnovi v osnutek na prvem nivoju'
     RESTORE_TO_ROOT_DESC: 'Obnovi arhivirano različico v obliki osnutka na prvem nivoju'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Element še ni bilo objavljen'
+    FLAG_ADDEDTODRAFT_SHORT: Osnutek
+    FLAG_ARCHIVED_HELP: 'Element smo odstranili iz objave in osnutkov'
+    FLAG_ARCHIVED_SHORT: Arhivirano
+    FLAG_MODIFIEDONDRAFT_HELP: 'Spremembe še niso bile objavljene'
+    FLAG_MODIFIEDONDRAFT_SHORT: Spremenjeno
+    FLAG_ONLIVEONLYSHORT_HELP: 'Element je objavljen, vendar nima osnutka'
+    FLAG_ONLIVEONLY_SHORT: 'Samo objavljeno'
     db_Version: Različica
     has_many_Versions: Različice
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
