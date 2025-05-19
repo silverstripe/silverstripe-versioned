@@ -63,6 +63,14 @@ eo:
     RESTORE_TO_ROOT: 'Restaŭri al malneto ĉe la supra nivelo'
     RESTORE_TO_ROOT_DESC: 'Restaŭri la enarkivigitan version al malneto kiel la supranivela ero'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Ero ankoraŭ ne publikigita'
+    FLAG_ADDEDTODRAFT_SHORT: Malneto
+    FLAG_ARCHIVED_HELP: 'Ero estas forigita el malneto kaj publika'
+    FLAG_ARCHIVED_SHORT: Arkivigita
+    FLAG_MODIFIEDONDRAFT_HELP: 'Ero havas nepublikigitajn ŝanĝojn'
+    FLAG_MODIFIEDONDRAFT_SHORT: Ŝanĝita
+    FLAG_ONLIVEONLYSHORT_HELP: 'Elemento estas publikigita, sed estas forigita el malneto'
+    FLAG_ONLIVEONLY_SHORT: 'Nur en publika'
     db_Version: Versio
     has_many_Versions: Versioj
   SilverStripe\Versioned\VersionedGridFieldItemRequest:

@@ -50,6 +50,14 @@ fi:
     RESTORE_TO_ROOT: 'Palauta vedoksena päätasolle'
     RESTORE_TO_ROOT_DESC: 'Palauta arkistoitu versio vedoksena päätasolle'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Kohdetta ei ole julkaistu vielä'
+    FLAG_ADDEDTODRAFT_SHORT: Vedos
+    FLAG_ARCHIVED_HELP: 'Kohde on poistettu vedoksista ja julkaisusta'
+    FLAG_ARCHIVED_SHORT: Arkistoitu
+    FLAG_MODIFIEDONDRAFT_HELP: 'Kohteessa on julkaisemattomia muutoksia'
+    FLAG_MODIFIEDONDRAFT_SHORT: Muokattu
+    FLAG_ONLIVEONLYSHORT_HELP: 'Kohde on julkaistu, mutta on poistettu vedoksista'
+    FLAG_ONLIVEONLY_SHORT: 'Vain julkaistuna'
     has_many_Versions: Versiot
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Arkistoitiin {name} {title}'
