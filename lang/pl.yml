@@ -58,6 +58,14 @@ pl:
     RESTORE_TO_ROOT: 'Przywróć wersję roboczą na najwyższym poziomie'
     RESTORE_TO_ROOT_DESC: 'Przywróć zarchiwizowaną wersję do wersji roboczej jako element najwyższego poziomu'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Rekord nie został jeszcze opublikowany'
+    FLAG_ADDEDTODRAFT_SHORT: Szkic
+    FLAG_ARCHIVED_HELP: 'Rekord usunięty'
+    FLAG_ARCHIVED_SHORT: Zarchiwizowano
+    FLAG_MODIFIEDONDRAFT_HELP: 'Rekord zawiera nieopublikowane zmiany'
+    FLAG_MODIFIEDONDRAFT_SHORT: Zmodyfikowano
+    FLAG_ONLIVEONLYSHORT_HELP: 'Rekord został opublikowany'
+    FLAG_ONLIVEONLY_SHORT: 'Tylko opublikowane'
     has_many_Versions: Wersje
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Zarchiwizowano {name} {title}'
