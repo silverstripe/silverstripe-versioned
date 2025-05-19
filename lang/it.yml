@@ -67,6 +67,14 @@ it:
     RESTORE_TO_ROOT: 'Ripristina la bozza al livello superiore'
     RESTORE_TO_ROOT_DESC: 'Ripristina la versione archiviata in bozza come elemento di livello superiore'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: "L'elemento non è stato ancora pubblicato"
+    FLAG_ADDEDTODRAFT_SHORT: Bozza
+    FLAG_ARCHIVED_HELP: "L'elemento è rimosso dalla bozza e dal vivo"
+    FLAG_ARCHIVED_SHORT: Archiviato
+    FLAG_MODIFIEDONDRAFT_HELP: "L'elemento ha modifiche non pubblicate"
+    FLAG_MODIFIEDONDRAFT_SHORT: Modificato
+    FLAG_ONLIVEONLYSHORT_HELP: "L'elemento è pubblicato, ma è stato cancellato dalla bozza"
+    FLAG_ONLIVEONLY_SHORT: 'Solo live'
     db_Version: Versione
     has_many_Versions: Versioni
   SilverStripe\Versioned\VersionedGridFieldItemRequest:

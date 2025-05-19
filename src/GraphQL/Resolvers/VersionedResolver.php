@@ -22,6 +22,7 @@ use Exception;
 use Closure;
 use InvalidArgumentException;
 use SilverStripe\Dev\Deprecation;
+use SilverStripe\Security\Member;
 
 /**
  * @deprecated 5.3.0 Will be moved to the silverstripe/graphql module in a future major release
@@ -86,7 +87,7 @@ class VersionedResolver
                 ));
             }
             $member = UserContextProvider::get($context);
-            if (!$object->canViewStage(Versioned::DRAFT, $member)) {
+            if (!VersionedResolver::checkPermissionForVersionList($object, $member)) {
                 throw new Exception(sprintf(
                     'Cannot view versions on %s',
                     $sourceClass
@@ -96,6 +97,17 @@ class VersionedResolver
             // Get all versions
             return VersionedResolver::getVersionsList($object);
         };
+    }
+
+    /**
+     * @param DataObject&Versioned $object
+     */
+    private static function checkPermissionForVersionList(DataObject $object, ?Member $member): bool
+    {
+        if ($object->isArchived()) {
+            return $object->canView($member);
+        }
+        return $object->canViewStage(Versioned::DRAFT, $member);
     }
 
     private static function getVersionsList(DataObject $object)

@@ -50,6 +50,14 @@ nl:
     RESTORE_TO_ROOT: 'Teruggezet op hoofniveau'
     RESTORE_TO_ROOT_DESC: 'Gearchiveerde versie terugzetten naar concept op hoofdniveau'
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Item is nog niet gepubliceerd'
+    FLAG_ADDEDTODRAFT_SHORT: Concept
+    FLAG_ARCHIVED_HELP: 'Item is verwijderd van concept en live'
+    FLAG_ARCHIVED_SHORT: Gearchiveerd
+    FLAG_MODIFIEDONDRAFT_HELP: 'Item heeft niet-gepubliceerde aanpassingen'
+    FLAG_MODIFIEDONDRAFT_SHORT: Aangepast
+    FLAG_ONLIVEONLYSHORT_HELP: 'Item is gepubliceerd, maar verwijderd van concept'
+    FLAG_ONLIVEONLY_SHORT: 'Alleen op Live-versie'
     has_many_Versions: Versies
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: '{name} {link} gearchiveerd'
