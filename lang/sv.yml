@@ -29,6 +29,12 @@ sv:
   SilverStripe\Versioned\RecursivePublishable:
     INFERRED_TITLE: "Skapad genom publicering av '{title}' {created}"
   SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: 'Objektet har inte publicerats ännu'
+    FLAG_ADDEDTODRAFT_SHORT: Utkast
+    FLAG_ARCHIVED_SHORT: Arkiverad
+    FLAG_MODIFIEDONDRAFT_HELP: 'Objektet har opublicerade ändringar'
+    FLAG_MODIFIEDONDRAFT_SHORT: Ändrad
+    FLAG_ONLIVEONLYSHORT_HELP: 'Objektet är publicerat, men har raderats från utkast'
     has_many_Versions: Versioner
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: 'Arkiverade {name} {title}'
