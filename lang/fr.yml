@@ -39,6 +39,14 @@ fr:
     RESTORE_DESC: 'Rétablir la version archivée en tant que brouillon'
     RESTORE_SUCCESS: 'Le {model} "{id}" a été rétabli avec succès.'
     RESTORE_TO_ROOT: 'Rétablir le brouillon à la racine'
+  SilverStripe\Versioned\Versioned:
+    FLAG_ADDEDTODRAFT_HELP: "L'élément n'a pas encore été publié"
+    FLAG_ADDEDTODRAFT_SHORT: Brouillon
+    FLAG_ARCHIVED_HELP: "L'élément est retiré des brouillons et en ligne"
+    FLAG_ARCHIVED_SHORT: Archivé
+    FLAG_MODIFIEDONDRAFT_HELP: "L'élément a des changements non publiés"
+    FLAG_MODIFIEDONDRAFT_SHORT: Modifié
+    FLAG_ONLIVEONLYSHORT_HELP: "L'élément est publié, mais a été effacé des brouillons"
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
     Archived: '{name} {title} archivé'
     BUTTONAPPLYCHANGES: 'Appliquer les modifications'
