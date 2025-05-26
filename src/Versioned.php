@@ -296,6 +296,12 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
     private static $use_session = false;
 
     /**
+     * Temporarily store data about a deleted version
+     * @internal
+     */
+    private static $deletedVersionData = [];
+
+    /**
      * Reset static configuration variables to their default values.
      */
     public static function reset()
@@ -783,7 +789,7 @@ SQL
 
         $query->addWhere("\"{$baseTable}_Draft\".\"ID\" IS NULL");
 
-        $this->augmentSQLVersionedLatest($query, $dataQuery);
+        $this->augmentSQLVersionedLatestIncludingDeleted($query, $dataQuery);
     }
 
     /**
@@ -815,22 +821,35 @@ SQL
      * Return latest version instances, regardless of whether they are on a particular stage.
      * This provides "show all, including deleted" functionality.
      *
-     * Note: latest_version ignores deleted versions, and will select the latest non-deleted
-     * version.
-     *
-     * @param SQLSelect $query
-     * @param DataQuery $dataQuery
+     * Note: latest_versions ignores versions which represent the archive action (aka deleted versions),
+     * and will select the latest non-deleted version.
      */
     protected function augmentSQLVersionedLatest(SQLSelect $query, DataQuery $dataQuery)
     {
+        $this->augmentSQLVersionedLatestInner($query, $dataQuery, true);
+    }
+
+    /**
+     * Return latest version instances, regardless of whether they are on a particular stage
+     * and including versions which represent the archive action (aka deleted versions).
+     */
+    protected function augmentSQLVersionedLatestIncludingDeleted(SQLSelect $query, DataQuery $dataQuery)
+    {
+        $this->augmentSQLVersionedLatestInner($query, $dataQuery, false);
+    }
+
+    private function augmentSQLVersionedLatestInner(SQLSelect $query, DataQuery $dataQuery, bool $excludeDeleted)
+    {
         // Query against _Versions table first
-        $this->augmentSQLVersioned($query);
+        $this->augmentSQLVersioned($query, $excludeDeleted);
 
         // Join and select only latest version
         $baseTable = $this->baseTable();
         $subSelect = $this->prepareMaxVersionSubSelect($query, $dataQuery);
 
-        $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
+        if ($excludeDeleted) {
+            $subSelect->addWhere("\"{$baseTable}_Versions_Latest\".\"WasDeleted\" = 0");
+        }
 
         if ($this->shouldApplySubSelectAsCondition($query)) {
             $subSelect->addWhere(
@@ -1173,7 +1192,11 @@ SQL
         ];
 
         // Add any extra, unchanged fields to the version record.
-        $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        if ($isDelete && isset(Versioned::$deletedVersionData[$table][$recordID])) {
+            $data = Versioned::$deletedVersionData[$table][$recordID];
+        } else {
+            $data = DB::prepared_query("SELECT * FROM \"{$table}\" WHERE \"ID\" = ?", [$recordID])->record();
+        }
         if ($data) {
             $fields = $schema->databaseFields($class, false);
             if (is_array($fields)) {
@@ -1901,10 +1924,29 @@ SQL
         return true;
     }
 
+    protected function onBeforeDelete(): void
+    {
+        // Skip if suppressed by parent delete
+        if (!$this->getDeleteWritesVersion()) {
+            return;
+        }
+        // Pre-fetch data that will be used in augmentWriteVersioned().
+        // This is necessary because that data doesn't exist after the base record is deleted.
+        $owner = $this->getOwner();
+        $baseTable = $owner->baseTable();
+        $recordID = $owner->ID;
+        Versioned::$deletedVersionData[$baseTable][$recordID] = DB::prepared_query("SELECT * FROM \"{$baseTable}\" WHERE \"ID\" = ?", [$recordID])->record();
+    }
+
     protected function onAfterDelete()
     {
         // Create deleted record for current stage
         $this->createDeletedVersion(static::get_stage());
+        // Remove pre-delete data.
+        $owner = $this->getOwner();
+        $baseTable = $owner->baseTable();
+        $recordID = $owner->ID;
+        unset(Versioned::$deletedVersionData[$baseTable][$recordID]);
     }
 
     /**
