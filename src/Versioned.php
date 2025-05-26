@@ -14,7 +14,6 @@ use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
@@ -25,6 +24,8 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use SilverStripe\View\TemplateGlobalProvider;
+use SilverStripe\Versioned\Traits\VersionsCacheTrait;
+use SilverStripe\Versioned\Traits\VersionNumberCacheTrait;
 
 /**
  * The Versioned extension allows your DataObjects to have several versions,
@@ -40,6 +41,9 @@ use SilverStripe\View\TemplateGlobalProvider;
  */
 class Versioned extends Extension implements TemplateGlobalProvider, Resettable
 {
+    use VersionsCacheTrait;
+    use VersionNumberCacheTrait;
+
     /**
      * Versioning mode for this object.
      * Note: Not related to the current versioning mode in the state / session
@@ -74,15 +78,6 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
      * The draft (default) stage
      */
     const DRAFT = 'Stage';
-
-    /**
-     * A cache used by get_versionnumber_by_stage().
-     * Clear through {@link flushCache()}.
-     * version (int)0 means not on this stage.
-     *
-     * @var array
-     */
-    protected static $cache_versionnumber;
 
     /**
      * Set if draft site is secured or not. Fails over to
@@ -190,15 +185,6 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
     private static $db = [
         'Version' => 'Int'
     ];
-
-    /**
-     * Used to enable or disable the prepopulation of the version number cache.
-     * Defaults to true.
-     *
-     * @config
-     * @var boolean
-     */
-    private static $prepopulate_versionnumber_cache = true;
 
     /**
      * Indicates whether augmentSQL operations should add subselects as WHERE conditions instead of INNER JOIN
@@ -2073,54 +2059,8 @@ SQL
      */
     public function Versions($filter = "", $sort = "", $limit = "", $join = "")
     {
-        $owner = $this->owner;
-
-        // When an object is not yet in the Database, we can't get its versions
-        if (!$owner->isInDB()) {
-            return ArrayList::create();
-        }
-
-        // Make sure the table names are not postfixed (e.g. _Live)
-        $oldMode = static::get_reading_mode();
-        static::set_stage(static::DRAFT);
-
-        $list = DataObject::get(DataObject::getSchema()->baseDataClass($owner), $filter, $sort, $limit);
-
-        $query = $list->dataQuery()->query();
-
-        $baseTable = null;
-        foreach ($query->getFrom() as $table => $tableJoin) {
-            if (is_string($tableJoin) && $tableJoin[0] == '"') {
-                $baseTable = str_replace('"', '', $tableJoin ?? '');
-            } elseif (is_string($tableJoin) && substr($tableJoin ?? '', 0, 5) != 'INNER') {
-                $query->setFrom([
-                    $table => "LEFT JOIN \"$table\" ON \"$table\".\"RecordID\"=\"{$baseTable}_Versions\".\"RecordID\""
-                        . " AND \"$table\".\"Version\" = \"{$baseTable}_Versions\".\"Version\""
-                ]);
-            }
-            $query->renameTable($table, $table . '_Versions');
-        }
-
-        // Add all <basetable>_Versions columns
-        foreach (Config::inst()->get(static::class, 'db_for_versions_table') as $name => $type) {
-            $query->selectField(sprintf('"%s_Versions"."%s"', $baseTable, $name), $name);
-        }
-
-        $query->addWhere([
-            "\"{$baseTable}_Versions\".\"RecordID\" = ?" => $owner->ID
-        ]);
-        $query->setOrderBy(($sort) ? $sort
-            : "\"{$baseTable}_Versions\".\"LastEdited\" DESC, \"{$baseTable}_Versions\".\"Version\" DESC");
-
-        $records = $query->execute();
-        $versions = new ArrayList();
-
-        foreach ($records as $record) {
-            $versions->push(new Versioned_Version($record));
-        }
-
-        Versioned::set_reading_mode($oldMode);
-        return $versions;
+        $owner = $this->getOwner();
+        return Versioned::readVersions($owner, $filter, $sort, $limit, $join);
     }
 
     /**
@@ -2507,55 +2447,17 @@ SQL
     }
 
     /**
-     * Pre-populate the cache for Versioned::get_versionnumber_by_stage() for
-     * a list of record IDs, for more efficient database querying.  If $idList
-     * is null, then every record will be pre-cached.
+     * Alias of prepopulateVersionNumberCacheForStage()
      *
      * @param string $class
      * @param string $stage
      * @param array $idList
+     *
+     * @deprecated 6.1.0 Use prepopulateVersionNumberCacheForStage() instead
      */
     public static function prepopulate_versionnumber_cache($class, $stage, $idList = null)
     {
-        ReadingMode::validateStage($stage);
-        if (!Config::inst()->get(static::class, 'prepopulate_versionnumber_cache')) {
-            return;
-        }
-
-        $singleton = DataObject::singleton($class);
-        $baseClass = $singleton->baseClass();
-        $baseTable = $singleton->baseTable();
-        $stageTable = $singleton->stageTable($baseTable, $stage);
-
-        $filter = "";
-        $parameters = [];
-        if ($idList) {
-            // Validate the ID list
-            foreach ($idList as $id) {
-                if (!is_numeric($id)) {
-                    throw new InvalidArgumentException(
-                        "Bad ID passed to Versioned::prepopulate_versionnumber_cache() in \$idList: " . $id
-                    );
-                }
-            }
-            $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
-            $parameters = $idList;
-
-        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
-        // no subsequent call is necessary
-        } else {
-            Versioned::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
-        }
-
-        $versions = DB::prepared_query("SELECT \"ID\", \"Version\" FROM \"$stageTable\" $filter", $parameters)->map();
-
-        foreach ($versions as $id => $version) {
-            Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
-        }
-
-        $className = $class instanceof DataObject ? $class->ClassName : $class;
-        $object = DataObject::singleton($className);
-        $object->invokeWithExtensions('updatePrePopulateVersionNumberCache', $versions, $class, $stage, $idList);
+        Versioned::prepopulateVersionNumberCacheForStage($class, $stage, $idList);
     }
 
     /**
@@ -3036,6 +2938,7 @@ SQL
     protected function onFlushCache()
     {
         Versioned::$cache_versionnumber = [];
+        Versioned::$versions_cache = [];
         $this->versionModifiedCache = [];
     }
 
