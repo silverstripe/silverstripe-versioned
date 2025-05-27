@@ -9,3 +9,6 @@ SilverStripe\Core\Injector\Injector:
     constructor:
       args:
         container: 'SilverStripe\Versioned\Caching\VersionedCacheAdapter'
+SilverStripe\ORM\DataList:
+  extensions:
+    - SilverStripe\Versioned\Extensions\DataListExtension

@@ -1,0 +1,5 @@
+SilverStripe\Versioned\Tests\Traits\TestObject:
+  one:
+    Title: 'One'
+  two:
+    Title: 'Two'

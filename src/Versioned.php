@@ -25,6 +25,8 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use SilverStripe\View\TemplateGlobalProvider;
+use SilverStripe\Versioned\Traits\VersionsCacheTrait;
+use SilverStripe\Versioned\Traits\VersionNumberCacheTrait;
 
 /**
  * The Versioned extension allows your DataObjects to have several versions,
@@ -40,6 +42,8 @@ use SilverStripe\View\TemplateGlobalProvider;
  */
 class Versioned extends Extension implements TemplateGlobalProvider, Resettable
 {
+    use VersionNumberCacheTrait;
+
     /**
      * Versioning mode for this object.
      * Note: Not related to the current versioning mode in the state / session
@@ -74,15 +78,6 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
      * The draft (default) stage
      */
     const DRAFT = 'Stage';
-
-    /**
-     * A cache used by get_versionnumber_by_stage().
-     * Clear through {@link flushCache()}.
-     * version (int)0 means not on this stage.
-     *
-     * @var array
-     */
-    protected static $cache_versionnumber;
 
     /**
      * Set if draft site is secured or not. Fails over to
@@ -190,15 +185,6 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
     private static $db = [
         'Version' => 'Int'
     ];
-
-    /**
-     * Used to enable or disable the prepopulation of the version number cache.
-     * Defaults to true.
-     *
-     * @config
-     * @var boolean
-     */
-    private static $prepopulate_versionnumber_cache = true;
 
     /**
      * Indicates whether augmentSQL operations should add subselects as WHERE conditions instead of INNER JOIN
@@ -2507,55 +2493,17 @@ SQL
     }
 
     /**
-     * Pre-populate the cache for Versioned::get_versionnumber_by_stage() for
-     * a list of record IDs, for more efficient database querying.  If $idList
-     * is null, then every record will be pre-cached.
+     * Alias of prepopulateVersionNumberCacheForStage()
      *
      * @param string $class
      * @param string $stage
      * @param array $idList
+     *
+     * @deprecated 6.1.0 Use prepopulateVersionNumberCacheForStage() instead
      */
     public static function prepopulate_versionnumber_cache($class, $stage, $idList = null)
     {
-        ReadingMode::validateStage($stage);
-        if (!Config::inst()->get(static::class, 'prepopulate_versionnumber_cache')) {
-            return;
-        }
-
-        $singleton = DataObject::singleton($class);
-        $baseClass = $singleton->baseClass();
-        $baseTable = $singleton->baseTable();
-        $stageTable = $singleton->stageTable($baseTable, $stage);
-
-        $filter = "";
-        $parameters = [];
-        if ($idList) {
-            // Validate the ID list
-            foreach ($idList as $id) {
-                if (!is_numeric($id)) {
-                    throw new InvalidArgumentException(
-                        "Bad ID passed to Versioned::prepopulate_versionnumber_cache() in \$idList: " . $id
-                    );
-                }
-            }
-            $filter = 'WHERE "ID" IN (' . DB::placeholders($idList) . ')';
-            $parameters = $idList;
-
-        // If we are caching IDs for _all_ records then we can mark this cache as "complete" and in the case of a cache-miss
-        // no subsequent call is necessary
-        } else {
-            Versioned::$cache_versionnumber[$baseClass][$stage] = [ '_complete' => true ];
-        }
-
-        $versions = DB::prepared_query("SELECT \"ID\", \"Version\" FROM \"$stageTable\" $filter", $parameters)->map();
-
-        foreach ($versions as $id => $version) {
-            Versioned::$cache_versionnumber[$baseClass][$stage][$id] = $version;
-        }
-
-        $className = $class instanceof DataObject ? $class->ClassName : $class;
-        $object = DataObject::singleton($className);
-        $object->invokeWithExtensions('updatePrePopulateVersionNumberCache', $versions, $class, $stage, $idList);
+        Versioned::prepopulateVersionNumberCacheForStage($class, $stage, $idList);
     }
 
     /**
