@@ -65,7 +65,7 @@ class VersionedTest extends SapphireTest
             foreach ($indexes as $index) {
                 $indexColumns = array_merge($indexColumns, $index['columns']);
             }
-            $expectedColumns = ['UniqA', 'UniqS'];
+            $expectedColumns = ['UniqA ASC', 'UniqS ASC'];
             foreach ($expectedColumns as $column) {
                 $this->assertContains($column, $indexColumns);
             }
