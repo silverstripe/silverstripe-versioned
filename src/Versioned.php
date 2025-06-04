@@ -1147,6 +1147,9 @@ SQL
     private function uniqueToIndex($indexes)
     {
         foreach ($indexes as &$spec) {
+            if ($spec === false) {
+                continue;
+            }
             if ($spec['type'] === 'unique') {
                 $spec['type'] = 'index';
             }
