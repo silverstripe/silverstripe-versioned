@@ -19,6 +19,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Dev\TestSession;
 use SilverStripe\Model\List\ArrayList;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\DB;
@@ -43,6 +44,7 @@ class VersionedTest extends SapphireTest
         VersionedTest\CustomTable::class,
         VersionedTest\ChangeSetTestObject::class,
         VersionedTest\NoFixtureModel::class,
+        VersionedTest\UnversionedWithField::class,
     ];
 
     public function testUniqueIndexes()
@@ -2041,6 +2043,62 @@ class VersionedTest extends SapphireTest
         $list = VersionedTest\NoFixtureModel::get()->filter($filter);
         $results = Versioned::updateListToOnlyIncludeArchived($list);
         $this->assertSame($expected, $results->column('Title'));
+    }
+
+    public function testDataListCacheBetweenStages(): void
+    {
+        $obj = $this->objFromFixture(VersionedTest\TestObject::class, 'page1');
+        $obj->Name = 'Published';
+        $obj->write();
+        $obj->publishSingle();
+        $obj->Name = 'Draft';
+        $obj->write();
+        DataList::reset();
+
+        Versioned::set_stage(Versioned::DRAFT);
+        $draftRecord = VersionedTest\TestObject::get()->setUseCache(true)->byID($obj->ID);
+        $draftCachedRecord = VersionedTest\TestObject::get()->setUseCache(true)->byID($obj->ID);
+        // Records are identical instances, i.e. we're getting the cached record not fetching a new one
+        $this->assertSame($draftRecord, $draftCachedRecord);
+        $this->assertSame('Draft', $draftCachedRecord->Name);
+
+        Versioned::set_stage(Versioned::LIVE);
+        $publishedRecord = VersionedTest\TestObject::get()->setUseCache(true)->byID($obj->ID);
+        $publishedCachedRecord = VersionedTest\TestObject::get()->setUseCache(true)->byID($obj->ID);
+        // Records are identical instances, i.e. we're getting the cached record not fetching a new one
+        $this->assertSame($publishedRecord, $publishedCachedRecord);
+        $this->assertSame('Published', $publishedCachedRecord->Name);
+        // Records between stages are NOT identical instances (i.e. it's a separate cache)
+        $this->assertNotSame($draftCachedRecord, $publishedCachedRecord);
+
+        // Make sure the above worked because cache is segmented, NOT because changing stages invalidates cache
+        Versioned::set_stage(Versioned::DRAFT);
+        $draftCachedRecord = VersionedTest\TestObject::get()->setUseCache(true)->byID($obj->ID);
+        $this->assertSame($draftRecord, $draftCachedRecord);
+    }
+
+    public function testDataListCacheNotAffectedForUnversioned(): void
+    {
+        $obj = new VersionedTest\UnversionedWithField();
+        $obj->Version = 'Published';
+        $obj->write();
+        $obj->publishRecursive();
+        $obj->Version = 'Draft';
+        $obj->write();
+        DataList::reset();
+
+        Versioned::set_stage(Versioned::DRAFT);
+        $draftRecord = VersionedTest\UnversionedWithField::get()->setUseCache(true)->byID($obj->ID);
+        $draftCachedRecord = VersionedTest\UnversionedWithField::get()->setUseCache(true)->byID($obj->ID);
+        // Records are identical instances, i.e. we're getting the cached record not fetching a new one
+        $this->assertSame($draftRecord, $draftCachedRecord);
+        $this->assertSame('Draft', $draftCachedRecord->Version);
+
+        Versioned::set_stage(Versioned::LIVE);
+        $publishedCachedRecord = VersionedTest\UnversionedWithField::get()->setUseCache(true)->byID($obj->ID);
+        // Records are identical instances, i.e. we're getting the cached record not fetching a new one
+        $this->assertSame($draftCachedRecord, $publishedCachedRecord);
+        $this->assertSame('Draft', $publishedCachedRecord->Version);
     }
 
     /**
