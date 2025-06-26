@@ -115,7 +115,7 @@ class RecursiveStagesService implements RecursiveStagesInterface, Resettable
         $identifiers = Versioned::withVersionedMode(function () use ($object, $stage): array {
             Versioned::set_stage($stage);
 
-            $stagedObject = DataObject::get_by_id($object->ClassName, $object->ID);
+            $stagedObject = DataObject::get($object->ClassName)->setUseCache(true)->byID($object->ID);
 
             if ($stagedObject === null) {
                 return [];

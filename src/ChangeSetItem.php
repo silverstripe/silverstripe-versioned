@@ -181,7 +181,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Ignore stage for unversioned objects
         if (!$this->isVersioned()) {
-            return DataObject::get_by_id($this->ObjectClass, $this->ObjectID);
+            return DataObject::get($this->ObjectClass)->setUseCache(true)->byID($this->ObjectID);
         }
 
         // Get versioned object
@@ -201,7 +201,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
 
         // Ignore version for unversioned objects
         if (!$this->isVersioned()) {
-            return DataObject::get_by_id($this->ObjectClass, $this->ObjectID);
+            return DataObject::get($this->ObjectClass)->setUseCache(true)->byID($this->ObjectID);
         }
 
         // Get versioned object
