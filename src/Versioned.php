@@ -2407,7 +2407,14 @@ SQL
     {
         return static::withVersionedMode(function () use ($class, $stage, $filter, $cache, $sort) {
             Versioned::set_stage($stage);
-            return DataObject::get_one($class, $filter, $cache, $sort);
+            $list = DataObject::get($class)->setUseCache($cache);
+            if (!empty($filter)) {
+                $list = $list->where($filter);
+            }
+            if (!empty($sort) || is_null($sort)) {
+                $list = $list->sort($sort);
+            }
+            return $list->first();
         });
     }
 
@@ -3061,7 +3068,7 @@ SQL
         if (!$this->owner->AuthorID) {
             return null;
         }
-        $member = DataObject::get_by_id(Member::class, $this->owner->AuthorID);
+        $member = Member::get()->setUseCache(true)->byID($this->owner->AuthorID);
         return $member;
     }
     /**
@@ -3075,7 +3082,7 @@ SQL
         if (!$this->owner->PublisherID) {
             return null;
         }
-        $member = DataObject::get_by_id(Member::class, $this->owner->PublisherID);
+        $member = Member::get()->setUseCache(true)->byID($this->owner->PublisherID);
         return $member;
     }
 
