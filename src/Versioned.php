@@ -1188,12 +1188,14 @@ SQL
         }
         if ($data) {
             $fields = $schema->databaseFields($class, false);
+            $generatedColumns = $schema->generatedFields($class, false);
             if (is_array($fields)) {
                 $data = array_intersect_key($data ?? [], $fields);
 
                 foreach ($data as $k => $v) {
                     // If the value is not set at all in the manipulation currently, use the existing value from the database
-                    if (!array_key_exists($k, $newManipulation['fields'] ?? [])) {
+                    // Do not include generated columns, cause we can't set values for those
+                    if (!array_key_exists($k, $newManipulation['fields'] ?? []) && !array_key_exists($k, $generatedColumns)) {
                         $newManipulation['fields'][$k] = $v;
                     }
                 }

@@ -8,6 +8,7 @@ use ReflectionMethod;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -26,6 +27,8 @@ use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\IdentityStore;
 use SilverStripe\Versioned\ChangeSet;
+use SilverStripe\Versioned\RestoreAction;
+use SilverStripe\Versioned\Tests\VersionedTest\TestGeneratedColumns;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedTest extends SapphireTest
@@ -45,6 +48,8 @@ class VersionedTest extends SapphireTest
         VersionedTest\ChangeSetTestObject::class,
         VersionedTest\NoFixtureModel::class,
         VersionedTest\UnversionedWithField::class,
+        VersionedTest\UnversionedWithField::class,
+        VersionedTest\TestGeneratedColumns::class,
     ];
 
     public function testUniqueIndexes()
@@ -2161,5 +2166,27 @@ class VersionedTest extends SapphireTest
         $noDraftRecord2->write();
         $noDraftRecord2->publishSingle();
         $noDraftRecord2->deleteFromStage(Versioned::DRAFT);
+    }
+
+    /**
+     * Test there are no exceptions with versioned actions on a model with a generated column
+     */
+    #[DoesNotPerformAssertions]
+    public function testVersionWorksWithGeneratedColumns(): void
+    {
+        // Create new record
+        $record = new TestGeneratedColumns(['BaseField' => 'a value']);
+        $record->write();
+        // Publish
+        $record->publishSingle();
+        // Update draft
+        $record->BaseField = 'Second Value';
+        $record->write();
+        // Unpublish
+        $record->doUnpublish();
+        // Archive
+        $record->doArchive();
+        // Restore
+        RestoreAction::restore($record);
     }
 }
