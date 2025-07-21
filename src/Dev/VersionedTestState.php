@@ -56,11 +56,13 @@ class VersionedTestState implements TestState
 
     /**
      * Reset to default "null" state both prior to, and following tests
+     * Then set the reading stage to DRAFT
      */
     protected function resetState()
     {
         Versioned::set_reading_mode(null);
         Versioned::set_default_reading_mode(null);
         Versioned::set_draft_site_secured(null);
+        Versioned::set_stage(Versioned::DRAFT);
     }
 }
