@@ -32,6 +32,7 @@ class VersionedTestState implements TestState
 
     public function setUp(SapphireTest $test)
     {
+        Versioned::set_stage(Versioned::DRAFT);
         $this->readingmode = Versioned::get_reading_mode();
         $this->defaultMode = Versioned::get_default_reading_mode();
         $this->securedDraft = Versioned::get_draft_site_secured();
@@ -63,6 +64,5 @@ class VersionedTestState implements TestState
         Versioned::set_reading_mode(null);
         Versioned::set_default_reading_mode(null);
         Versioned::set_draft_site_secured(null);
-        Versioned::set_stage(Versioned::DRAFT);
     }
 }
