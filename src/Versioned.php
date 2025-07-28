@@ -20,6 +20,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataQuery;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\Queries\SQLDelete;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
@@ -1111,7 +1112,7 @@ SQL
 
         // Select all orphaned version records
         $orphanedQuery = SQLSelect::create()
-            ->selectField("\"{$childTable}\".\"ID\"")
+            ->setSelect("\"{$childTable}\".\"ID\"")
             ->setFrom("\"{$childTable}\"");
 
         // If we have a parent table limit orphaned records
@@ -1128,13 +1129,12 @@ SQL
                 ->addWhere("\"{$baseTable}\".\"ID\" IS NULL");
         }
 
-        $count = $orphanedQuery->count();
+        $ids = $orphanedQuery->execute()->column();
+        $count = count($ids);
         if ($count > 0) {
             DB::alteration_message("Removing {$count} orphaned versioned records", "deleted");
-            $ids = $orphanedQuery->execute()->column();
-            foreach ($ids as $id) {
-                DB::prepared_query("DELETE FROM \"{$childTable}\" WHERE \"ID\" = ?", [$id]);
-            }
+            // We can't use $orphanedQuery as a subquery of the DELETE, since selecting from the table we're updating is forbidden in MySQL.
+            SQLDelete::create("\"{$childTable}\"", ['"ID" IN (' . DB::placeholders($ids) . ')' => $ids])->execute();
         }
     }
 
