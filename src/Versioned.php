@@ -2499,7 +2499,7 @@ SQL
     protected function onPrepopulateTreeDataCache($recordList = null, array $options = [])
     {
         $idList = is_array($recordList) ? $recordList :
-            ($recordList instanceof DataList ? $recordList->column('ID') : null);
+            ($recordList instanceof DataList ? $recordList->sort(null)->column('ID') : null);
         Versioned::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::DRAFT, $idList);
         Versioned::prepopulate_versionnumber_cache($this->owner->baseClass(), Versioned::LIVE, $idList);
     }
