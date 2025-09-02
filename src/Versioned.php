@@ -2666,7 +2666,7 @@ SQL
      * @template T of DataObject
      * @param class-string<T> $class
      * @param int $id
-     * @return T&static
+     * @return null|T&static
      */
     public static function get_latest_version($class, $id)
     {
@@ -2695,7 +2695,7 @@ SQL
         }
 
         $version = static::get_latest_version($this->owner->baseClass(), $owner->ID);
-        return ($version->Version == $owner->Version);
+        return ($version?->Version == $owner->Version);
     }
 
     /**
