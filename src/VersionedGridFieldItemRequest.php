@@ -238,7 +238,7 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $canDelete = $record->canDelete();
 
         // "save", supports an alternate state that is still clickable, but notifies the user that the action is not needed.
-        $noChangesClasses = 'btn-outline-primary font-icon-tick';
+        $noChangesClasses = 'btn-outline-primary';
 
         /** @var DataObject|Versioned|RecursivePublishable $liveRecord */
         $liveRecord = Versioned::get_by_stage(get_class($record), Versioned::LIVE)->byID($record->ID);
@@ -272,10 +272,12 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if ($canEdit && $isOnDraft && $actionSave !== null) {
             $actionSave
                 ->setTitle(_t(VersionedGridFieldItemRequest::class . '.BUTTONSAVED', 'Saved'))
-                ->removeExtraClass('btn-primary font-icon-save font-icon-rocket')
-                ->addExtraClass('btn-outline-primary font-icon-tick')
-                ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-save')
-                ->setAttribute('data-btn-alternate-remove', 'btn-outline-primary font-icon-tick')
+                ->setIcon('tick')
+                ->setAttribute('data-icon-alternate', 'save')
+                ->removeExtraClass('btn-primary')
+                ->addExtraClass('btn-outline-primary')
+                ->setAttribute('data-btn-alternate-add', 'btn-primary')
+                ->setAttribute('data-btn-alternate-remove', 'btn-outline-primary')
                 ->setAttribute('data-text-alternate', _t(CMSMain::class . '.SAVEDRAFT', 'Save draft'));
         }
 
@@ -283,8 +285,10 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         if ($canPublish && $isOnDraft) {
             // "publish", as with "save", it supports an alternate state to show when action is needed.
             $actionPublish = FormAction::create('doPublish', _t(VersionedGridFieldItemRequest::class . '.BUTTONPUBLISHED', 'Published'))
+                ->setIcon('tick')
+                ->setAttribute('data-icon-alternate', 'rocket')
                 ->addExtraClass($noChangesClasses)
-                ->setAttribute('data-btn-alternate-add', 'btn-primary font-icon-rocket')
+                ->setAttribute('data-btn-alternate-add', 'btn-primary')
                 ->setAttribute('data-btn-alternate-remove', $noChangesClasses)
                 ->setUseButtonTag(true)
                 ->setAttribute('data-text-alternate', _t(VersionedGridFieldItemRequest::class . '.BUTTONSAVEPUBLISH', 'Publish'));
@@ -293,7 +297,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
             // Set up the initial state of the button to reflect the state of the underlying record object.
             if ($stagesDiffer) {
-                $actionPublish->addExtraClass('btn-primary font-icon-rocket');
+                $actionPublish->setIcon('rocket');
+                $actionPublish->addExtraClass('btn-primary');
                 $actionPublish->setTitle(_t(VersionedGridFieldItemRequest::class . '.BUTTONSAVEPUBLISH', 'Publish'));
                 $actionPublish->removeExtraClass($noChangesClasses);
             }
@@ -357,6 +362,8 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $saveAction->setTitle(_t(
             __CLASS__ . '.BUTTONAPPLYCHANGES',
             'Apply changes'
-        ))->addExtraClass('btn-primary font-icon-save');
+        ))
+            ->setIcon('save')
+            ->addExtraClass('btn-primary');
     }
 }
