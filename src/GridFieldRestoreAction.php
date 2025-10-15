@@ -139,8 +139,9 @@ class GridFieldRestoreAction implements GridField_ColumnProvider, GridField_Acti
                 "restore",
                 ['RecordID' => $record->ID]
             )
-                ->addExtraClass('btn btn--no-text btn--icon-md font-icon-back-in-time grid-field__icon-action action-menu--handled action-restore')
-                ->setAttribute('classNames', 'font-icon-back-in-time action-restore')
+                ->setIcon('back-in-time')
+                ->addExtraClass('btn btn--no-text btn--icon-md grid-field__icon-action action-menu--handled action-restore')
+                ->setAttribute('classNames', 'action-restore')
                 ->setAttribute('data-to-root', $restoreToRoot)
                 ->setDescription($description)
                 ->setAttribute('aria-label', $title);
