@@ -251,8 +251,9 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             'MoreOptions',
             _t(VersionedGridFieldItemRequest::class . '.MoreOptions', 'More options', 'Expands a view for more buttons')
         );
+        $moreOptions->setIcon('dot-3');
 
-        $moreOptions->addExtraClass('popover-actions-simulate');
+        $moreOptions->addExtraClass('popover-actions-simulate popover-actions-simulate--no-icon btn--icon-xl');
         $rootTabSet->push($moreOptions);
         $rootTabSet->addExtraClass('ss-ui-action-tabset action-menus noborder');
 
