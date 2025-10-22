@@ -2,8 +2,15 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Dev\CSSContentParser;
 use SilverStripe\Dev\FunctionalTest;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Versioned\GridFieldArchiveAction;
+use SilverStripe\Versioned\GridFieldRestoreAction;
 use SilverStripe\Versioned\Versioned;
 
 class VersionedGridFieldTest extends FunctionalTest
@@ -55,5 +62,43 @@ class VersionedGridFieldTest extends FunctionalTest
         $this->assertNotNull($livePage);
         $this->assertEquals('Page 1 renamed', $draftPage->Title);
         $this->assertEquals('Page 1 renamed', $livePage->Title);
+    }
+
+    public static function provideOnBeforeRenderHolder(): array
+    {
+        return [
+            'versioned' => [
+                'modelClass' => VersionedTest\TestObject::class,
+                'hasComponents' => true,
+            ],
+            'not-versioned' => [
+                'modelClass' => VersionedTest\RelatedWithoutversion::class,
+                'hasComponents' => false,
+            ],
+        ];
+    }
+
+    #[DataProvider('provideOnBeforeRenderHolder')]
+    public function testOnBeforeRenderHolder(string $modelClass, bool $hasComponents): void
+    {
+        $config = new GridFieldConfig_RecordEditor();
+        $archiveComponent = $config->getComponentsByType(GridFieldArchiveAction::class);
+        $restoreComponent = $config->getComponentsByType(GridFieldRestoreAction::class);
+        $this->assertCount(1, $archiveComponent);
+        $this->assertCount(0, $restoreComponent);
+        $config->addComponent(new GridFieldRestoreAction());
+
+        $gridField = new GridField('test', 'test', $modelClass::get(), $config);
+        $form = new Form(new VersionedGridFieldTest\TestController(), fields: new FieldList($gridField));
+        $gridField->FieldHolder();
+        $archiveComponent = $config->getComponentsByType(GridFieldArchiveAction::class);
+        $restoreComponent = $config->getComponentsByType(GridFieldRestoreAction::class);
+        if ($hasComponents) {
+            $this->assertCount(1, $archiveComponent);
+            $this->assertCount(1, $restoreComponent);
+        } else {
+            $this->assertCount(0, $archiveComponent);
+            $this->assertCount(0, $restoreComponent);
+        }
     }
 }

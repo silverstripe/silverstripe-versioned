@@ -11,6 +11,10 @@ SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor:
 SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor:
   extensions:
     - SilverStripe\Versioned\VersionedGridFieldArchiveExtension
+# Remove versioned components from non-versioned gridfields
+SilverStripe\Forms\GridField\GridField:
+  extensions:
+    - 'SilverStripe\Versioned\VersionedGridFieldRemoveComponentsExtension'
 # Enable gridfield extensions for dataobjects by default
 SilverStripe\ORM\DataObject:
   versioned_gridfield_extensions: true
