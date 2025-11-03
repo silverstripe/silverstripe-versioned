@@ -395,7 +395,10 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $moreOptions->push($actionArchive);
         }
 
-        $actions->insertAfter('MajorActions', $rootTabSet);
+        // Only add $moreOptions menu if it contains action buttons
+        if ($moreOptions->Fields()->count() > 1) {
+            $actions->insertAfter('MajorActions', $rootTabSet);
+        }
     }
 
     /**
