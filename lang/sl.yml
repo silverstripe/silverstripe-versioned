@@ -12,18 +12,18 @@ sl:
       other: '{count} skupaj'
       two: '{count} skupaj'
     NAME: Naziv
-    PLURALNAME: Kampanje
+    PLURALNAME: 'Kompleti sprememb'
     PLURALS:
-      few: '{count} kampanj'
-      one: Kampanja
-      other: '{count} kampanj'
-      two: '{count} kampanji'
+      few: '{count} kompletov'
+      one: Komplet
+      other: '{count} kompletov'
+      two: '{count} kompleta'
     PUBLISHED_DATE_BY: 'Objavil {name}, {date}'
     PUBLISHED_TODAY: 'Danes {time}'
     PUBLISHED_TODAY_BY: 'Objavil {name} danes, {time}'
     PUBLISHER_NAME: Objavil
     PUBLISH_DATE: 'Datum objave'
-    SINGULARNAME: Kampanja
+    SINGULARNAME: Komplet
     STATE: Stanje
     STATE_OPEN: Aktivno
     STATE_PUBLISHED: Objavljeno
@@ -82,7 +82,7 @@ sl:
     db_Version: Različica
     has_many_Versions: Različice
   SilverStripe\Versioned\VersionedGridFieldItemRequest:
-    Archived: 'Arhivirano {name} {title}'
+    Archived: 'Arhivirano {name} "{title}"'
     BUTTONAPPLYCHANGES: 'Izvedi spremembe'
     BUTTONARCHIVEDESC: 'Umakni iz objave in arhiviraj'
     BUTTONPUBLISHED: Objavljeno
@@ -93,8 +93,9 @@ sl:
     DRAFT: Osnutek
     MODIFIED: Spremenjeno
     MoreOptions: 'Druge možnosti'
+    PUBLISHEDTOASTMESSAGE: 'Objavljeno {type} "{title}"'
     Published: 'Objavljeno {name} {link}'
-    Unpublished: 'Umaknjeno iz objave {name} {title}'
+    Unpublished: 'Umaknjeno iz objave {name} "{title}"'
   SilverStripe\Versioned\VersionedGridFieldState\VersionedGridFieldState:
     ADDEDTODRAFTHELP: 'Element še ni bilo objavljen'
     ADDEDTODRAFTSHORT: Osnutek
