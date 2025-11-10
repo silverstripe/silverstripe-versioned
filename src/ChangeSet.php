@@ -17,6 +17,8 @@ use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\ORM\UnexpectedDataException;
 use SilverStripe\Core\Validation\ValidationException;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\ORM\Filters\WithinRangeFilter;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
@@ -94,6 +96,21 @@ class ChangeSet extends DataObject
         'Details' => 'Items',
         'StateLabel' => 'Status',
         'PublishedLabel' => 'Published',
+    ];
+
+    private static array $searchable_fields = [
+        'Name' => [
+            'title' => 'Title',
+        ],
+        'Description',
+        'State' => [
+            'title' => 'Status',
+            'general' => false,
+        ],
+        'PublishDate' => [
+            'filter' => WithinRangeFilter::class,
+            'general' => false,
+        ]
     ];
 
     /**
@@ -621,7 +638,12 @@ class ChangeSet extends DataObject
      */
     public function getStateLabel()
     {
-        switch ($this->State) {
+        return $this->getLabelForState($this->State);
+    }
+
+    private function getLabelForState(string $state): ?string
+    {
+        switch ($state) {
             case ChangeSet::STATE_OPEN:
                 return _t(__CLASS__.'.STATE_OPEN', 'Active');
             case ChangeSet::STATE_PUBLISHED:
@@ -676,5 +698,26 @@ class ChangeSet extends DataObject
                 ],
             ]
         );
+    }
+
+    public function scaffoldSearchFields($_params = null)
+    {
+        $fields = parent::scaffoldSearchFields($_params);
+        /** @var DropdownField $stateField */
+        $stateField = $fields->dataFieldByName('State');
+        // Update state labels to make gridfield columns
+        if ($stateField) {
+            $states = [
+                ChangeSet::STATE_OPEN,
+                ChangeSet::STATE_REVERTED,
+                ChangeSet::STATE_PUBLISHED,
+            ];
+            $source = [];
+            foreach ($states as $option) {
+                $source[$option] = $this->getLabelForState($option);
+            }
+            $stateField->setSource($source);
+        }
+        return $fields;
     }
 }
