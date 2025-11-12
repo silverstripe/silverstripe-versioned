@@ -395,10 +395,21 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
             $moreOptions->push($actionArchive);
         }
 
-        // Only add $moreOptions menu if it contains action buttons
-        if ($moreOptions->Fields()->count() > 1) {
-            $actions->insertAfter('MajorActions', $rootTabSet);
-        }
+        $actions->insertAfter('MajorActions', $rootTabSet);
+
+        // Remove ActionMenus when ActionMenus.MoreOptions has no actions
+        $this->afterExtending('updateItemEditForm', function (Form $form) {
+            $actionMenusMoreOptions = $form->Actions()->findTab('ActionMenus.MoreOptions');
+
+            if ($actionMenusMoreOptions) {
+                // Check if there are any FormAction fields (recursively through nested tabs)
+                if (!$actionMenusMoreOptions->Fields()->flattenFields()->filterByCallback(function ($field) {
+                    return $field instanceof FormAction;
+                })->first()) {
+                    $form->Actions()->removeByName('ActionMenus');
+                }
+            }
+        });
     }
 
     /**
