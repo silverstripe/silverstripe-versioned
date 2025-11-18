@@ -11,6 +11,7 @@ use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\TestExtension;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedObject;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\UnversionedOwner;
 use SilverStripe\Versioned\Tests\VersionedGridFieldItemRequestTest\VersionedObject;
@@ -149,6 +150,65 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
 
         // Warning was removed as part of #154 ... it may be brough back later
         $this->assertNull($warningField);
+    }
+
+    /**
+     * Test that ActionMenus is added when an extension adds actions via updateFormActions
+     */
+    public function testActionMenusAddedWhenExtensionAddsActions()
+    {
+        // Enable the test extension to add an action
+        TestExtension::$add_test_action = true;
+        VersionedGridFieldItemRequest::add_extension(TestExtension::class);
+
+        try {
+            $testObject = $this->objFromFixture(VersionedObject::class, 'object-1');
+            $itemRequest = $this->createItemRequestForObject($testObject);
+            $this->logInWithPermission('ADMIN');
+            $form = $itemRequest->ItemEditForm();
+            $actions = $form->Actions();
+
+            // ActionMenus should be present
+            $actionMenus = $actions->fieldByName('ActionMenus');
+            $this->assertNotNull($actionMenus, 'ActionMenus should be present when extension adds actions');
+
+            // MoreOptions should contain the test action
+            $moreOptions = $actionMenus->fieldByName('MoreOptions');
+            $this->assertNotNull($moreOptions, 'MoreOptions should be present');
+
+            $testAction = $moreOptions->fieldByName('action_doTestAction');
+            $this->assertInstanceOf(
+                FormAction::class,
+                $testAction,
+                'Test action added by extension should be present'
+            );
+        } finally {
+            // Clean up
+            TestExtension::$add_test_action = false;
+            VersionedGridFieldItemRequest::remove_extension(TestExtension::class);
+        }
+    }
+
+    /**
+     * Test that ActionMenus is removed when there are no actions in MoreOptions
+     */
+    public function testActionMenusRemovedWhenNoActions()
+    {
+        // Create an unversioned owner which has no archive action
+        $testObject = UnversionedOwner::create();
+        $testObject->write();
+
+        $itemRequest = $this->createItemRequestForObject($testObject);
+        $this->logInWithPermission('ADMIN');
+        $form = $itemRequest->ItemEditForm();
+        $actions = $form->Actions();
+
+        // ActionMenus should not be present when there are no actions
+        $actionMenus = $actions->fieldByName('ActionMenus');
+        $this->assertNull(
+            $actionMenus,
+            'ActionMenus should be removed when MoreOptions has no FormAction fields'
+        );
     }
 
     protected function createItemRequestForObject(DataObject $obj)
