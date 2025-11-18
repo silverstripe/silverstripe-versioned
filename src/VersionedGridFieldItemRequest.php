@@ -403,9 +403,16 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
             if ($actionMenusMoreOptions) {
                 // Check if there are any FormAction fields (recursively through nested tabs)
-                if (!$actionMenusMoreOptions->Fields()->flattenFields()->filterByCallback(function ($field) {
-                    return $field instanceof FormAction;
-                })->first()) {
+                $hasFormAction = false;
+                $actionMenusMoreOptions->Fields()->recursiveWalk(function ($field) use (&$hasFormAction) {
+                    if ($field instanceof FormAction) {
+                        $hasFormAction = true;
+                        return false; // Stop walking
+                    }
+                    return true; // Continue walking
+                });
+
+                if (!$hasFormAction) {
                     $form->Actions()->removeByName('ActionMenus');
                 }
             }
