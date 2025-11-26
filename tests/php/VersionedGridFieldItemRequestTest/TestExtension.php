@@ -13,13 +13,13 @@ use SilverStripe\Forms\FormAction;
 class TestExtension extends Extension implements TestOnly
 {
     /**
-     * @var bool Flag to control whether to add actions
+     * Flag to control whether to add actions
      */
-    public static $add_test_action = false;
+    public static bool $add_test_action = false;
 
     public function updateFormActions(FieldList $actions)
     {
-        if (self::$add_test_action) {
+        if (static::$add_test_action) {
             $moreOptions = $actions->findOrMakeTab('ActionMenus.MoreOptions');
             $moreOptions->push(FormAction::create('doTestAction', 'Test Action'));
         }

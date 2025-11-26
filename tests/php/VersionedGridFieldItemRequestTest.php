@@ -207,7 +207,7 @@ class VersionedGridFieldItemRequestTest extends SapphireTest
         $actionMenus = $actions->fieldByName('ActionMenus');
         $this->assertNull(
             $actionMenus,
-            'ActionMenus should be removed when MoreOptions has no FormAction fields'
+            'ActionMenus should be removed when MoreOptions has no content other than structural Tab/TabSet fields'
         );
     }
 

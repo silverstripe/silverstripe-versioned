@@ -397,22 +397,20 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
 
         $actions->insertAfter('MajorActions', $rootTabSet);
 
-        // Remove ActionMenus when ActionMenus.MoreOptions has no actions
+        // Remove ActionMenus when ActionMenus.MoreOptions has no content
         $this->afterExtending('updateItemEditForm', function (Form $form) {
             $actionMenusMoreOptions = $form->Actions()->findTab('ActionMenus.MoreOptions');
 
             if ($actionMenusMoreOptions) {
-                // Check if there are any FormAction fields (recursively through nested tabs)
-                $hasFormAction = false;
-                $actionMenusMoreOptions->Fields()->recursiveWalk(function ($field) use (&$hasFormAction) {
-                    if ($field instanceof FormAction) {
-                        $hasFormAction = true;
-                        return false; // Stop walking
+                // Check if there are any fields other than structural Tab/TabSet fields
+                $hasContent = false;
+                $actionMenusMoreOptions->Fields()->recursiveWalk(function ($field) use (&$hasContent) {
+                    if (!$field instanceof Tab && !$field instanceof TabSet) {
+                        $hasContent = true;
                     }
-                    return true; // Continue walking
                 });
 
-                if (!$hasFormAction) {
+                if (!$hasContent) {
                     $form->Actions()->removeByName('ActionMenus');
                 }
             }
