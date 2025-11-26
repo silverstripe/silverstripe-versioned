@@ -151,14 +151,12 @@ class VersionNumberCacheTraitTest extends SapphireTest
     private function getCache(): ?array
     {
         $refl = new ReflectionProperty(TestTraitHolder::class, 'cache_versionnumber');
-        $refl->setAccessible(true);
         return $refl->getValue();
     }
 
     private function resetCache(): ?array
     {
         $refl = new ReflectionProperty(TestTraitHolder::class, 'cache_versionnumber');
-        $refl->setAccessible(true);
         // The property unset by default, though getting its value will resolve to null
         // so this is good enough
         return $refl->setValue(null, null);

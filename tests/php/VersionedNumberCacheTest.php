@@ -102,7 +102,6 @@ class VersionedNumberCacheTest extends SapphireTest
         $ext = new Versioned();
         $ext->setOwner($owner);
         $method = new ReflectionMethod(Versioned::class, 'onPrepopulateTreeDataCache');
-        $method->setAccessible(true);
         $method->invoke($ext);
         $actual = Versioned::get_versionnumber_by_stage(TestObject::class, $stage, VersionedNumberCacheTest::${$ID}, $cache);
         $this->assertEquals(VersionedNumberCacheTest::$expectedVersions[$expected], $actual);

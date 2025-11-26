@@ -116,7 +116,6 @@ class VersionedTest extends SapphireTest
         // Note: Pass in table names in incorrect case intentionally
         // to test that it internally corrects itself
         $method = new ReflectionMethod(Versioned::class, 'cleanupVersionedOrphans');
-        $method->setAccessible(true);
         $extension = $obj->getExtensionInstance(Versioned::class);
         $extension->setOwner($obj);
         try {
