@@ -94,8 +94,6 @@ class SlowDummyParent extends DataObject implements TestOnly
     private function getMockNow()
     {
         $propertyMockNow = new ReflectionProperty(DBDatetime::class, 'mock_now');
-        $propertyMockNow->setAccessible(true);
-
         return $propertyMockNow->getValue();
     }
 }
