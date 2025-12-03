@@ -2706,8 +2706,8 @@ SQL
         if (!$id || !$this->isPublished()) {
             return false;
         }
-
-        $liveVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::LIVE, $id);
+        $stage = $this->hasStages() ? Versioned::LIVE : Versioned::DRAFT;
+        $liveVersionNumber = static::get_versionnumber_by_stage($this->owner, $stage, $id);
         return $liveVersionNumber == $this->owner->Version;
     }
 
@@ -2722,7 +2722,6 @@ SQL
         if (!$id || !$this->isOnDraft()) {
             return false;
         }
-
         $draftVersionNumber = static::get_versionnumber_by_stage($this->owner, Versioned::DRAFT, $id);
         return $draftVersionNumber == $this->owner->Version;
     }
