@@ -2188,4 +2188,19 @@ class VersionedTest extends SapphireTest
         // Restore
         RestoreAction::restore($record);
     }
+
+    public function testIsLiveVersionForVersionedWithoutStages()
+    {
+        // Create a new SingleStage object (versioned without stages)
+        $object = new VersionedTest\SingleStage();
+        $object->Name = 'Test Object';
+        $object->write();
+        // Should always return true for isLiveVersion()
+        $this->assertTrue($object->isLiveVersion());
+        // Modify and write again
+        $object->Name = 'Modified Object';
+        $object->write();
+        // Should still return true even after modification
+        $this->assertTrue($object->isLiveVersion());
+    }
 }
