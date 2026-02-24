@@ -31,4 +31,9 @@ class UnstagedObject extends DataObject implements TestOnly
         // Should be ignored
         return false;
     }
+
+    public function getCMSEditLink(): ?string
+    {
+        return 'test-path';
+    }
 }
