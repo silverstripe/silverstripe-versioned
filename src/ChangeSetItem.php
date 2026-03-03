@@ -170,7 +170,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
      * If the object isn't versioned it will return the normal record.
      *
      * @param string $stage
-     * @return DataObject|Versioned|RecursivePublishable Object in this stage (may not be Versioned)
+     * @return DataObject|Versioned|RecursivePublishable|null Object in this stage (may not be Versioned)
      * @throws UnexpectedDataException
      */
     protected function getObjectInStage($stage)
@@ -534,7 +534,7 @@ class ChangeSetItem extends DataObject implements Thumbnail
     public function CMSEditLink(): ?string
     {
         $link = $this->getObjectInStage(Versioned::DRAFT);
-        return $link->CMSEditLink();
+        return $link?->CMSEditLink();
     }
 
     /**
