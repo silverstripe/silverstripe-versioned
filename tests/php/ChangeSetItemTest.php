@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Versioned\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use SilverStripe\Versioned\ChangeSetItem;
 use SilverStripe\Dev\SapphireTest;
 
@@ -122,5 +123,35 @@ class ChangeSetItemTest extends SapphireTest
 
         // Should not error
         $item->publish();
+    }
+
+    public static function provideCMSEditLink(): array
+    {
+        return [
+            [true],
+            [false],
+        ];
+    }
+
+    #[DataProvider('provideCMSEditLink')]
+    public function testCMSEditLink(bool $objectExists): void
+    {
+        $object = new ChangeSetItemTest\UnstagedObject(['Bar' => 2]);
+        if ($objectExists) {
+            $object->write();
+        }
+        $item = new ChangeSetItem(
+            [
+                'ObjectID' => $object->ID,
+                'ObjectClass' => $object->baseClass(),
+            ]
+        );
+
+        $link = $item->CMSEditLink();
+        if ($objectExists) {
+            $this->assertSame('test-path', $link);
+        } else {
+            $this->assertNull($link);
+        }
     }
 }
