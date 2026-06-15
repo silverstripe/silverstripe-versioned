@@ -86,23 +86,27 @@ class RestoreAction
      */
     public static function getRestoreMessage($originalItem, $restoredItem, $changedLocation = false)
     {
-        $restoredID = $restoredItem->Title ?: $restoredItem->ID;
+        // The message is rendered as HTML (CAST_HTML), so any user-supplied content
+        // (e.g. Title, URLSegment) must be escaped to prevent stored XSS.
+        $restoredID = Convert::raw2xml($restoredItem->Title ?: $restoredItem->ID);
         $restoredType = Convert::raw2xml(strtolower($restoredItem->i18n_singular_name() ?? ''));
 
         $editLink = $restoredItem->CMSEditLink();
         if ($editLink) {
-            $restoredID = sprintf('<a href="%s">%s</a>', $editLink, $restoredID);
+            $restoredID = sprintf('<a href="%s">%s</a>', Convert::raw2xml($editLink), $restoredID);
         }
 
+        // These values are interpolated into the message a second time (as "{value}"), so
+        // they must be escaped here as well as in $restoredID above.
         if ($originalItem->URLSegment !== $restoredItem->URLSegment) {
             $changedProperty = [
                 'property' => 'URL',
-                'value' => '../' . $restoredItem->URLSegment
+                'value' => Convert::raw2xml('../' . $restoredItem->URLSegment)
             ];
         } elseif ($originalItem->Title !== $restoredItem->Title) {
             $changedProperty = [
                 'property' => 'Name',
-                'value' => $restoredItem->Title
+                'value' => Convert::raw2xml($restoredItem->Title)
             ];
         }
 
