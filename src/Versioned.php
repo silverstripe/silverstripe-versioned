@@ -155,13 +155,13 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
      * @var array $db_for_versions_table
      */
     private static $db_for_versions_table = [
-        "RecordID" => "Int",
+        "RecordID" => "ForeignKey",
         "Version" => "Int",
         "WasPublished" => "Boolean",
         "WasDeleted" => "Boolean",
         "WasDraft" => "Boolean(1)",
-        "AuthorID" => "Int",
-        "PublisherID" => "Int"
+        "AuthorID" => "ForeignKey",
+        "PublisherID" => "ForeignKey"
     ];
 
     /**
@@ -171,12 +171,12 @@ class Versioned extends Extension implements TemplateGlobalProvider, Resettable
      * @var array
      */
     private static $casting = [
-        "RecordID" => "Int",
+        "RecordID" => "ForeignKey",
         "WasPublished" => "Boolean",
         "WasDeleted" => "Boolean",
         "WasDraft" => "Boolean",
-        "AuthorID" => "Int",
-        "PublisherID" => "Int"
+        "AuthorID" => "ForeignKey",
+        "PublisherID" => "ForeignKey"
     ];
 
     /**
@@ -1045,7 +1045,7 @@ SQL
                     // Create fields for any tables of subclasses
                     $versionFields = array_merge(
                         [
-                            "RecordID" => "Int",
+                            "RecordID" => "ForeignKey",
                             "Version" => "Int",
                         ],
                         (array)$fields
