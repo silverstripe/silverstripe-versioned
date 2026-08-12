@@ -6,10 +6,10 @@ use InvalidArgumentException;
 use LogicException;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Cookie;
-use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Extension;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Resettable;
@@ -2246,7 +2246,7 @@ SQL
         }
 
         // This cookie is for the silverstripe/staticpublishqueue module
-        if (!headers_sent() && !Director::is_cli()) {
+        if (!headers_sent() && !Environment::isCli()) {
             if (Versioned::get_stage() === static::LIVE) {
                 // clear the cookie if it's set
                 if (Cookie::get('bypassStaticCache')) {
