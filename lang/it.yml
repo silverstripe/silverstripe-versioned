@@ -10,17 +10,17 @@ it:
       one: '1 totale'
       other: '{count} totale'
     NAME: Nome
-    PLURALNAME: Campagne
+    PLURALNAME: 'Set di modifiche'
     PLURALS:
-      many: '{count} Campagne'
-      one: 'Una Campagna'
-      other: '{count} Campagne'
+      many: '{count} set di modifiche'
+      one: 'Un set di modifiche'
+      other: '{count} set di modifiche'
     PUBLISHED_DATE_BY: '{date} di {name}'
     PUBLISHED_TODAY: 'Oggi {time}'
     PUBLISHED_TODAY_BY: 'Oggi {time} di {name}'
     PUBLISHER_NAME: 'Pubblicato da'
     PUBLISH_DATE: 'Data pubblicazione'
-    SINGULARNAME: Campagna
+    SINGULARNAME: 'Set di modifiche'
     STATE: Stato
     STATE_OPEN: Attiva
     STATE_PUBLISHED: Pubblicata
