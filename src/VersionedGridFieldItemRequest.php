@@ -14,6 +14,7 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Validation\ValidationResult;
+use SilverStripe\Core\Validation\ValidationException;
 use SilverStripe\View\SSViewer;
 
 /**
@@ -131,12 +132,22 @@ class VersionedGridFieldItemRequest extends GridFieldDetailForm_ItemRequest
         $isNewRecord = $record->ID == 0;
 
         // Check permission
-        if (!$record->canPublish()) {
-            return $this->httpError(403);
+        $validation = $record->validatePublishRecursive();
+        if (!$validation->isValid()) {
+            throw ValidationException::create($validation);
         }
 
         // Initial save and reload
         $record = $this->saveFormIntoRecord($data, $form);
+        // Check again now the form data is saved, as it may have added owned records
+        $validation = $record->validatePublishRecursive();
+        if (!$validation->isValid()) {
+            throw ValidationException::create(_t(
+                __CLASS__ . '.SAVED_NOT_PUBLISHED',
+                'Saved as a draft, but not published. {message}',
+                ['message' => implode(' ', array_column($validation->getMessages(), 'message'))]
+            ));
+        }
         $record->publishRecursive();
 
         $editURL = $this->Link('edit');

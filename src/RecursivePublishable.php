@@ -6,12 +6,15 @@ namespace SilverStripe\Versioned;
 use InvalidArgumentException;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Model\List\ArrayList;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\Queries\SQLUpdate;
 use SilverStripe\Model\List\SS_List;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 
 /**
  * Provides owns / owned_by and recursive publishing API for all objects.
@@ -48,6 +51,76 @@ class RecursivePublishable extends Extension
      * @var array
      */
     private static $owned_by = [];
+
+    /**
+     * Check if the member can publish this object and every owned record that a recursive publish would change.
+     * CMS publish actions call this method. publishRecursive() never checks permissions.
+     */
+    public function canPublishRecursive(?Member $member = null): bool
+    {
+        return $this->validatePublishRecursive($member)->isValid();
+    }
+
+    /**
+     * Returns an invalid result with a message for the editor when the member cannot publish this object
+     * or an owned record that a recursive publish would change.
+     */
+    public function validatePublishRecursive(?Member $member = null): ValidationResult
+    {
+        $member ??= Security::getCurrentUser();
+        $owner = $this->getOwner();
+        $result = ValidationResult::create();
+        $canPublishOwner = $owner->hasMethod('canPublish') ? $owner->canPublish($member) : $owner->canEdit($member);
+        $extended = $canPublishOwner ? $owner->extendedCan('canPublishRecursive', $member) : null;
+        if (!$canPublishOwner || $extended === false) {
+            return $result->addError(_t(
+                __CLASS__ . '.CANNOT_PUBLISH',
+                'You do not have permission to publish "{title}".',
+                ['title' => $owner->getTitle()]
+            ));
+        }
+        if ($extended === true) {
+            return $result;
+        }
+        $blocked = Versioned::withVersionedMode(function () use ($owner, $member) {
+            Versioned::set_stage(Versioned::DRAFT);
+            $blocked = [];
+            foreach ($owner->findOwned() as $record) {
+                if ($record->hasExtension(Versioned::class)
+                    && $record->stagesDiffer()
+                    && !$record->canPublish($member)
+                ) {
+                    $blocked[] = $record->i18n_singular_name() . ' "' . $record->getTitle() . '"';
+                }
+            }
+            return $blocked;
+        });
+        if ($blocked) {
+            $shown = array_slice($blocked, 0, 10);
+            $items = implode(', ', $shown);
+            if (count($blocked) > count($shown)) {
+                $items .= ' ' . _t(
+                    __CLASS__ . '.BLOCKED_MORE',
+                    'and {count} more',
+                    ['count' => count($blocked) - count($shown)]
+                );
+            }
+            $result->addError(_t(
+                __CLASS__ . '.CANNOT_PUBLISH_OWNED',
+                'You can\'t publish "{title}" because it would also publish changes to items'
+                    . ' you don\'t have permission to publish: {items}.'
+                    . ' Ask someone with permission to publish them first.',
+                ['title' => $owner->getTitle(), 'items' => $items]
+            ));
+        }
+        return $result;
+    }
+
+    protected function extendCanPublishRecursive(): ?bool
+    {
+        // Prevent canPublishRecursive() from extending itself
+        return null;
+    }
 
     /**
      * Publish this object and all owned objects to Live

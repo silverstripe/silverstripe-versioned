@@ -377,11 +377,13 @@ class ChangeSetTest extends SapphireTest
         // With model publish permissions only publish is allowed
         $this->assertTrue($changeSet->canPublish());
 
-        // setting canPublish = false on any implicit items in the changeset doesn't
-        // deny publishing permissions
+        // setting canPublish = false on an implicit item with changes the member did not author
+        // denies publishing permissions
         /** @var ChangeSetTest\MidObject $mid2 */
         $mid2 = $this->objFromFixture(ChangeSetTest\MidObject::class, 'mid2');
         $mid2->setCan('canPublish', false);
+        $this->assertFalse($changeSet->canPublish());
+        $mid2->setCan('canPublish', true);
         $this->assertTrue($changeSet->canPublish());
 
         // Setting canPublish = false on any explicit item in the changeset
