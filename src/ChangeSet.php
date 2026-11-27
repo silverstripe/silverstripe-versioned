@@ -425,7 +425,20 @@ class ChangeSet extends DataObject
                 return false;
             }
         }
-
+        // Check implicitly added items, as publishing puts their draft changes live
+        $implicitChanges = $this->Changes()->filter(['Added' => ChangeSetItem::IMPLICITLY]);
+        foreach ($implicitChanges as $change) {
+            if (!$change->isVersioned() || !in_array($change->getChangeType(), [
+                ChangeSetItem::CHANGE_CREATED,
+                ChangeSetItem::CHANGE_MODIFIED,
+            ])) {
+                continue;
+            }
+            $record = Versioned::get_by_stage($change->ObjectClass, Versioned::DRAFT)->byID($change->ObjectID);
+            if ($record && !$record->canPublish($member)) {
+                return false;
+            }
+        }
         return true;
     }
 
